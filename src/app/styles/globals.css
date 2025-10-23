@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./typography.css";
 @tailwind utilities;
 
 :root {

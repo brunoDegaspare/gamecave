@@ -20,9 +20,9 @@ type Props = {
 };
 
 const sizeMap: Record<Size, string> = {
-  sm: "text-xs px-2.5",
-  md: "text-sm px-3",
-  lg: "text-base px-4",
+  sm: "body-14 px-2.5",
+  md: "body-16 px-3",
+  lg: "body-18 px-4",
 };
 
 export default function SearchPaletteTrigger({
@@ -62,7 +62,7 @@ export default function SearchPaletteTrigger({
       )}
       <span className="flex-1 truncate text-left">{label}</span>
       {showShortcut && (
-        <kbd className="ml-1 rounded bg-neutral-800 px-1.5 py-0.5 text-[14px] text-neutral-400">
+        <kbd className="ml-1 rounded bg-neutral-800 px-1.5 py-0.5 body-14 text-neutral-400">
           {shortcutLabel}
         </kbd>
       )}

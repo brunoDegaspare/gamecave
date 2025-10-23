@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "./styles/globals.css";
 import { saira } from "./font";
 import ClientProviders from "@/app/client-providers";
 

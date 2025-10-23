@@ -1,0 +1,64 @@
+@layer utilities {
+  /* === Headings === */
+  .heading-1 {
+    @apply text-[48px] leading-[56px] font-bold;
+  }
+  .heading-2 {
+    @apply text-[40px] leading-[48px] font-bold;
+  }
+  .heading-3 {
+    @apply text-[32px] leading-[40px] font-bold;
+  }
+  .heading-4 {
+    @apply text-[24px] leading-[32px] font-bold;
+  }
+  .heading-5 {
+    @apply text-[20px] leading-[28px] font-bold;
+  }
+  .heading-6 {
+    @apply text-[18px] leading-[24px] font-bold;
+  }
+
+  /* === Body text === */
+  .body-18 {
+    @apply text-[18px] leading-[26px];
+  }
+  .body-16 {
+    @apply text-[16px] leading-[24px];
+  }
+  .body-14 {
+    @apply text-[14px] leading-[22px];
+  }
+
+  /* Font weights */
+  .weight-regular {
+    @apply font-normal;
+  }
+  .weight-medium {
+    @apply font-medium;
+  }
+  .weight-semibold {
+    @apply font-semibold;
+  }
+  .weight-bold {
+    @apply font-bold;
+  }
+
+  /* === Captions === */
+  .caption-12 {
+    @apply text-[12px] leading-[20px];
+  }
+
+  /* === Extras === */
+  .text-muted {
+    @apply text-neutral-500;
+  }
+  .text-strong {
+    @apply text-white;
+  }
+
+  /* === Dashboard stats === */
+  .stat-32 {
+    @apply text-[32px] leading-none tracking-tight font-extrabold;
+  }
+}

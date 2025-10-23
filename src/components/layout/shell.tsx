@@ -33,7 +33,7 @@ export default function MainLayout({
           </Link>
         </div>
 
-        <nav className="mt-4 pb-8 space-y-2 text-sm">
+        <nav className="mt-4 pb-8 space-y-2 body-18 weight-medium">
           <SidebarNavItem
             href="/"
             label="Dashboard"
@@ -51,7 +51,7 @@ export default function MainLayout({
           />
         </nav>
 
-        <nav className="pt-8 border-t border-neutral-800 space-y-2 text-sm">
+        <nav className="pt-8 border-t border-neutral-800 space-y-2 body-18 weight-medium">
           <SidebarNavItem
             href="#"
             label="SNES"
@@ -91,7 +91,7 @@ export default function MainLayout({
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-6 bg-neutral-950">{children}</main>
+        <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
   );

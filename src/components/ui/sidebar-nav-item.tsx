@@ -39,7 +39,7 @@ export default function SidebarNavItem({
     <Link
       href={href}
       className={clsx(
-        "flex items-center gap-3 rounded-xl py-2 px-3 text-base font-medium transition-colors",
+        "flex items-center gap-3 rounded-xl py-3 px-3 text-base font-medium transition-colors",
         active
           ? "bg-neutral-800 text-purple-400"
           : "text-neutral-300 hover:bg-neutral-800"
