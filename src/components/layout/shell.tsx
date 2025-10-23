@@ -2,8 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import SidebarNavItem from "@/components/sidebar-nav-item";
-import { SearchPalette, useCommandPalette } from "@/components/search-palette";
+import SidebarNavItem from "@/components/ui/sidebar-nav-item";
+import {
+  SearchPalette,
+  useCommandPalette,
+} from "@/components/ui/search-palette/search-palette";
+import SearchPaletteTrigger from "@/components/ui/search-palette/search-palette-trigger";
 
 export default function MainLayout({
   children,
@@ -16,7 +20,7 @@ export default function MainLayout({
   return (
     <div className="flex h-screen bg-neutral-950 text-neutral-100">
       {/* Sidebar fixa */}
-      <aside className="w-[300px] border-r border-neutral-800 p-4 pt-4">
+      <aside className="w-[300px] bg-neutral-900/70 border-r border-neutral-800 p-4 pt-4">
         <div className="pt-2 pb-2 mb-10">
           <Link href="/" className="flex items-center gap-2">
             <Image
@@ -30,7 +34,11 @@ export default function MainLayout({
         </div>
 
         <nav className="mt-4 pb-8 space-y-2 text-sm">
-          <SidebarNavItem href="/" label="Home" iconName="ico-home-outline" />
+          <SidebarNavItem
+            href="/"
+            label="Dashboard"
+            iconName="ico-home-outline"
+          />
           <SidebarNavItem
             href="#"
             label="Wishlist"
@@ -65,19 +73,20 @@ export default function MainLayout({
       {/* Main container */}
       <div className="flex flex-1 flex-col">
         {/* Header */}
-        <header className="flex items-center justify-center border-b border-neutral-800 px-4 py-2">
-          <div className="p-2">
-            <button
+        <header className="bg-neutral-900/70 px-4 py-2">
+          <div className="p-2 w-full flex items-center justify-center">
+            <SearchPaletteTrigger
               onClick={() => setOpen(true)}
-              className="rounded-lg border border-neutral-700 px-3 py-2 text-sm hover:bg-neutral-800"
-            >
-              Search…{" "}
-              <span className="ml-2 rounded bg-neutral-800 px-1.5 text-xs">
-                ⌘K
-              </span>
-            </button>
+              leftIconName="ico-search-outline"
+              widthClassName="w-full max-w-[880px]" // width
+              heightClassName="h-11" // height
+            />
 
-            <SearchPalette open={open} setOpen={setOpen} />
+            <SearchPalette
+              open={open}
+              setOpen={setOpen}
+              panelClassName="!max-w-3xl md:!max-w-[680px] w-[92vw]"
+            />
           </div>
         </header>
 

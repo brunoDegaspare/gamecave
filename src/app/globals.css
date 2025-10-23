@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @tailwind utilities;
-@import "./icons.css";
 
 :root {
   --background: #ffffff;

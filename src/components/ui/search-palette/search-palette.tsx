@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Command } from "cmdk";
+import Icon, { IconName } from "@/components/ui/icon";
 
 type Item = {
   id: string;
@@ -61,10 +62,12 @@ export function SearchPalette({
   open,
   setOpen,
   items = DOC_ITEMS,
+  panelClassName,
 }: {
   open: boolean;
   setOpen: (v: boolean) => void;
   items?: Item[];
+  panelClassName?: string;
 }) {
   const groups = groupBy(items);
 
@@ -84,7 +87,9 @@ export function SearchPalette({
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-xl overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/95 shadow-2xl"
+            className={`w-full max-w-xl overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/95 shadow-2xl ${
+              panelClassName ?? ""
+            }`}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -99,7 +104,7 @@ export function SearchPalette({
               <div className="relative">
                 <Command.Input
                   autoFocus
-                  placeholder="What are you searching for?"
+                  placeholder="Type to search..."
                   className="w-full bg-transparent px-4 py-3 text-base placeholder-zinc-500 outline-none"
                 />
                 <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-400">
@@ -130,7 +135,7 @@ export function SearchPalette({
                         className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm data-[selected=true]:bg-zinc-800 data-[selected=true]:text-white"
                       >
                         {/* Ícone à esquerda */}
-                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-sm border border-zinc-700 text-[11px]">
+                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-sm border border-zinc-700 text-[12px]">
                           {it.icon ?? "🔎"}
                         </span>
 
