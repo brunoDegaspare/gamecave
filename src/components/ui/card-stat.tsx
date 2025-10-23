@@ -18,7 +18,9 @@ export default function CardStat({
       {/* Header (icon + title) */}
       <div className="flex items-center gap-2">
         <span className={`${iconColor}`}>{icon}</span>
-        <span className="body-16 weight-medium text-neutral-400">{title}</span>
+        <span className="body-16 md:body-14 weight-medium text-neutral-400">
+          {title}
+        </span>
       </div>
 
       {/* Value */}

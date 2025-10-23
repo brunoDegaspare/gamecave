@@ -1,36 +1,60 @@
 @layer utilities {
-  /* === Headings === */
+  /* ===== Headings ===== */
+
+  /* 48px > md:44px */
   .heading-1 {
-    @apply text-[48px] leading-[56px] font-bold;
+    @apply text-[44px] leading-[52px] font-bold md:text-[48px] md:leading-[56px];
   }
+
+  /* 40px > md:32px */
   .heading-2 {
-    @apply text-[40px] leading-[48px] font-bold;
+    @apply text-[32px] leading-[40px] font-bold md:text-[40px] md:leading-[48px];
   }
+
+  /* 32px > md:28px */
   .heading-3 {
-    @apply text-[32px] leading-[40px] font-bold;
+    @apply text-[28px] leading-[36px] font-bold md:text-[32px] md:leading-[40px];
   }
+
+  /* 24px > md:20px */
   .heading-4 {
-    @apply text-[24px] leading-[32px] font-bold;
+    @apply text-[20px] leading-[28px] font-bold md:text-[24px] md:leading-[32px];
   }
+
+  /* 20px > md:18px */
   .heading-5 {
-    @apply text-[20px] leading-[28px] font-bold;
+    @apply text-[18px] leading-[26px] font-bold md:text-[20px] md:leading-[28px];
   }
+
+  /* 18px > md:16px */
   .heading-6 {
-    @apply text-[18px] leading-[24px] font-bold;
+    @apply text-[16px] leading-[24px] font-bold md:text-[18px] md:leading-[24px];
   }
 
-  /* === Body text === */
-  .body-18 {
-    @apply text-[18px] leading-[26px];
-  }
+  /* ===== Body text ===== */
+
+  /* 16px > md:14px */
   .body-16 {
-    @apply text-[16px] leading-[24px];
-  }
-  .body-14 {
-    @apply text-[14px] leading-[22px];
+    @apply text-[14px] leading-[22px] md:text-[16px] md:leading-[24px];
   }
 
-  /* Font weights */
+  /* 18px > md:16px */
+  .body-18 {
+    @apply text-[16px] leading-[24px] md:text-[18px] md:leading-[26px];
+  }
+
+  /* 14px > md:12px */
+  .body-14 {
+    @apply text-[12px] leading-[20px] md:text-[14px] md:leading-[22px];
+  }
+
+  /* ===== Captions ===== */
+  /* 12px > md:10px (ajuste proporcional) */
+  .caption-12 {
+    @apply text-[10px] leading-[18px] md:text-[12px] md:leading-[20px];
+  }
+
+  /* ===== Font weights ===== */
   .weight-regular {
     @apply font-normal;
   }
@@ -44,21 +68,17 @@
     @apply font-bold;
   }
 
-  /* === Captions === */
-  .caption-12 {
-    @apply text-[12px] leading-[20px];
-  }
-
-  /* === Extras === */
+  /* ===== Text tones ===== */
   .text-muted {
-    @apply text-neutral-500;
+    @apply text-neutral-400;
   }
   .text-strong {
     @apply text-white;
   }
 
-  /* === Dashboard stats === */
+  /* ===== Stats / Display ===== */
+  /* 32px > md:28px */
   .stat-32 {
-    @apply text-[32px] leading-none tracking-tight font-extrabold;
+    @apply text-[28px] leading-none tracking-tight font-extrabold md:text-[32px];
   }
 }
