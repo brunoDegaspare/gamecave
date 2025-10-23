@@ -14,7 +14,12 @@
     "jsx": "preserve",
     "incremental": true,
     "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./src/*"] }
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@root/*": ["*"]
+    }
   },
   "include": [
     "next-env.d.ts",

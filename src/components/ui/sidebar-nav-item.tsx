@@ -6,7 +6,7 @@ import clsx from "clsx";
 import Icon from "@/components/ui/icon";
 import { iconsMap, IconName } from "@/components/generated/icons-map";
 
-// type guard: aceita qualquer valor e confirma se é um ícone válido
+// type guard: garante que o ícone é válido
 function isIconName(v: unknown): v is IconName {
   return typeof v === "string" && v in iconsMap;
 }
@@ -17,6 +17,7 @@ type SidebarNavItemProps = {
   iconName?: string;
   showIcon?: boolean;
   isActive?: boolean;
+  collapsed?: boolean;
 };
 
 export default function SidebarNavItem({
@@ -25,6 +26,7 @@ export default function SidebarNavItem({
   iconName,
   showIcon = true,
   isActive,
+  collapsed = false,
 }: SidebarNavItemProps) {
   const pathname = usePathname();
 
@@ -39,15 +41,18 @@ export default function SidebarNavItem({
     <Link
       href={href}
       className={clsx(
-        "flex items-center gap-3 rounded-xl py-3 px-3 text-base font-medium transition-colors",
+        "group flex items-center rounded-xl py-3 px-3 text-base font-medium transition-colors",
         active
           ? "bg-neutral-800 text-purple-400"
-          : "text-neutral-300 hover:bg-neutral-800"
+          : "text-neutral-300 hover:bg-neutral-800",
+        collapsed ? "justify-center" : "gap-3"
       )}
+      title={collapsed ? label : undefined} // tooltip no modo colapsado
+      aria-label={collapsed ? label : undefined}
       aria-current={active ? "page" : undefined}
     >
       {showIcon && isIconName(finalIconName) && (
-        <div className="w-6 h-6">
+        <div className="w-6 h-6 flex-shrink-0">
           <Icon
             name={finalIconName}
             size={24}
@@ -56,7 +61,9 @@ export default function SidebarNavItem({
           />
         </div>
       )}
-      <span>{label}</span>
+
+      {/* Esconde o texto quando colapsado */}
+      {!collapsed && <span className="truncate">{label}</span>}
     </Link>
   );
 }
