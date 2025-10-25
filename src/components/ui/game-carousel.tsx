@@ -1,54 +1,40 @@
 "use client";
-
 import useEmblaCarousel from "embla-carousel-react";
 import GameCard from "@/components/ui/game-card";
-
-type Game = {
-  cover: string;
-  name: string;
-  platform: string;
-};
-
-type GameCarouselProps = {
-  title: string;
-  games: Game[];
-  viewAllLink?: string;
-};
 
 export default function GameCarousel({
   title,
   games,
-  viewAllLink,
-}: GameCarouselProps) {
-  const [emblaRef] = useEmblaCarousel({ loop: false, align: "start" });
+}: {
+  title: string;
+  games: { cover: string; name: string; platform: string }[];
+}) {
+  const [emblaRef] = useEmblaCarousel({
+    loop: false,
+    align: "start",
+    dragFree: true,
+    containScroll: "keepSnaps",
+  });
 
   return (
-    <section className="mt-8">
+    <section className="w-full max-w-full overflow-x-clip overflow-y-visible">
       <div className="mb-4 flex items-center justify-between px-1">
         <h2 className="text-lg font-semibold text-neutral-100">{title}</h2>
-        {viewAllLink && (
-          <a
-            href={viewAllLink}
-            className="text-sm text-neutral-400 hover:text-neutral-200 transition"
-          >
-            View all
-          </a>
-        )}
       </div>
 
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-5">
-          {games.map((game) => (
+      {/* Viewport */}
+      <div
+        ref={emblaRef}
+        className="relative w-full max-w-full overflow-x-clip overflow-y-visible"
+      >
+        {/* Track */}
+        <div className="flex gap-2 will-change-transform">
+          {games.map((g) => (
             <div
-              key={`${game.name}-${game.platform}`}
-              className="flex-[0_0_auto]"
+              key={`${g.name}-${g.platform}`}
+              className="flex-[0_0_auto] basis-[148px] md:basis-[200px] shrink-0"
             >
-              <GameCard
-                cover={game.cover}
-                name={game.name}
-                platform={game.platform}
-                className="w-[200px]"
-              />
+              <GameCard {...g} className="w-full" />
             </div>
           ))}
         </div>

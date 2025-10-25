@@ -26,7 +26,7 @@ export default function HomePage() {
     },
     {
       cover: "/covers/alex-kidd.jpg",
-      name: "Alex Kidd in Miracle World",
+      name: "Alex Kidd in Miracle World and a very long name",
       platform: "Master System",
     },
     { cover: "/covers/f-zero.jpg", name: "F-Zero", platform: "SNES" },
@@ -46,16 +46,22 @@ export default function HomePage() {
       platform: "Mega Drive",
     },
     { cover: "/covers/mega-man-x.jpg", name: "Mega Man X", platform: "SNES" },
+    {
+      cover: "/covers/mega-man-x.jpg",
+      name: "Another game A",
+      platform: "SNES",
+    },
+    {
+      cover: "/covers/mega-man-x.jpg",
+      name: "Another game B",
+      platform: "SNES",
+    },
   ];
 
   return (
     <div className="flex flex-col gap-8">
       <HomeHighlights />
-      <GameCarousel
-        title="Recently added"
-        games={recentGames}
-        viewAllLink="/collections"
-      />
+      <GameCarousel title="Recently added" games={recentGames} />
     </div>
   );
 }

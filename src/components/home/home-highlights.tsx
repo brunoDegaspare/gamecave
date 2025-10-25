@@ -38,7 +38,7 @@ export default function HomeHighlights() {
           className="w-full h-full"
         />
       ),
-      title: "Games in progress",
+      title: "Playing now",
       value: 8,
       iconColor: "text-green-400",
     },

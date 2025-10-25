@@ -107,7 +107,7 @@ export default function MainLayout({
       </aside>
 
       {/* Main container */}
-      <div className="flex flex-1 flex-col transition-all duration-300 ease-in-out">
+      <div className="flex flex-1 flex-col min-w-0 overflow-x-hidden transition-all duration-300 ease-in-out">
         {/* Header */}
         <header className="bg-neutral-900/70 px-4 py-2 relative">
           <div className="relative mx-auto w-full px-6 py-3">

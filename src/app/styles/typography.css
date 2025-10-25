@@ -33,14 +33,14 @@
 
   /* ===== Body text ===== */
 
-  /* 16px > md:14px */
-  .body-16 {
-    @apply text-[14px] leading-[22px] md:text-[16px] md:leading-[24px];
-  }
-
   /* 18px > md:16px */
   .body-18 {
     @apply text-[16px] leading-[24px] md:text-[18px] md:leading-[26px];
+  }
+
+  /* 16px > md:14px */
+  .body-16 {
+    @apply text-[14px] leading-[22px] md:text-[16px] md:leading-[24px];
   }
 
   /* 14px > md:12px */
@@ -51,7 +51,7 @@
   /* ===== Captions ===== */
   /* 12px > md:10px (ajuste proporcional) */
   .caption-12 {
-    @apply text-[10px] leading-[18px] md:text-[12px] md:leading-[20px];
+    @apply text-[12px] leading-[18px] md:text-[12px] md:leading-[20px];
   }
 
   /* ===== Font weights ===== */

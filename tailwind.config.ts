@@ -1,4 +1,4 @@
-// Sem tipar o objeto
+import lineClamp from "@tailwindcss/line-clamp";
 const config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -18,7 +18,7 @@ const config = {
       },
     },
   },
-  plugins: [],
+  plugins: [lineClamp],
 };
 
 export default config;
