@@ -1,6 +1,6 @@
 import Link from "next/link";
 import HomeHighlights from "@/components/home/home-highlights";
-import GameCard from "@/components/ui/game-card";
+import GameCarousel from "@/components/ui/game-carousel";
 
 export default function HomePage() {
   const recentGames = [
@@ -50,44 +50,12 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* === Row 1: Hero / Highlights === */}
       <HomeHighlights />
-
-      {/* === Row 2: Recent Activity === */}
-      <section>
-        <div className="mb-4 flex items-center justify-between px-1">
-          <h2 className="text-lg font-semibold text-neutral-100">
-            Recently added to my collection
-          </h2>
-          <Link
-            href="/collections"
-            className="text-sm text-neutral-400 hover:text-neutral-200 transition"
-          >
-            View all
-          </Link>
-        </div>
-
-        <div
-          className="
-            flex gap-6 overflow-x-auto pb-3
-            [scrollbar-width:none] [-ms-overflow-style:none]
-          "
-          style={{ scrollbarWidth: "none" } as React.CSSProperties}
-        >
-          {recentGames.map((g) => (
-            <GameCard
-              key={`${g.name}-${g.platform}`}
-              cover={g.cover}
-              name={g.name}
-              platform={g.platform}
-              className="min-w-[120px] md:min-w-[140px]"
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* === Row 3: Recommendations (placeholder) === */}
-      {/* Futuro: seção de recomendações/AI trends */}
+      <GameCarousel
+        title="Recently added"
+        games={recentGames}
+        viewAllLink="/collections"
+      />
     </div>
   );
 }

@@ -23,7 +23,7 @@ export default function GameCard({
     <div
       onClick={onClick}
       className={clsx(
-        "flex flex-col w-[200px] items-center rounded-xl bg-neutral-900/60 p-3 transition-all duration-200 hover:bg-neutral-800 hover:cursor-pointer hover:scale-[1.02]",
+        "flex flex-col items-center rounded-xl bg-neutral-900/60 p-3 transition-all duration-200 hover:bg-neutral-800 hover:cursor-pointer hover:scale-[1.02]",
         className
       )}
     >
