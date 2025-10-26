@@ -18,8 +18,8 @@ export default function GameCarousel({
 
   return (
     <section className="w-full max-w-full overflow-x-clip overflow-y-visible">
-      <div className="mb-4 flex items-center justify-between px-1">
-        <h2 className="text-lg font-semibold text-neutral-100">{title}</h2>
+      <div className="mb-3 flex items-center justify-between px-1">
+        <h2 className="heading-4 text-neutral-100">{title}</h2>
       </div>
 
       {/* Viewport */}

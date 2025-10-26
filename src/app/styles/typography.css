@@ -3,32 +3,32 @@
 
   /* 48px > md:44px */
   .heading-1 {
-    @apply text-[44px] leading-[52px] font-bold md:text-[48px] md:leading-[56px];
+    @apply text-[44px] leading-[52px] font-medium md:text-[48px] md:leading-[56px];
   }
 
   /* 40px > md:32px */
   .heading-2 {
-    @apply text-[32px] leading-[40px] font-bold md:text-[40px] md:leading-[48px];
+    @apply text-[32px] leading-[40px] font-medium md:text-[40px] md:leading-[48px];
   }
 
   /* 32px > md:28px */
   .heading-3 {
-    @apply text-[28px] leading-[36px] font-bold md:text-[32px] md:leading-[40px];
+    @apply text-[28px] leading-[36px] font-medium md:text-[32px] md:leading-[40px];
   }
 
   /* 24px > md:20px */
   .heading-4 {
-    @apply text-[20px] leading-[28px] font-bold md:text-[24px] md:leading-[32px];
+    @apply text-[20px] leading-[28px] font-medium md:text-[24px] md:leading-[32px];
   }
 
   /* 20px > md:18px */
   .heading-5 {
-    @apply text-[18px] leading-[26px] font-bold md:text-[20px] md:leading-[28px];
+    @apply text-[18px] leading-[26px] font-medium md:text-[20px] md:leading-[28px];
   }
 
   /* 18px > md:16px */
   .heading-6 {
-    @apply text-[16px] leading-[24px] font-bold md:text-[18px] md:leading-[24px];
+    @apply text-[16px] leading-[24px] font-medium md:text-[18px] md:leading-[24px];
   }
 
   /* ===== Body text ===== */

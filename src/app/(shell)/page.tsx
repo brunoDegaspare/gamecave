@@ -59,7 +59,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
       <HomeHighlights />
       <GameCarousel title="Recently added" games={recentGames} />
     </div>

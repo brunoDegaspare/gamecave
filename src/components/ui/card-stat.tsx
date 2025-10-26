@@ -24,7 +24,9 @@ export default function CardStat({
       </div>
 
       {/* Value */}
-      <div className="mt-4 heading-3 text-white tracking-tight">{value}</div>
+      <div className="mt-4 heading-3 weight-bold text-white tracking-tight">
+        {value}
+      </div>
     </div>
   );
 }
