@@ -1,4 +1,3 @@
-import Link from "next/link";
 import HomeHighlights from "@/components/home/home-highlights";
 import GameCarousel from "@/components/ui/game-carousel";
 
@@ -61,7 +60,26 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-10">
       <HomeHighlights />
-      <GameCarousel title="Recently added" games={recentGames} />
+      <GameCarousel
+        title="Recently added"
+        viewAllLink="/collections"
+        games={recentGames}
+      />
+      <GameCarousel
+        title="SNES"
+        viewAllLink="/collections"
+        games={recentGames}
+      />
+      <GameCarousel
+        title="Mega Drive"
+        viewAllLink="/collections"
+        games={recentGames}
+      />
+      <GameCarousel
+        title="Master System"
+        viewAllLink="/collections"
+        games={recentGames}
+      />
     </div>
   );
 }
