@@ -141,6 +141,7 @@ export default function MainLayout({
               <SearchPalette
                 open={open}
                 setOpen={setOpen}
+                items={[]}
                 panelClassName="!max-w-3xl md:!max-w-[680px] w-[92vw]"
               />
             </div>

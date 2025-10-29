@@ -44,7 +44,7 @@ export default function SearchPaletteTrigger({
       onClick={onClick}
       aria-controls={ariaControlsId}
       className={[
-        "inline-flex items-center gap-2 border border-neutral-700",
+        "cursor-pointer inline-flex items-center gap-2 border border-neutral-700",
         "bg-neutral-900 hover:bg-neutral-800 text-neutral-200 transition-colors",
         rounded,
         heightClassName,
