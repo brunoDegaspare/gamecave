@@ -45,7 +45,7 @@ export default function GameCarousel({
           {games.map((g) => (
             <div
               key={`${g.name}-${g.platform}`}
-              className="flex-[0_0_auto] basis-[148px] md:basis-[200px] shrink-0"
+              className="flex-[0_0_auto] basis-[148px] md:basis-[180px] shrink-0"
             >
               <GameCard {...g} className="w-full" />
             </div>

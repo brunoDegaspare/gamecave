@@ -62,7 +62,6 @@ export default function HomePage() {
       <HomeHighlights />
       <GameCarousel
         title="Recently added to your collections"
-        viewAllLink="/collections"
         games={recentGames}
       />
       <GameCarousel

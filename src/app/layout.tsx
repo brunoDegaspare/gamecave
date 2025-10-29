@@ -14,7 +14,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-US" className={`${saira.variable} h-full gc-scrollbar dark`}>
+    <html
+      lang="en-US"
+      className={`${saira.variable} h-full gc-scrollbar dark `}
+    >
       <body className="min-h-screen font-sans bg-neutral-950 text-neutral-100 antialiased">
         <ClientProviders>{children}</ClientProviders>
       </body>
