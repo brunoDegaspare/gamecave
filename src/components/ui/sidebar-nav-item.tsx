@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import Icon from "@/components/ui/icon";
 import { iconsMap, IconName } from "@/components/generated/icons-map";
+import { Tooltip } from "@/components/ui/tooltip"; // ✅ import Tooltip
 
-// type guard: garante que o ícone é válido
+// Type guard: ensures the icon name exists in the icon map
 function isIconName(v: unknown): v is IconName {
   return typeof v === "string" && v in iconsMap;
 }
@@ -30,14 +31,15 @@ export default function SidebarNavItem({
 }: SidebarNavItemProps) {
   const pathname = usePathname();
 
-  // Detecta automaticamente o item ativo
+  // Automatically detect the active item
   const active = isActive ?? pathname === href;
   const finalIconName =
     iconName && active && iconName.includes("-outline")
       ? iconName.replace("-outline", "-bold")
       : iconName;
 
-  return (
+  // Reusable link content
+  const linkContent = (
     <Link
       href={href}
       className={clsx(
@@ -47,8 +49,6 @@ export default function SidebarNavItem({
           : "text-neutral-300 hover:bg-neutral-800",
         collapsed ? "justify-center" : "gap-3"
       )}
-      title={collapsed ? label : undefined} // tooltip no modo colapsado
-      aria-label={collapsed ? label : undefined}
       aria-current={active ? "page" : undefined}
     >
       {showIcon && isIconName(finalIconName) && (
@@ -62,8 +62,17 @@ export default function SidebarNavItem({
         </div>
       )}
 
-      {/* Esconde o texto quando colapsado */}
+      {/* Hide label when collapsed */}
       {!collapsed && <span className="truncate">{label}</span>}
     </Link>
+  );
+
+  // ✅ Show tooltip only when collapsed
+  return collapsed ? (
+    <Tooltip content={label} side="right">
+      {linkContent}
+    </Tooltip>
+  ) : (
+    linkContent
   );
 }
