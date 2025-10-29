@@ -61,7 +61,7 @@ export default function HomePage() {
     <div className="flex flex-col gap-10">
       <HomeHighlights />
       <GameCarousel
-        title="Recently added"
+        title="Recently added to your collections"
         viewAllLink="/collections"
         games={recentGames}
       />

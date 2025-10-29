@@ -1,6 +1,16 @@
 @import "tailwindcss";
+@plugin "tailwind-scrollbar";
 @import "./typography.css";
 @tailwind utilities;
+
+@layer utilities {
+  .light.gc-scrollbar {
+    color-scheme: light;
+  }
+  .dark.gc-scrollbar {
+    color-scheme: dark;
+  }
+}
 
 :root {
   --background: #ffffff;

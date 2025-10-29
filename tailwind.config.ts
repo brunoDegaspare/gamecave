@@ -1,4 +1,6 @@
 import lineClamp from "@tailwindcss/line-clamp";
+import scrollbar from "tailwind-scrollbar";
+
 const config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -18,7 +20,7 @@ const config = {
       },
     },
   },
-  plugins: [lineClamp],
+  plugins: [lineClamp, scrollbar({ nocompatible: true })],
 };
 
 export default config;

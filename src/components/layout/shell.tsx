@@ -114,7 +114,7 @@ export default function MainLayout({
             {/* botão fixo na esquerda da header */}
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="cursor-pointer absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-neutral-800 transition-colors"
+              className="cursor-pointer absolute left-6 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-neutral-800 transition-colors"
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               <Icon
