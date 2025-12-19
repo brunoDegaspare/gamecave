@@ -1,4 +1,5 @@
 import lineClamp from "@tailwindcss/line-clamp";
+import daisyui from "daisyui";
 import scrollbar from "tailwind-scrollbar";
 
 const config = {
@@ -20,7 +21,7 @@ const config = {
       },
     },
   },
-  plugins: [lineClamp, scrollbar({ nocompatible: true })],
+  plugins: [lineClamp, scrollbar({ nocompatible: true }), daisyui],
 };
 
 export default config;
