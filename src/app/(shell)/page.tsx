@@ -1,3 +1,7 @@
+/*
+Defines the dashboard/home route; it wires stat highlight cards and several horizontal carousels of recent or platform-specific games, seeded with mock data and making heavy use of the UI component library.
+*/
+
 import HomeHighlights from "@/components/home/home-highlights";
 import GameCarousel from "@/components/ui/game-carousel";
 
@@ -58,7 +62,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 p-6">
       <HomeHighlights />
       <GameCarousel
         title="Recently added to your collections"

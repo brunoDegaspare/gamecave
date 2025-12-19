@@ -1,3 +1,7 @@
+/*
+ Implements the main “shell” layout: a responsive sidebar with collection links and branding, a sticky header with a command-palette style search bar, and a collapsible state that adapts to Tailwind breakpoints—every routed page renders inside this frame.
+*/
+
 "use client";
 
 import * as React from "react";
@@ -149,7 +153,7 @@ export default function MainLayout({
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );
