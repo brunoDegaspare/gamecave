@@ -82,7 +82,7 @@ export default function MainLayout({
           />
           <SidebarNavItem
             href="#"
-            label="Create collection"
+            label="New collection"
             iconName="ico-add-outline"
             collapsed={collapsed}
           />
