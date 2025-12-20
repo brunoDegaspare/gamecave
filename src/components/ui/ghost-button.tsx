@@ -23,7 +23,7 @@ export default function GhostButton({
 }: GhostButtonProps) {
   const baseClasses = clsx(
     "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 body-16 font-medium transition-colors hover:cursor-pointer",
-    "bg-transparent text-neutral-200 border border-transparent hover:bg-neutral-800/60",
+    "bg-transparent text-neutral-200 border border-transparent hover:bg-gray-800/60",
     "disabled:bg-transparent disabled:text-neutral-500 disabled:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-70",
     className
   );
