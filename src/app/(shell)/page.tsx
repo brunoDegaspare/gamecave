@@ -1,7 +1,7 @@
 "use client";
 
 import HomeHighlights from "@/components/home/home-highlights";
-import CollectionCarousel from "@/components/ui/collection-carousel";
+import CollectionCard from "@/components/ui/collection-card";
 
 const RECENT_COLLECTIONS = [
   {
@@ -35,10 +35,19 @@ export default function HomePage() {
     <div className="flex flex-col gap-10 p-6">
       <HomeHighlights />
 
-      <CollectionCarousel
-        title="Recently added to your collections"
-        collections={RECENT_COLLECTIONS}
-      />
+      <section className="w-full max-w-full overflow-hidden">
+        <div className="mb-4 flex items-center justify-between px-1">
+          <h2 className="heading-5 text-neutral-100">
+            Your collections
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {RECENT_COLLECTIONS.map((collection) => (
+            <CollectionCard key={collection.id} {...collection} />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
