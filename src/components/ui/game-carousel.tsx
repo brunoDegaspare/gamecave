@@ -7,10 +7,32 @@ export default function GameCarousel({
   title,
   games,
   viewAllLink,
+  onGameClick,
 }: {
   title: string;
-  games: { cover: string; name: string; platform: string }[];
+  games: {
+    cover: string;
+    name: string;
+    platform: string;
+    completion?: {
+      cartridge: boolean;
+      manual: boolean;
+      box: boolean;
+    };
+  }[];
   viewAllLink?: string;
+  onGameClick?: (
+    game: {
+      cover: string;
+      name: string;
+      platform: string;
+      completion?: {
+        cartridge: boolean;
+        manual: boolean;
+        box: boolean;
+      };
+    }
+  ) => void;
 }) {
   const [emblaRef] = useEmblaCarousel({
     loop: false,
@@ -47,7 +69,11 @@ export default function GameCarousel({
               key={`${g.name}-${g.platform}`}
               className="flex-[0_0_auto] basis-[148px] md:basis-[180px] shrink-0"
             >
-              <GameCard {...g} className="w-full" />
+              <GameCard
+                {...g}
+                className="w-full"
+                onClick={() => onGameClick?.(g)}
+              />
             </div>
           ))}
         </div>

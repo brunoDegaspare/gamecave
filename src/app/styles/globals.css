@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "tailwind-scrollbar";
+@plugin "daisyui";
 @import "./typography.css";
 @tailwind utilities;
 
