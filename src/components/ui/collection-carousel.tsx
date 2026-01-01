@@ -40,7 +40,7 @@ export default function CollectionCarousel({
           {collections.map((collection) => (
             <div
               key={collection.id}
-              className="flex-[0_0_auto] basis-[260px] md:basis-[320px] shrink-0"
+              className="flex-[0_0_auto] basis-[150px] md:basis-[320px] shrink-0"
             >
               <CollectionCard
                 {...collection}

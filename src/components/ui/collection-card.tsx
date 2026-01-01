@@ -26,24 +26,26 @@ export default function CollectionCard({
     <article
       onClick={onClick}
       className={clsx(
-        "group relative overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/80 shadow-xl",
-        "min-h-[220px] cursor-pointer transition-transform duration-200 hover:shadow-2xl",
+        "group relative overflow-hidden rounded-xl bg-neutral-900 shadow-xl",
+        "min-h-[200px] cursor-pointer transition-transform duration-200 hover:shadow-2xl",
         className
       )}
     >
-      <div
-        aria-hidden
-        className="absolute inset-0 scale-105 bg-cover bg-center blur-[2px] transition-transform duration-500 group-hover:scale-110"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-black/35" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/65 via-transparent to-transparent" />
+      <div className="absolute inset-0 overflow-hidden">
+        <div
+          aria-hidden
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+          className="absolute inset-[2px] scale-105 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-neutral-900/50" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-neutral-800/30 via-neutral-900/80 to-neutral-900/95" />
+      </div>
 
-      <div className="relative flex w-full flex-col items-center gap-3 px-5 pt-8 pb-6 text-center">
-        <h3 className="heading-4 text-neutral-50 drop-shadow-sm">{title}</h3>
-        <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-sm font-medium text-white/90 backdrop-blur-sm">
+      <div className="relative flex h-full w-full flex-col items-center justify-end px-5 pt-10 pb-6 text-center">
+        <span className="px-3 py-1 text-sm body-16 text-white/90">{title}</span>
+        <h4 className="heading-4 weight-medium text-neutral-50 drop-shadow-sm">
           {gamesCount} games
-        </span>
+        </h4>
       </div>
     </article>
   );

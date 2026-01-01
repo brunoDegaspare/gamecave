@@ -32,17 +32,15 @@ const RECENT_COLLECTIONS = [
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col gap-10 p-6">
+    <div className="flex flex-col gap-12 p-6 max-w-[1440px] mx-auto">
       <HomeHighlights />
 
       <section className="w-full max-w-full overflow-hidden">
         <div className="mb-4 flex items-center justify-between px-1">
-          <h2 className="heading-5 text-neutral-100">
-            Your collections
-          </h2>
+          <h2 className="heading-5 text-neutral-100">Your collections</h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {RECENT_COLLECTIONS.map((collection) => (
             <CollectionCard key={collection.id} {...collection} />
           ))}
