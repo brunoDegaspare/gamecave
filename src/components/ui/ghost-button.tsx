@@ -11,7 +11,7 @@ export interface GhostButtonProps
   rightIcon?: IconName;
   iconSize?: number;
   iconClassName?: string;
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 export default function GhostButton({
