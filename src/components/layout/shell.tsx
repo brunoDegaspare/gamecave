@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SidebarNavItem from "@/components/ui/sidebar-nav-item";
 import Icon from "@/components/ui/icon";
+import GhostButton from "@/components/ui/ghost-button";
 import {
   SearchPalette,
   useCommandPalette,
@@ -43,9 +44,23 @@ export default function MainLayout({
       {/* Sidebar fixa */}
       <aside
         className={`${
-          collapsed ? "w-[80px]" : "w-[300px]"
-        } bg-neutral-900/70 border-r border-neutral-800 p-4 pt-4 transition-all duration-300 ease-in-out`}
+          collapsed ? "w-[80px]" : "w-full md:w-[300px]"
+        } ${
+          collapsed
+            ? "static"
+            : "absolute left-0 top-0 z-50 h-full md:static md:h-auto"
+        } bg-neutral-900 border-r border-neutral-800 p-4 pt-4 transition-all duration-300 ease-in-out`}
       >
+        {!collapsed && (
+          <div className="md:hidden absolute right-4 top-4">
+            <GhostButton
+              size="md"
+              iconOnly="ico-arrow-left-outline"
+              aria-label="Close sidebar"
+              onClick={() => setCollapsed(true)}
+            />
+          </div>
+        )}
         <div className="pt-2 pb-2 mb-10 flex items-center justify-center">
           <Link href="/" className="flex items-center gap-2">
             {!collapsed ? (

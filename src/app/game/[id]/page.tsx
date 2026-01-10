@@ -56,9 +56,9 @@ export default function GamePage() {
               <Image
                 src={game.boxart}
                 alt={game.title}
-                width={220}
-                height={280}
-                className="rounded-xl shadow-xl object-cover"
+                width={280}
+                height={340}
+                className="w-[220px] h-auto rounded-xl shadow-xl object-cover md:w-[280px]"
               />
             </div>
 
