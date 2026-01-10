@@ -35,10 +35,10 @@ export default function SecondaryButton({
     size === "lg" ? "px-5 py-4 body-18 leading-[26px]" : "px-4 py-2 body-16";
 
   const baseClasses = clsx(
-    "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border transition-colors hover:cursor-pointer",
+    "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border transition-all duration-300 ease-out hover:cursor-pointer",
     sizeClasses,
-    "bg-transparent border border-white text-white hover:bg-white/10",
-    "disabled:bg-transparent disabled:text-neutral-500 disabled:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-70",
+    "bg-transparent border border-purple-100 text-purple-100 shadow-[0_0_12px_rgba(168,85,247,0.25)] hover:bg-purple-500/10 hover:border-purple-300/80 hover:shadow-[0_0_16px_rgba(168,85,247,0.4)]",
+    "disabled:bg-transparent disabled:text-neutral-500 disabled:border-neutral-700 disabled:shadow-none disabled:cursor-not-allowed disabled:opacity-70",
     className
   );
 

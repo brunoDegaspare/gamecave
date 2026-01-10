@@ -35,7 +35,7 @@ export default function GhostButton({
     size === "lg" ? "px-5 py-4 body-18 leading-[26px]" : "px-4 py-2 body-16";
 
   const baseClasses = clsx(
-    "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border border border-transparent transition-colors hover:cursor-pointer",
+    "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border border border-transparent transition-all duration-300 ease-out hover:cursor-pointer",
     sizeClasses,
     "bg-transparent text-neutral-200 border border-transparent hover:bg-gray-800/60",
     "disabled:bg-transparent disabled:text-neutral-500 disabled:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-70",

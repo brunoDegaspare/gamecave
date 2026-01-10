@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import GhostButton from "@/components/ui/ghost-button";
 import ModalLayout from "@/components/ui/modal-layout";
-import PrimaryButton from "@/components/ui/primary-button";
+import SecondaryButton from "@/components/ui/secondary-button";
 
 type CompletionState = {
   cartridge: boolean;
@@ -122,9 +122,9 @@ export default function GameCompletionModal({
         <GhostButton size="md" type="button" onClick={onClose}>
           Cancel
         </GhostButton>
-        <PrimaryButton size="md" type="button" onClick={handleSave}>
+        <SecondaryButton size="md" type="button" onClick={handleSave}>
           Save
-        </PrimaryButton>
+        </SecondaryButton>
       </div>
     </ModalLayout>
   );

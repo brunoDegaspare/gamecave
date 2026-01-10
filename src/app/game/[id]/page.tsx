@@ -7,8 +7,8 @@ A client component for an individual game’s detail view, presenting hero image
 import Image from "next/image";
 import Icon from "@/components/ui/icon";
 import MainLayout from "@/components/layout/shell";
-import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
+import PrimaryButton from "@/components/ui/primary-button";
 
 export default function GamePage() {
   const game = {
@@ -73,15 +73,15 @@ export default function GamePage() {
                   Wishlist
                 </SecondaryButton>
               </div>
-              <p className="body-16 text-neutral-300 leading-relaxed">
+              <p className="body-18 text-neutral-300 leading-relaxed">
                 {game.overview}
               </p>
 
               {/* ===== STATS SECTION ===== */}
               <section className="grid w-full grid-cols-2 md:grid-cols-4 text-center divide-x divide-neutral-800/40 border border-neutral-800/40 rounded-xl bg-neutral-900/25 backdrop-blur-sm mt-10">
                 <div className="flex flex-col py-3 px-3">
-                  <span className="body-16 text-slate-500">Platform</span>
-                  <span className="body-18 font-medium text-neutral-100 mt-1">
+                  <span className="body-14 text-slate-500">Platform</span>
+                  <span className="body-16 font-medium text-neutral-100 mt-1">
                     {game.platform}
                   </span>
                 </div>
@@ -95,14 +95,14 @@ export default function GamePage() {
 
                 <div className="flex flex-col py-3 px-3">
                   <span className="body-14 text-slate-500">Developer(s)</span>
-                  <span className="body-18 font-medium text-neutral-100 mt-1">
+                  <span className="body-16 font-medium text-neutral-100 mt-1">
                     {game.developer}
                   </span>
                 </div>
 
                 <div className="flex flex-col py-3 px-3">
                   <span className="body-14 text-slate-500">Publisher(s)</span>
-                  <span className="body-18 font-medium text-neutral-100 mt-1">
+                  <span className="body-16 font-medium text-neutral-100 mt-1">
                     {game.publisher}
                   </span>
                 </div>
