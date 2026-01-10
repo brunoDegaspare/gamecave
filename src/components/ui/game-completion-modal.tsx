@@ -119,10 +119,10 @@ export default function GameCompletionModal({
       </div>
 
       <div className="mt-4 flex w-full items-center justify-end gap-3">
-        <GhostButton type="button" onClick={onClose}>
+        <GhostButton size="md" type="button" onClick={onClose}>
           Cancel
         </GhostButton>
-        <PrimaryButton type="button" onClick={handleSave}>
+        <PrimaryButton size="md" type="button" onClick={handleSave}>
           Save
         </PrimaryButton>
       </div>

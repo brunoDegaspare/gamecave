@@ -8,6 +8,7 @@ import Image from "next/image";
 import Icon from "@/components/ui/icon";
 import MainLayout from "@/components/layout/shell";
 import PrimaryButton from "@/components/ui/primary-button";
+import SecondaryButton from "@/components/ui/secondary-button";
 
 export default function GamePage() {
   const game = {
@@ -49,62 +50,59 @@ export default function GamePage() {
             </div>
           )}
 
-          <div className="relative z-10 flex flex-col md:flex-row gap-8 pt-20 px-6 max-w-7xl mx-auto">
-            {/* ===== LEFT: COVER & STATUS ===== */}
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <Image
-                  src={game.boxart}
-                  alt={game.title}
-                  width={220}
-                  height={280}
-                  className="rounded-xl shadow-xl object-cover"
-                />
-              </div>
-
-              {/* Add button */}
-              <PrimaryButton
-                leftIcon="ico-add-outline"
-                className="mt-4 w-[232px]"
-                iconSize={24}
-              >
-                Add to collection
-              </PrimaryButton>
+          <div className="relative z-10 flex flex-col items-center gap-6 pt-20 px-6 max-w-6xl mx-auto text-center">
+            {/* ===== COVER ===== */}
+            <div className="relative">
+              <Image
+                src={game.boxart}
+                alt={game.title}
+                width={220}
+                height={280}
+                className="rounded-xl shadow-xl object-cover"
+              />
             </div>
 
-            {/* ===== RIGHT: INFO ===== */}
-            <div className="flex-1 flex flex-col justify-end-safe">
-              <h1 className="text-3xl font-semibold mb-3">{game.title}</h1>
-              <p className="text-sm text-neutral-300 leading-relaxed w-full mb-6">
+            {/* ===== INFO ===== */}
+            <div className="w-full flex flex-col items-center">
+              <h1 className="heading-2 text-3xl font-semibold">{game.title}</h1>
+              <div className="actions flex items-center justify-center gap-4 py-8">
+                <PrimaryButton size="lg" leftIcon="ico-add-outline">
+                  Add to collection
+                </PrimaryButton>
+                <SecondaryButton size="lg" leftIcon="ico-heart-outline">
+                  Wishlist
+                </SecondaryButton>
+              </div>
+              <p className="body-16 text-neutral-300 leading-relaxed">
                 {game.overview}
               </p>
 
               {/* ===== STATS SECTION ===== */}
-              <section className="grid grid-cols-2 md:grid-cols-4 text-center divide-x divide-neutral-800/40 border border-neutral-800/40 rounded-xl bg-neutral-900/25 backdrop-blur-sm">
+              <section className="grid w-full grid-cols-2 md:grid-cols-4 text-center divide-x divide-neutral-800/40 border border-neutral-800/40 rounded-xl bg-neutral-900/25 backdrop-blur-sm mt-10">
                 <div className="flex flex-col py-3 px-3">
-                  <span className="body-14 text-slate-500">Platform</span>
-                  <span className="body-14 font-medium text-neutral-100 mt-1">
+                  <span className="body-16 text-slate-500">Platform</span>
+                  <span className="body-18 font-medium text-neutral-100 mt-1">
                     {game.platform}
                   </span>
                 </div>
 
                 <div className="flex flex-col py-3 px-3">
                   <span className="body-14 text-slate-500">Release Year</span>
-                  <span className="body-14 font-medium text-neutral-100 mt-1">
+                  <span className="body-18 font-medium text-neutral-100 mt-1">
                     {game.release_year}
                   </span>
                 </div>
 
                 <div className="flex flex-col py-3 px-3">
                   <span className="body-14 text-slate-500">Developer(s)</span>
-                  <span className="body-14 font-medium text-neutral-100 mt-1">
+                  <span className="body-18 font-medium text-neutral-100 mt-1">
                     {game.developer}
                   </span>
                 </div>
 
                 <div className="flex flex-col py-3 px-3">
                   <span className="body-14 text-slate-500">Publisher(s)</span>
-                  <span className="body-14 font-medium text-neutral-100 mt-1">
+                  <span className="body-18 font-medium text-neutral-100 mt-1">
                     {game.publisher}
                   </span>
                 </div>
@@ -114,9 +112,9 @@ export default function GamePage() {
         </section>
 
         {/* ===== MEDIA GALLERY ===== */}
-        <section className="px-6 py-10 max-w-6xl mx-auto">
-          <h2 className="text-lg font-medium mb-4">Screenshots</h2>
-          <div className="grid grid-cols-4 gap-4">
+        <section className="px-6 pb-10 max-w-7xl mx-auto mt-10">
+          <h2 className="heading-5 mb-4">Screenshots</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {game.images.map((img, index) => (
               <div
                 key={index}

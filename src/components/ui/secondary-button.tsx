@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import clsx from "clsx";
 import Icon, { type IconName } from "@/components/ui/icon";
 
-export interface GhostButtonProps
+export interface SecondaryButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
   size: "md" | "lg";
   showIcon?: boolean;
@@ -14,7 +14,7 @@ export interface GhostButtonProps
   children: ReactNode;
 }
 
-export default function GhostButton({
+export default function SecondaryButton({
   children,
   className,
   size,
@@ -26,7 +26,7 @@ export default function GhostButton({
   iconClassName,
   disabled,
   ...rest
-}: GhostButtonProps) {
+}: SecondaryButtonProps) {
   const resolvedIconSize =
     iconSize ?? (iconOnly ? (size === "lg" ? 32 : 24) : 24);
   const hasIconOnly = Boolean(iconOnly);
@@ -37,7 +37,7 @@ export default function GhostButton({
   const baseClasses = clsx(
     "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold transition-colors hover:cursor-pointer",
     sizeClasses,
-    "bg-transparent text-neutral-200 border border-transparent hover:bg-gray-800/60",
+    "bg-transparent border border-white text-white hover:bg-white/10",
     "disabled:bg-transparent disabled:text-neutral-500 disabled:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-70",
     className
   );
