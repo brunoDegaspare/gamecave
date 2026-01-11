@@ -10,28 +10,17 @@ import MainLayout from "@/components/layout/shell";
 import PrimaryButton from "@/components/ui/primary-button";
 import GhostButton from "@/components/ui/ghost-button";
 import InvertedButton from "@/components/ui/inverted-button";
+import Alert from "@/components/ui/alert";
 
 export default function GamePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [pendingCollections, setPendingCollections] = useState<string[]>([]);
+  const [showCollectionError, setShowCollectionError] = useState(false);
   const [showCollectionsScrollbar, setShowCollectionsScrollbar] =
     useState(false);
-  const [dropdownPlacement, setDropdownPlacement] = useState<"bottom" | "top">(
-    "bottom"
-  );
-  const [dropdownMaxHeight, setDropdownMaxHeight] = useState<number | null>(
-    null
-  );
-  const [dropdownPosition, setDropdownPosition] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
   const collectionsScrollTimeout = useRef<number | null>(null);
   const collectionsScrollRef = useRef<HTMLDivElement | null>(null);
-  const dropdownTriggerRef = useRef<HTMLDivElement | null>(null);
-  const dropdownContentRef = useRef<HTMLDivElement | null>(null);
   const isDraggingCollections = useRef(false);
   const hasDraggedCollections = useRef(false);
   const dragStartY = useRef(0);
@@ -88,133 +77,17 @@ export default function GamePage() {
   };
 
   useEffect(() => {
-    if (isPopoverOpen) {
+    if (isDrawerOpen) {
       setPendingCollections(selectedCollections);
+      setShowCollectionError(false);
     }
-  }, [isPopoverOpen, selectedCollections]);
+  }, [isDrawerOpen, selectedCollections]);
 
   useEffect(() => {
-    if (!isPopoverOpen) {
-      return;
+    if (pendingCollections.length > 0 && showCollectionError) {
+      setShowCollectionError(false);
     }
-    // Reset positioning state on open to avoid inheriting stale placement.
-    setDropdownPlacement("bottom");
-    setDropdownMaxHeight(null);
-    setDropdownPosition(null);
-  }, [isPopoverOpen]);
-
-  useEffect(() => {
-    if (!isPopoverOpen) {
-      return;
-    }
-
-    const updateDropdownPlacement = () => {
-      const trigger = dropdownTriggerRef.current;
-      const content = dropdownContentRef.current;
-      if (!trigger || !content) {
-        return;
-      }
-
-      const triggerRect = trigger.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const viewportWidth = window.innerWidth;
-      const margin = 12;
-      const spaceBelow = viewportHeight - triggerRect.bottom - margin;
-      const spaceAbove = triggerRect.top - margin;
-      const contentHeight = content.scrollHeight;
-      const contentWidth = content.offsetWidth;
-
-      const fitsBelow = contentHeight <= spaceBelow;
-      const fitsAbove = contentHeight <= spaceAbove;
-      let placement: "bottom" | "top" = "bottom";
-      let maxHeight: number | null = null;
-
-      if (fitsBelow || (!fitsAbove && spaceBelow >= spaceAbove)) {
-        placement = "bottom";
-        if (!fitsBelow) {
-          maxHeight = Math.max(spaceBelow, 0);
-        }
-      } else {
-        placement = "top";
-        if (!fitsAbove) {
-          maxHeight = Math.max(spaceAbove, 0);
-        }
-      }
-
-      const cappedHeight =
-        maxHeight !== null ? Math.min(contentHeight, maxHeight) : contentHeight;
-      let desiredTop =
-        placement === "bottom"
-          ? triggerRect.bottom + margin
-          : triggerRect.top - cappedHeight - margin;
-      const desiredLeft = Math.min(
-        Math.max(margin, triggerRect.left),
-        viewportWidth - contentWidth - margin
-      );
-
-      if (desiredTop < margin) {
-        desiredTop = margin;
-        if (placement === "top") {
-          maxHeight = Math.max(spaceAbove, 0);
-        }
-      }
-
-      if (desiredTop + cappedHeight > viewportHeight - margin) {
-        desiredTop = Math.max(margin, viewportHeight - margin - cappedHeight);
-        if (placement === "bottom") {
-          maxHeight = Math.max(spaceBelow, 0);
-        }
-      }
-
-      setDropdownPlacement(placement);
-      setDropdownMaxHeight(
-        maxHeight !== null && maxHeight > 0 ? Math.floor(maxHeight) : null
-      );
-      setDropdownPosition({
-        // Position relative to the viewport so it always aligns with the trigger.
-        top: Math.round(desiredTop),
-        left: Math.round(desiredLeft),
-      });
-    };
-
-    // Keep the dropdown fully visible by adapting to available viewport space.
-    const rafId = window.requestAnimationFrame(updateDropdownPlacement);
-    window.addEventListener("resize", updateDropdownPlacement);
-
-    return () => {
-      window.cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", updateDropdownPlacement);
-    };
-  }, [isPopoverOpen]);
-
-  useEffect(() => {
-    if (!isPopoverOpen) {
-      return;
-    }
-
-    const handleScroll = (event: Event) => {
-      const target = event.target as Node | null;
-      if (target && dropdownContentRef.current?.contains(target)) {
-        return;
-      }
-      setIsPopoverOpen(false);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsPopoverOpen(false);
-      }
-    };
-
-    // Close on scroll so the dropdown never loses context on smaller viewports.
-    window.addEventListener("scroll", handleScroll, true);
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll, true);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isPopoverOpen]);
+  }, [pendingCollections, showCollectionError]);
 
   useEffect(() => {
     return () => {
@@ -282,19 +155,12 @@ export default function GamePage() {
   };
 
   const handleApplyCollections = () => {
-    setIsPopoverOpen(false);
     if (pendingCollections.length === 0) {
+      setShowCollectionError(true);
       return;
     }
+    setIsDrawerOpen(false);
     setSelectedCollections(pendingCollections);
-  };
-
-  const handlePopoverBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-    const nextTarget = event.relatedTarget as Node | null;
-    if (nextTarget && event.currentTarget.contains(nextTarget)) {
-      return;
-    }
-    setIsPopoverOpen(false);
   };
 
   return (
@@ -343,103 +209,27 @@ export default function GamePage() {
                 </h1>
                 {/* Tighter hero spacing boosts above-the-fold visibility on smaller desktops. */}
                 <div className="actions flex items-center justify-center gap-4 py-8 lg:gap-3 lg:py-4 xl:py-5 2xl:py-8">
-                  <div
-                    className={`dropdown dropdown-end ${
-                      isPopoverOpen ? "dropdown-open" : ""
-                    }`}
-                    tabIndex={0}
-                    onBlur={handlePopoverBlur}
-                  >
-                    <div ref={dropdownTriggerRef}>
-                      {selectedCollections.length > 0 ? (
-                        <InvertedButton
-                          size="md"
-                          leftIcon="ico-tick-outline"
-                          onClick={() => setIsPopoverOpen((prev) => !prev)}
-                        >
-                          Added ({selectedCollections.length} collections)
-                        </InvertedButton>
-                      ) : (
-                        <PrimaryButton
-                          size="md"
-                          leftIcon="ico-add-outline"
-                          onClick={() => setIsPopoverOpen((prev) => !prev)}
-                        >
-                          Add to collection
-                        </PrimaryButton>
-                      )}
-                    </div>
-                    <div
-                      ref={dropdownContentRef}
-                      className={`dropdown-content fixed z-[1000] w-80 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950/95 shadow-xl backdrop-blur transition-[opacity,transform] duration-200 ease-out ${
-                        dropdownMaxHeight ? "overflow-y-auto" : ""
-                      } ${
-                        isPopoverOpen && dropdownPosition
-                          ? "visible opacity-100 translate-y-0 scale-100"
-                          : "pointer-events-none invisible opacity-0 -translate-y-1 scale-95"
-                      }`}
-                      tabIndex={isPopoverOpen ? 0 : -1}
-                      aria-hidden={!isPopoverOpen}
-                      style={{
-                        top: dropdownPosition
-                          ? `${dropdownPosition.top}px`
-                          : undefined,
-                        left: dropdownPosition
-                          ? `${dropdownPosition.left}px`
-                          : undefined,
-                        maxHeight: dropdownMaxHeight
-                          ? `${dropdownMaxHeight}px`
-                          : undefined,
-                      }}
+                  {selectedCollections.length > 0 ? (
+                    <InvertedButton
+                      size="md"
+                      leftIcon="ico-tick-outline"
+                      onClick={() => setIsDrawerOpen(true)}
                     >
-                      <div className="sticky top-0 z-1000 flex items-center rounded-t-2xl border-b border-neutral-800 bg-neutral-900/70 px-4 py-1">
-                        <span className="body-16 text-neutral-100">Add to</span>
-                      </div>
-                      <div className="p-4">
-                        <GhostButton
-                          size="md"
-                          leftIcon="ico-add-outline"
-                          className="w-full justify-start bg-neutral-900/60 hover:bg-neutral-900"
-                        >
-                          New collection
-                        </GhostButton>
-                      </div>
-                      <div
-                        className={`px-4 pb-4 space-y-3 pr-4 gc-scrollbar ${
-                          dropdownMaxHeight ? "" : "max-h-64 overflow-y-auto"
-                        }`}
-                      >
-                        {sortedCollections.map((collection) => (
-                          <label
-                            key={collection}
-                            className="relative flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/30 px-4 py-3 cursor-pointer transition-all duration-300 ease-out hover:bg-neutral-900"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={pendingCollections.includes(collection)}
-                              onChange={() =>
-                                handleCollectionToggle(collection)
-                              }
-                              className="checkbox peer border-neutral-600 bg-neutral-900/80 hover:bg-neutral-900 checked:border-transparent checked:bg-purple-600 checked:hover:bg-purple-600 focus:ring-0 [--chkfg:#ffffff] cursor-pointer transition-colors duration-300 ease-out"
-                            />
-                            <span className="body-16 text-neutral-100">
-                              {collection}
-                            </span>
-                            <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
-                          </label>
-                        ))}
-                      </div>
-                      <div className="border-t border-neutral-800 px-4 py-4">
-                        <PrimaryButton
-                          size="md"
-                          className="w-full"
-                          onClick={handleApplyCollections}
-                        >
-                          Done
-                        </PrimaryButton>
-                      </div>
-                    </div>
-                  </div>
+                      Added (in {selectedCollections.length}{" "}
+                      {selectedCollections.length === 1
+                        ? "collection"
+                        : "collections"}
+                      )
+                    </InvertedButton>
+                  ) : (
+                    <PrimaryButton
+                      size="md"
+                      leftIcon="ico-add-outline"
+                      onClick={() => setIsDrawerOpen(true)}
+                    >
+                      Add to collection
+                    </PrimaryButton>
+                  )}
                   <GhostButton size="md" iconOnly="ico-heart-outline">
                     Wishlist
                   </GhostButton>
@@ -508,10 +298,10 @@ export default function GamePage() {
             className="drawer-overlay"
             onClick={() => setIsDrawerOpen(false)}
           />
-          <aside className="w-80 md:w-[465px] h-screen bg-neutral-950 text-neutral-100 border-l border-neutral-800 flex flex-col">
-            <div className="sticky top-0 z-10 bg-neutral-950 border-b border-neutral-900 px-6 py-6">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="heading-4 text-white">Add to collection</h3>
+          <aside className="w-80 md:w-[460px] h-screen bg-neutral-950 text-neutral-100 border-l border-neutral-800 flex flex-col">
+            <div className="sticky top-0 z-10 bg-neutral-950 border-b border-neutral-900 px-6 py-3">
+              <div className="flex items-center justify-between">
+                <h3 className="heading-4 text-white">Add to</h3>
                 <GhostButton
                   size="md"
                   iconOnly="ico-cross-outline"
@@ -521,101 +311,78 @@ export default function GamePage() {
               </div>
             </div>
 
-            <div className="flex-1 p-6 pb-24 overflow-y-auto gc-scrollbar">
-              <div className="space-y-6">
-                <div className="space-y-3 px-4 py-4 rounded-xl bg-neutral-900/50">
-                  <p className="body-14 weight-medium text-neutral-300">
-                    Collections
-                  </p>
-                  <div
-                    ref={collectionsScrollRef}
-                    className={`space-y-3 max-h-78 overflow-y-auto pr-1 gc-scrollbar scrollbar-thin scrollbar-track-transparent cursor-grab select-none ${
-                      showCollectionsScrollbar
-                        ? "scrollbar-thumb-neutral-700/70"
-                        : "scrollbar-thumb-transparent"
-                    }`}
-                    onScroll={handleCollectionsScroll}
-                    onMouseDown={handleCollectionsPointerDown}
-                    onMouseMove={handleCollectionsPointerMove}
-                    onMouseUp={handleCollectionsPointerUp}
-                    onMouseLeave={handleCollectionsPointerUp}
-                    onClickCapture={(event) => {
-                      if (hasDraggedCollections.current) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        hasDraggedCollections.current = false;
-                      }
-                    }}
-                  >
-                    {sortedCollections.map((collection) => (
-                      <label
-                        key={collection}
-                        className="relative flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/30 px-4 py-4 cursor-pointer transition-all duration-300 ease-out hover:bg-neutral-900"
-                      >
-                        <input
-                          type="checkbox"
-                          className="checkbox peer border-neutral-600 bg-neutral-900/80 hover:bg-neutral-900 checked:border-transparent checked:bg-purple-600 checked:hover:bg-purple-600 focus:ring-0 [--chkfg:#ffffff] cursor-pointer transition-colors duration-300 ease-out"
-                        />
-                        <span className="body-16 text-neutral-100">
-                          {collection}
-                        </span>
-                        <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-3 px-4 py-4 rounded-xl bg-neutral-900/50">
-                  <p className="body-14 weight-medium text-slate-400">
-                    Contents
-                  </p>
-                  <div className="space-y-3">
-                    {["Cartridge", "Box", "Manual"].map((item) => (
-                      <label
-                        key={item}
-                        className="relative flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/30 px-4 py-4 cursor-pointer transition-all duration-300 ease-out hover:bg-neutral-900"
-                      >
-                        <input
-                          type="checkbox"
-                          className="checkbox peer border-neutral-600 bg-neutral-900/80 hover:bg-neutral-900 checked:border-transparent checked:bg-purple-600 checked:hover:bg-purple-600 focus:ring-0 [--chkfg:#ffffff] cursor-pointer transition-colors duration-300 ease-out"
-                        />
-                        <span className="body-16 text-neutral-100">{item}</span>
-                        <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-3 px-4 py-4 rounded-xl bg-neutral-900/50">
-                  <p className="body-14 weight-medium text-slate-400">
-                    Play status
-                  </p>
-                  <div className="space-y-3">
-                    {statusOptions.map((status) => (
-                      <label
-                        key={status.value}
-                        className="relative flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/30 px-4 py-4 cursor-pointer transition-all duration-300 ease-in-out hover:bg-neutral-900"
-                      >
-                        <input
-                          type="radio"
-                          name="game-status"
-                          value={status.value}
-                          className="radio peer border-neutral-600 bg-neutral-900/80 text-purple-600 transition-colors duration-300 ease-in-out"
-                        />
-                        <span className="body-16 text-neutral-100">
-                          {status.label}
-                        </span>
-                        <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-in-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
-                      </label>
-                    ))}
-                  </div>
+            <div className="flex-1 p-6">
+              <div className="flex h-full flex-col space-y-6">
+                <GhostButton
+                  size="md"
+                  leftIcon="ico-add-outline"
+                  className="w-full justify-start bg-neutral-900/60 hover:bg-neutral-900"
+                >
+                  New collection
+                </GhostButton>
+                <div
+                  ref={collectionsScrollRef}
+                  className={`flex-1 space-y-3 overflow-y-auto pr-1 gc-scrollbar scrollbar-thin scrollbar-track-transparent cursor-grab select-none ${
+                    showCollectionsScrollbar
+                      ? "scrollbar-thumb-neutral-700/70"
+                      : "scrollbar-thumb-transparent"
+                  }`}
+                  onScroll={handleCollectionsScroll}
+                  onMouseDown={handleCollectionsPointerDown}
+                  onMouseMove={handleCollectionsPointerMove}
+                  onMouseUp={handleCollectionsPointerUp}
+                  onMouseLeave={handleCollectionsPointerUp}
+                  onClickCapture={(event) => {
+                    if (hasDraggedCollections.current) {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      hasDraggedCollections.current = false;
+                    }
+                  }}
+                >
+                  {sortedCollections.map((collection) => (
+                    <label
+                      key={collection}
+                      className="relative flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/30 px-4 py-3 cursor-pointer transition-all duration-300 ease-out hover:bg-neutral-900"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={pendingCollections.includes(collection)}
+                        onChange={() => handleCollectionToggle(collection)}
+                        className="checkbox peer border-neutral-600 bg-neutral-900/80 hover:bg-neutral-900 checked:border-transparent checked:bg-purple-600 checked:hover:bg-purple-600 focus:ring-0 [--chkfg:#ffffff] cursor-pointer transition-colors duration-300 ease-out"
+                      />
+                      <span className="body-16 text-neutral-100">
+                        {collection}
+                      </span>
+                      <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
 
+            <div
+              className={`px-6 overflow-hidden transition-all duration-200 ease-out ${
+                showCollectionError
+                  ? "max-h-24 pb-3 opacity-100"
+                  : "max-h-0 pb-0 opacity-0 pointer-events-none"
+              }`}
+              aria-hidden={!showCollectionError}
+            >
+              <Alert icon="ico-cross-circle-bold">
+                <span>Please select at least one collection.</span>
+              </Alert>
+            </div>
             <div className="sticky bottom-0 border-t border-neutral-900 bg-neutral-950/95 px-6 py-6 backdrop-blur">
-              <PrimaryButton size="md" onClick={() => setIsDrawerOpen(false)}>
-                Add to collection
+              <PrimaryButton
+                size="md"
+                className="w-full"
+                onClick={handleApplyCollections}
+              >
+                Add
+                {pendingCollections.length > 0
+                  ? ` (${pendingCollections.length})`
+                  : ""}
               </PrimaryButton>
             </div>
           </aside>
