@@ -17,8 +17,20 @@ export default function GamePage() {
   const [pendingCollections, setPendingCollections] = useState<string[]>([]);
   const [showCollectionsScrollbar, setShowCollectionsScrollbar] =
     useState(false);
+  const [dropdownPlacement, setDropdownPlacement] = useState<"bottom" | "top">(
+    "bottom"
+  );
+  const [dropdownMaxHeight, setDropdownMaxHeight] = useState<number | null>(
+    null
+  );
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const collectionsScrollTimeout = useRef<number | null>(null);
   const collectionsScrollRef = useRef<HTMLDivElement | null>(null);
+  const dropdownTriggerRef = useRef<HTMLDivElement | null>(null);
+  const dropdownContentRef = useRef<HTMLDivElement | null>(null);
   const isDraggingCollections = useRef(false);
   const hasDraggedCollections = useRef(false);
   const dragStartY = useRef(0);
@@ -79,6 +91,129 @@ export default function GamePage() {
       setPendingCollections(selectedCollections);
     }
   }, [isPopoverOpen, selectedCollections]);
+
+  useEffect(() => {
+    if (!isPopoverOpen) {
+      return;
+    }
+    // Reset positioning state on open to avoid inheriting stale placement.
+    setDropdownPlacement("bottom");
+    setDropdownMaxHeight(null);
+    setDropdownPosition(null);
+  }, [isPopoverOpen]);
+
+  useEffect(() => {
+    if (!isPopoverOpen) {
+      return;
+    }
+
+    const updateDropdownPlacement = () => {
+      const trigger = dropdownTriggerRef.current;
+      const content = dropdownContentRef.current;
+      if (!trigger || !content) {
+        return;
+      }
+
+      const triggerRect = trigger.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      const margin = 12;
+      const spaceBelow = viewportHeight - triggerRect.bottom - margin;
+      const spaceAbove = triggerRect.top - margin;
+      const contentHeight = content.scrollHeight;
+      const contentWidth = content.offsetWidth;
+
+      const fitsBelow = contentHeight <= spaceBelow;
+      const fitsAbove = contentHeight <= spaceAbove;
+      let placement: "bottom" | "top" = "bottom";
+      let maxHeight: number | null = null;
+
+      if (fitsBelow || (!fitsAbove && spaceBelow >= spaceAbove)) {
+        placement = "bottom";
+        if (!fitsBelow) {
+          maxHeight = Math.max(spaceBelow, 0);
+        }
+      } else {
+        placement = "top";
+        if (!fitsAbove) {
+          maxHeight = Math.max(spaceAbove, 0);
+        }
+      }
+
+      const cappedHeight =
+        maxHeight !== null ? Math.min(contentHeight, maxHeight) : contentHeight;
+      let desiredTop =
+        placement === "bottom"
+          ? triggerRect.bottom + margin
+          : triggerRect.top - cappedHeight - margin;
+      const desiredLeft = Math.min(
+        Math.max(margin, triggerRect.left),
+        viewportWidth - contentWidth - margin
+      );
+
+      if (desiredTop < margin) {
+        desiredTop = margin;
+        if (placement === "top") {
+          maxHeight = Math.max(spaceAbove, 0);
+        }
+      }
+
+      if (desiredTop + cappedHeight > viewportHeight - margin) {
+        desiredTop = Math.max(margin, viewportHeight - margin - cappedHeight);
+        if (placement === "bottom") {
+          maxHeight = Math.max(spaceBelow, 0);
+        }
+      }
+
+      setDropdownPlacement(placement);
+      setDropdownMaxHeight(
+        maxHeight !== null && maxHeight > 0 ? Math.floor(maxHeight) : null
+      );
+      setDropdownPosition({
+        // Position relative to the viewport so it always aligns with the trigger.
+        top: Math.round(desiredTop),
+        left: Math.round(desiredLeft),
+      });
+    };
+
+    // Keep the dropdown fully visible by adapting to available viewport space.
+    const rafId = window.requestAnimationFrame(updateDropdownPlacement);
+    window.addEventListener("resize", updateDropdownPlacement);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", updateDropdownPlacement);
+    };
+  }, [isPopoverOpen]);
+
+  useEffect(() => {
+    if (!isPopoverOpen) {
+      return;
+    }
+
+    const handleScroll = (event: Event) => {
+      const target = event.target as Node | null;
+      if (target && dropdownContentRef.current?.contains(target)) {
+        return;
+      }
+      setIsPopoverOpen(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsPopoverOpen(false);
+      }
+    };
+
+    // Close on scroll so the dropdown never loses context on smaller viewports.
+    window.addEventListener("scroll", handleScroll, true);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isPopoverOpen]);
 
   useEffect(() => {
     return () => {
@@ -149,7 +284,7 @@ export default function GamePage() {
     setSelectedCollections(pendingCollections);
     setIsPopoverOpen(false);
   };
-  
+
   const handlePopoverBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     const nextTarget = event.relatedTarget as Node | null;
     if (nextTarget && event.currentTarget.contains(nextTarget)) {
@@ -184,24 +319,26 @@ export default function GamePage() {
               </div>
             )}
 
-            <div className="relative z-10 flex flex-col items-center gap-6 pt-20 px-6 max-w-6xl mx-auto text-center">
+            <div className="relative flex flex-col items-center gap-6 pt-20 px-6 max-w-6xl mx-auto text-center lg:gap-4 xl:gap-5 2xl:gap-6 lg:pt-14 xl:pt-16 2xl:pt-20">
               {/* ===== COVER ===== */}
               <div className="relative">
+                {/* Compact desktops get a smaller cover so title/CTA/metadata land above the fold. */}
                 <Image
                   src={game.boxart}
                   alt={game.title}
                   width={280}
                   height={340}
-                  className="w-[220px] h-auto rounded-xl shadow-xl object-cover md:w-[280px]"
+                  className="w-[220px] h-auto rounded-xl shadow-xl object-cover md:w-[280px] lg:w-[190px] lg:max-h-[270px] xl:w-[230px] xl:max-h-[330px] 2xl:w-[280px] 2xl:max-h-[420px]"
                 />
               </div>
 
               {/* ===== INFO ===== */}
               <div className="w-full flex flex-col items-center">
-                <h1 className="heading-2 text-3xl font-semibold">
+                <h1 className="heading-3 2xl:heading-2 lg:heading-3 xl:heading-4">
                   {game.title}
                 </h1>
-                <div className="actions flex items-center justify-center gap-4 py-8">
+                {/* Tighter hero spacing boosts above-the-fold visibility on smaller desktops. */}
+                <div className="actions flex items-center justify-center gap-4 py-8 lg:gap-3 lg:py-4 xl:py-5 2xl:py-8">
                   <div
                     className={`dropdown dropdown-end ${
                       isPopoverOpen ? "dropdown-open" : ""
@@ -209,62 +346,81 @@ export default function GamePage() {
                     tabIndex={0}
                     onBlur={handlePopoverBlur}
                   >
-                    <PrimaryButton
-                      size="lg"
-                      leftIcon="ico-add-outline"
-                      onClick={() => setIsPopoverOpen((prev) => !prev)}
-                    >
-                      Add to collection
-                    </PrimaryButton>
-                    {isPopoverOpen && (
-                      <div
-                        className="dropdown-content z-50 mt-3 w-80 rounded-2xl border border-neutral-800 bg-neutral-950/95 shadow-xl backdrop-blur"
-                        tabIndex={0}
+                    <div ref={dropdownTriggerRef}>
+                      <PrimaryButton
+                        size="md"
+                        leftIcon="ico-add-outline"
+                        onClick={() => setIsPopoverOpen((prev) => !prev)}
                       >
-                        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-neutral-800 bg-neutral-950/95 px-4 py-3">
-                          <span className="body-16 text-neutral-100">
-                            Add to
-                          </span>
-                          <GhostButton size="md" onClick={handleApplyCollections}>
-                            Done
-                          </GhostButton>
-                        </div>
-                        <div className="p-4">
-                          <GhostButton
-                            size="md"
-                            leftIcon="ico-add-outline"
-                            className="w-full justify-start bg-neutral-900/60 hover:bg-neutral-900"
-                          >
-                            Create collection
-                          </GhostButton>
-                        </div>
-                        <div className="px-4 pb-4 space-y-3 max-h-64 overflow-y-auto pr-1 gc-scrollbar">
-                          {sortedCollections.map((collection) => (
-                            <label
-                              key={collection}
-                              className="relative flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/30 px-4 py-3 cursor-pointer transition-all duration-300 ease-out hover:bg-neutral-900"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={pendingCollections.includes(
-                                  collection
-                                )}
-                                onChange={() =>
-                                  handleCollectionToggle(collection)
-                                }
-                                className="checkbox peer border-neutral-600 bg-neutral-900/80 hover:bg-neutral-900 checked:border-transparent checked:bg-purple-600 checked:hover:bg-purple-600 focus:ring-0 [--chkfg:#ffffff] cursor-pointer transition-colors duration-300 ease-out"
-                              />
-                              <span className="body-16 text-neutral-100">
-                                {collection}
-                              </span>
-                              <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
-                            </label>
-                          ))}
-                        </div>
+                        Add to collection
+                      </PrimaryButton>
+                    </div>
+                    <div
+                      ref={dropdownContentRef}
+                      className={`dropdown-content fixed z-[1000] w-80 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950/95 shadow-xl backdrop-blur transition-[opacity,transform] duration-200 ease-out ${
+                        dropdownMaxHeight ? "overflow-y-auto" : ""
+                      } ${
+                        isPopoverOpen && dropdownPosition
+                          ? "visible opacity-100 translate-y-0 scale-100"
+                          : "pointer-events-none invisible opacity-0 -translate-y-1 scale-95"
+                      }`}
+                      tabIndex={isPopoverOpen ? 0 : -1}
+                      aria-hidden={!isPopoverOpen}
+                      style={{
+                        top: dropdownPosition
+                          ? `${dropdownPosition.top}px`
+                          : undefined,
+                        left: dropdownPosition
+                          ? `${dropdownPosition.left}px`
+                          : undefined,
+                        maxHeight: dropdownMaxHeight
+                          ? `${dropdownMaxHeight}px`
+                          : undefined,
+                      }}
+                    >
+                      <div className="sticky top-0 z-1000 flex items-center justify-between gap-4 rounded-t-2xl border-b border-neutral-800 bg-neutral-900/70 px-4 py-1">
+                        <span className="body-16 text-neutral-100">Add to</span>
+                        <GhostButton size="md" onClick={handleApplyCollections}>
+                          Done
+                        </GhostButton>
                       </div>
-                    )}
+                      <div className="p-4">
+                        <GhostButton
+                          size="md"
+                          leftIcon="ico-add-outline"
+                          className="w-full justify-start bg-neutral-900/60 hover:bg-neutral-900"
+                        >
+                          New collection
+                        </GhostButton>
+                      </div>
+                      <div
+                        className={`px-4 pb-4 space-y-3 pr-4 gc-scrollbar ${
+                          dropdownMaxHeight ? "" : "max-h-64 overflow-y-auto"
+                        }`}
+                      >
+                        {sortedCollections.map((collection) => (
+                          <label
+                            key={collection}
+                            className="relative flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/30 px-4 py-3 cursor-pointer transition-all duration-300 ease-out hover:bg-neutral-900"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={pendingCollections.includes(collection)}
+                              onChange={() =>
+                                handleCollectionToggle(collection)
+                              }
+                              className="checkbox peer border-neutral-600 bg-neutral-900/80 hover:bg-neutral-900 checked:border-transparent checked:bg-purple-600 checked:hover:bg-purple-600 focus:ring-0 [--chkfg:#ffffff] cursor-pointer transition-colors duration-300 ease-out"
+                            />
+                            <span className="body-16 text-neutral-100">
+                              {collection}
+                            </span>
+                            <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <GhostButton size="lg" iconOnly="ico-heart-outline">
+                  <GhostButton size="md" iconOnly="ico-heart-outline">
                     Wishlist
                   </GhostButton>
                 </div>
@@ -273,7 +429,7 @@ export default function GamePage() {
                 </p>
 
                 {/* ===== STATS SECTION ===== */}
-                <section className="grid w-full grid-cols-2 md:grid-cols-4 text-center divide-x divide-neutral-800/40 border border-neutral-800/40 rounded-xl bg-neutral-900/25 backdrop-blur-sm mt-10">
+                <section className="grid w-full grid-cols-2 md:grid-cols-4 text-center divide-x divide-neutral-800/40 border border-neutral-800/40 rounded-xl bg-neutral-900/25 backdrop-blur-sm mt-10 lg:mt-6 xl:mt-8 2xl:mt-10">
                   <div className="flex flex-col py-3 px-3">
                     <span className="body-14 text-slate-500">Platform</span>
                     <span className="body-16 font-medium text-neutral-100 mt-1">

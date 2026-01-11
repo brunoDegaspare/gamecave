@@ -43,9 +43,7 @@ export default function MainLayout({
     <div className="flex h-screen bg-neutral-950 text-neutral-100 relative">
       {/* Sidebar fixa */}
       <aside
-        className={`${
-          collapsed ? "w-[80px]" : "w-full md:w-[300px]"
-        } ${
+        className={`${collapsed ? "w-[80px]" : "w-full md:w-[300px]"} ${
           collapsed
             ? "static"
             : "absolute left-0 top-0 z-50 h-full md:static md:h-auto"
