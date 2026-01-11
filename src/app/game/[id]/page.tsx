@@ -7,12 +7,14 @@ A client component for an individual game’s detail view, presenting hero image
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import MainLayout from "@/components/layout/shell";
-import SecondaryButton from "@/components/ui/secondary-button";
 import PrimaryButton from "@/components/ui/primary-button";
 import GhostButton from "@/components/ui/ghost-button";
 
 export default function GamePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [pendingCollections, setPendingCollections] = useState<string[]>([]);
   const [showCollectionsScrollbar, setShowCollectionsScrollbar] =
     useState(false);
   const collectionsScrollTimeout = useRef<number | null>(null);
@@ -73,6 +75,12 @@ export default function GamePage() {
   };
 
   useEffect(() => {
+    if (isPopoverOpen) {
+      setPendingCollections(selectedCollections);
+    }
+  }, [isPopoverOpen, selectedCollections]);
+
+  useEffect(() => {
     return () => {
       if (collectionsScrollTimeout.current !== null) {
         window.clearTimeout(collectionsScrollTimeout.current);
@@ -129,6 +137,27 @@ export default function GamePage() {
     isDraggingCollections.current = false;
   };
 
+  const handleCollectionToggle = (collection: string) => {
+    setPendingCollections((prev) =>
+      prev.includes(collection)
+        ? prev.filter((item) => item !== collection)
+        : [...prev, collection]
+    );
+  };
+
+  const handleApplyCollections = () => {
+    setSelectedCollections(pendingCollections);
+    setIsPopoverOpen(false);
+  };
+  
+  const handlePopoverBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    const nextTarget = event.relatedTarget as Node | null;
+    if (nextTarget && event.currentTarget.contains(nextTarget)) {
+      return;
+    }
+    setIsPopoverOpen(false);
+  };
+
   return (
     <MainLayout>
       <div className="drawer drawer-end">
@@ -141,9 +170,9 @@ export default function GamePage() {
         />
         <div className="drawer-content w-full min-h-screen bg-neutral-950 text-neutral-100 overflow-y-auto gc-scrollbar">
           {/* ===== HERO ===== */}
-          <section className="relative overflow-hidden">
+          <section className="relative">
             {game.background && (
-              <div className="absolute inset-0">
+              <div className="absolute inset-0 overflow-hidden">
                 <Image
                   src={game.background}
                   alt=""
@@ -173,13 +202,68 @@ export default function GamePage() {
                   {game.title}
                 </h1>
                 <div className="actions flex items-center justify-center gap-4 py-8">
-                  <PrimaryButton
-                    size="lg"
-                    leftIcon="ico-add-outline"
-                    onClick={() => setIsDrawerOpen(true)}
+                  <div
+                    className={`dropdown dropdown-end ${
+                      isPopoverOpen ? "dropdown-open" : ""
+                    }`}
+                    tabIndex={0}
+                    onBlur={handlePopoverBlur}
                   >
-                    Add to collection
-                  </PrimaryButton>
+                    <PrimaryButton
+                      size="lg"
+                      leftIcon="ico-add-outline"
+                      onClick={() => setIsPopoverOpen((prev) => !prev)}
+                    >
+                      Add to collection
+                    </PrimaryButton>
+                    {isPopoverOpen && (
+                      <div
+                        className="dropdown-content z-50 mt-3 w-80 rounded-2xl border border-neutral-800 bg-neutral-950/95 shadow-xl backdrop-blur"
+                        tabIndex={0}
+                      >
+                        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-neutral-800 bg-neutral-950/95 px-4 py-3">
+                          <span className="body-16 text-neutral-100">
+                            Add to
+                          </span>
+                          <GhostButton size="md" onClick={handleApplyCollections}>
+                            Done
+                          </GhostButton>
+                        </div>
+                        <div className="p-4">
+                          <GhostButton
+                            size="md"
+                            leftIcon="ico-add-outline"
+                            className="w-full justify-start bg-neutral-900/60 hover:bg-neutral-900"
+                          >
+                            Create collection
+                          </GhostButton>
+                        </div>
+                        <div className="px-4 pb-4 space-y-3 max-h-64 overflow-y-auto pr-1 gc-scrollbar">
+                          {sortedCollections.map((collection) => (
+                            <label
+                              key={collection}
+                              className="relative flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/30 px-4 py-3 cursor-pointer transition-all duration-300 ease-out hover:bg-neutral-900"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={pendingCollections.includes(
+                                  collection
+                                )}
+                                onChange={() =>
+                                  handleCollectionToggle(collection)
+                                }
+                                className="checkbox peer border-neutral-600 bg-neutral-900/80 hover:bg-neutral-900 checked:border-transparent checked:bg-purple-600 checked:hover:bg-purple-600 focus:ring-0 [--chkfg:#ffffff] cursor-pointer transition-colors duration-300 ease-out"
+                              />
+                              <span className="body-16 text-neutral-100">
+                                {collection}
+                              </span>
+                              <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <GhostButton size="lg" iconOnly="ico-heart-outline">
                     Wishlist
                   </GhostButton>
