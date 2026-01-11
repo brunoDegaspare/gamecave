@@ -21,10 +21,6 @@ export default function GamePage() {
     useState(false);
   const collectionsScrollTimeout = useRef<number | null>(null);
   const collectionsScrollRef = useRef<HTMLDivElement | null>(null);
-  const isDraggingCollections = useRef(false);
-  const hasDraggedCollections = useRef(false);
-  const dragStartY = useRef(0);
-  const dragStartScrollTop = useRef(0);
   const userCollections = [
     "Mega Drive",
     "SNES",
@@ -107,45 +103,6 @@ export default function GamePage() {
     }, 800);
   };
 
-  const handleCollectionsPointerDown = (
-    event: React.MouseEvent<HTMLDivElement>
-  ) => {
-    const target = collectionsScrollRef.current;
-    if (!target) {
-      return;
-    }
-    isDraggingCollections.current = true;
-    hasDraggedCollections.current = false;
-    dragStartY.current = event.clientY;
-    dragStartScrollTop.current = target.scrollTop;
-    target.classList.add("cursor-grabbing");
-  };
-
-  const handleCollectionsPointerMove = (
-    event: React.MouseEvent<HTMLDivElement>
-  ) => {
-    if (!isDraggingCollections.current) {
-      return;
-    }
-    const target = collectionsScrollRef.current;
-    if (!target) {
-      return;
-    }
-    const delta = event.clientY - dragStartY.current;
-    if (Math.abs(delta) > 5) {
-      hasDraggedCollections.current = true;
-    }
-    target.scrollTop = dragStartScrollTop.current - delta;
-  };
-
-  const handleCollectionsPointerUp = () => {
-    const target = collectionsScrollRef.current;
-    if (target) {
-      target.classList.remove("cursor-grabbing");
-    }
-    isDraggingCollections.current = false;
-  };
-
   const handleCollectionToggle = (collection: string) => {
     setPendingCollections((prev) =>
       prev.includes(collection)
@@ -173,7 +130,7 @@ export default function GamePage() {
           checked={isDrawerOpen}
           onChange={(event) => setIsDrawerOpen(event.target.checked)}
         />
-        <div className="drawer-content w-full min-h-screen bg-neutral-950 text-neutral-100 overflow-y-auto gc-scrollbar">
+        <div className="drawer-content w-full min-h-[100dvh] md:min-h-screen bg-neutral-950 text-neutral-100 overflow-y-auto gc-scrollbar">
           {/* ===== HERO ===== */}
           <section className="relative">
             {game.background && (
@@ -189,7 +146,7 @@ export default function GamePage() {
               </div>
             )}
 
-            <div className="relative flex flex-col items-center gap-6 pt-20 px-6 max-w-6xl mx-auto text-center lg:gap-4 xl:gap-5 2xl:gap-6 lg:pt-14 xl:pt-16 2xl:pt-20">
+            <div className="relative flex flex-col items-center gap-6 pt-14 px-6 max-w-6xl mx-auto text-center lg:gap-4 xl:gap-5 2xl:gap-6 lg:pt-14 xl:pt-16 2xl:pt-20">
               {/* ===== COVER ===== */}
               <div className="relative">
                 {/* Compact desktops get a smaller cover so title/CTA/metadata land above the fold. */}
@@ -298,8 +255,8 @@ export default function GamePage() {
             className="drawer-overlay"
             onClick={() => setIsDrawerOpen(false)}
           />
-          <aside className="w-80 md:w-[460px] h-screen bg-neutral-950 text-neutral-100 border-l border-neutral-800 flex flex-col">
-            <div className="sticky top-0 z-10 bg-neutral-950 border-b border-neutral-900 px-6 py-3">
+          <aside className="w-full md:w-[460px] h-[100dvh] md:h-screen bg-neutral-950 text-neutral-100 border-l border-neutral-800 flex flex-col">
+            <div className="sticky top-0 z-10 bg-neutral-950 border-b border-neutral-900 px-4 py-3">
               <div className="flex items-center justify-between">
                 <h3 className="heading-4 text-white">Add to</h3>
                 <GhostButton
@@ -311,7 +268,7 @@ export default function GamePage() {
               </div>
             </div>
 
-            <div className="flex-1 p-6">
+            <div className="flex-1 px-4 pt-6 pb-0 md:pb-6">
               <div className="flex h-full flex-col space-y-6">
                 <GhostButton
                   size="md"
@@ -322,23 +279,12 @@ export default function GamePage() {
                 </GhostButton>
                 <div
                   ref={collectionsScrollRef}
-                  className={`flex-1 space-y-3 overflow-y-auto pr-1 gc-scrollbar scrollbar-thin scrollbar-track-transparent cursor-grab select-none ${
+                  className={`flex-1 space-y-3 overflow-y-auto pr-1 gc-scrollbar scrollbar-thin scrollbar-track-transparent ${
                     showCollectionsScrollbar
                       ? "scrollbar-thumb-neutral-700/70"
                       : "scrollbar-thumb-transparent"
                   }`}
                   onScroll={handleCollectionsScroll}
-                  onMouseDown={handleCollectionsPointerDown}
-                  onMouseMove={handleCollectionsPointerMove}
-                  onMouseUp={handleCollectionsPointerUp}
-                  onMouseLeave={handleCollectionsPointerUp}
-                  onClickCapture={(event) => {
-                    if (hasDraggedCollections.current) {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      hasDraggedCollections.current = false;
-                    }
-                  }}
                 >
                   {sortedCollections.map((collection) => (
                     <label
@@ -361,19 +307,19 @@ export default function GamePage() {
               </div>
             </div>
 
-            <div
-              className={`px-6 overflow-hidden transition-all duration-200 ease-out ${
-                showCollectionError
-                  ? "max-h-24 pb-3 opacity-100"
-                  : "max-h-0 pb-0 opacity-0 pointer-events-none"
-              }`}
-              aria-hidden={!showCollectionError}
-            >
-              <Alert icon="ico-cross-circle-bold">
-                <span>Please select at least one collection.</span>
-              </Alert>
-            </div>
-            <div className="sticky bottom-0 border-t border-neutral-900 bg-neutral-950/95 px-6 py-6 backdrop-blur">
+            <div className="sticky bottom-0 border-t border-neutral-900 bg-neutral-950/95 px-4 py-6 backdrop-blur relative">
+              <div
+                className={`absolute inset-x-0 bottom-full mb-3 px-4 transition-all duration-200 ease-out ${
+                  showCollectionError
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-2 pointer-events-none"
+                }`}
+                aria-hidden={!showCollectionError}
+              >
+                <Alert icon="ico-cross-circle-bold">
+                  <span>Please select at least one collection.</span>
+                </Alert>
+              </div>
               <PrimaryButton
                 size="md"
                 className="w-full"
