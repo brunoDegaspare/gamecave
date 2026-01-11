@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import MainLayout from "@/components/layout/shell";
 import PrimaryButton from "@/components/ui/primary-button";
 import GhostButton from "@/components/ui/ghost-button";
+import InvertedButton from "@/components/ui/inverted-button";
 
 export default function GamePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -281,8 +282,11 @@ export default function GamePage() {
   };
 
   const handleApplyCollections = () => {
-    setSelectedCollections(pendingCollections);
     setIsPopoverOpen(false);
+    if (pendingCollections.length === 0) {
+      return;
+    }
+    setSelectedCollections(pendingCollections);
   };
 
   const handlePopoverBlur = (event: React.FocusEvent<HTMLDivElement>) => {
@@ -347,13 +351,23 @@ export default function GamePage() {
                     onBlur={handlePopoverBlur}
                   >
                     <div ref={dropdownTriggerRef}>
-                      <PrimaryButton
-                        size="md"
-                        leftIcon="ico-add-outline"
-                        onClick={() => setIsPopoverOpen((prev) => !prev)}
-                      >
-                        Add to collection
-                      </PrimaryButton>
+                      {selectedCollections.length > 0 ? (
+                        <InvertedButton
+                          size="md"
+                          leftIcon="ico-tick-outline"
+                          onClick={() => setIsPopoverOpen((prev) => !prev)}
+                        >
+                          Added ({selectedCollections.length} collections)
+                        </InvertedButton>
+                      ) : (
+                        <PrimaryButton
+                          size="md"
+                          leftIcon="ico-add-outline"
+                          onClick={() => setIsPopoverOpen((prev) => !prev)}
+                        >
+                          Add to collection
+                        </PrimaryButton>
+                      )}
                     </div>
                     <div
                       ref={dropdownContentRef}
@@ -378,11 +392,8 @@ export default function GamePage() {
                           : undefined,
                       }}
                     >
-                      <div className="sticky top-0 z-1000 flex items-center justify-between gap-4 rounded-t-2xl border-b border-neutral-800 bg-neutral-900/70 px-4 py-1">
+                      <div className="sticky top-0 z-1000 flex items-center rounded-t-2xl border-b border-neutral-800 bg-neutral-900/70 px-4 py-1">
                         <span className="body-16 text-neutral-100">Add to</span>
-                        <GhostButton size="md" onClick={handleApplyCollections}>
-                          Done
-                        </GhostButton>
                       </div>
                       <div className="p-4">
                         <GhostButton
@@ -417,6 +428,15 @@ export default function GamePage() {
                             <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
                           </label>
                         ))}
+                      </div>
+                      <div className="border-t border-neutral-800 px-4 py-4">
+                        <PrimaryButton
+                          size="md"
+                          className="w-full"
+                          onClick={handleApplyCollections}
+                        >
+                          Done
+                        </PrimaryButton>
                       </div>
                     </div>
                   </div>
