@@ -18,7 +18,7 @@ export default function RootLayout({
       lang="en-US"
       className={`${saira.variable} h-full gc-scrollbar dark scroll-smooth md:scroll-auto`}
     >
-      <body className="min-h-screen font-sans bg-neutral-950 text-neutral-100 antialiased">
+      <body className="min-h-screen min-h-[100dvh] font-sans bg-neutral-950 text-neutral-100 antialiased">
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>

@@ -25,6 +25,8 @@ export default function MainLayout({
   const { open, setOpen } = useCommandPalette();
   const [collapsed, setCollapsed] = React.useState(false);
   const [isHydrated, setIsHydrated] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
+  const scrollLockPosition = React.useRef(0);
 
   // Em mobile (< md) sidebar começa collapsed
   React.useEffect(() => {
@@ -32,107 +34,68 @@ export default function MainLayout({
 
     // define o estado inicial invertido
     setCollapsed(!mediaQuery.matches);
+    setIsMobile(!mediaQuery.matches);
     setIsHydrated(true);
 
     // atualiza automaticamente quando redimensionar
-    const handleChange = (e: MediaQueryListEvent) => setCollapsed(!e.matches);
+    const handleChange = (e: MediaQueryListEvent) => {
+      setCollapsed(!e.matches);
+      setIsMobile(!e.matches);
+    };
     mediaQuery.addEventListener("change", handleChange);
 
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
+  React.useEffect(() => {
+    if (!isHydrated) return;
+    const body = document.body;
+    const html = document.documentElement;
+    if (isMobile && !collapsed) {
+      scrollLockPosition.current = window.scrollY || window.pageYOffset;
+      body.style.position = "fixed";
+      body.style.top = `-${scrollLockPosition.current}px`;
+      body.style.left = "0";
+      body.style.right = "0";
+      body.style.width = "100%";
+      body.style.overflow = "hidden";
+      html.style.overflow = "hidden";
+    } else {
+      const restoreY = scrollLockPosition.current;
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+      body.style.overflow = "";
+      html.style.overflow = "";
+      if (restoreY) {
+        window.scrollTo(0, restoreY);
+      }
+    }
+    return () => {
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+      body.style.overflow = "";
+      html.style.overflow = "";
+    };
+  }, [collapsed, isHydrated, isMobile]);
+
   return (
-    <div className="flex h-screen bg-neutral-950 text-neutral-100 relative">
-      {/* Sidebar fixa */}
-      <aside
-        className={`${
-          !isHydrated
-            ? "invisible pointer-events-none md:visible md:pointer-events-auto"
-            : ""
-        } ${
-          collapsed ? "hidden md:block md:w-[80px]" : "w-full md:w-[300px]"
-        } ${
-          collapsed
-            ? "static"
-            : "absolute left-0 top-0 z-50 h-full md:static md:h-auto"
-        } bg-neutral-900 border-r border-neutral-800 p-4 pt-4 transition-all duration-300 ease-in-out`}
-      >
-        {!collapsed && (
-          <div className="md:hidden absolute right-4 top-4">
-            <GhostButton
-              size="md"
-              iconOnly="ico-arrow-left-outline"
-              aria-label="Close sidebar"
-              onClick={() => setCollapsed(true)}
-            />
-          </div>
-        )}
-        <div className="pt-2 pb-2 mb-10 flex items-center justify-center">
-          <Link href="/" className="flex items-center gap-2">
-            {!collapsed ? (
-              <Image
-                src="/assets/gamecave-logo-beta.svg"
-                alt="GameCave logo"
-                width={200}
-                height={60}
-                priority
-              />
-            ) : (
-              <Icon
-                name="ico-controller-outline"
-                size={24}
-                viewBox="0 0 24 24"
-                className="text-neutral-100"
-              />
-            )}
-          </Link>
-        </div>
+    <div className="drawer min-h-[100dvh] md:h-screen bg-neutral-950 text-neutral-100 relative md:flex md:overflow-hidden">
+      <input
+        id="shell-drawer"
+        type="checkbox"
+        className="drawer-toggle md:hidden"
+        checked={!collapsed && isHydrated && isMobile}
+        disabled={!isMobile}
+        onChange={(event) => setCollapsed(!event.target.checked)}
+      />
 
-        <nav className="mt-4 pb-8 space-y-2 body-18 weight-medium">
-          <SidebarNavItem
-            href="/"
-            label="Dashboard"
-            iconName="ico-home-outline"
-            collapsed={collapsed}
-          />
-          <SidebarNavItem
-            href="#"
-            label="Wishlist"
-            iconName="ico-heart-outline"
-            collapsed={collapsed}
-          />
-          <SidebarNavItem
-            href="#"
-            label="New collection"
-            iconName="ico-add-outline"
-            collapsed={collapsed}
-          />
-        </nav>
-
-        <nav className="pt-8 border-t border-neutral-800 space-y-2 body-18 weight-medium">
-          <SidebarNavItem
-            href="#"
-            label="SNES"
-            iconName="ico-collection-outline"
-            collapsed={collapsed}
-          />
-          <SidebarNavItem
-            href="#"
-            label="Mega Drive"
-            iconName="ico-collection-outline"
-            collapsed={collapsed}
-          />
-          <SidebarNavItem
-            href="#"
-            label="Master System"
-            iconName="ico-collection-outline"
-            collapsed={collapsed}
-          />
-        </nav>
-      </aside>
-
-      {/* Main container */}
-      <div className="flex flex-1 flex-col min-w-0 overflow-x-hidden transition-all duration-300 ease-in-out">
+      <div className="drawer-content flex flex-1 flex-col min-h-0 min-w-0 md:order-2 md:overflow-x-hidden transition-all duration-300 ease-in-out">
         {/* Header */}
         <header className="sticky top-0 z-40 bg-neutral-900/70 backdrop-blur-md border-b border-neutral-800">
           <div className="relative mx-auto w-full px-6 py-3">
@@ -197,7 +160,103 @@ export default function MainLayout({
         </header>
 
         {/* Content */}
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 min-h-0 overflow-visible md:overflow-y-auto gc-scrollbar">
+          {children}
+        </main>
+      </div>
+
+      <div className="drawer-side bg-neutral-900 border-r border-neutral-800 md:order-1 md:static md:visible md:opacity-100 md:pointer-events-auto md:overflow-visible md:flex-none md:w-auto">
+        <label
+          htmlFor="shell-drawer"
+          className={`drawer-overlay md:hidden ${
+            !isHydrated ? "invisible" : ""
+          }`}
+          onClick={() => setCollapsed(true)}
+          aria-label="Close sidebar"
+        />
+        {/* Sidebar fixa */}
+        <aside
+          className={`${
+            !isHydrated
+              ? "invisible pointer-events-none md:visible md:pointer-events-auto"
+              : ""
+          } w-full ${
+            collapsed ? "md:w-[80px]" : "md:w-[300px]"
+          } md:[translate:0] p-4 pt-4 transition-all duration-300 ease-in-out`}
+        >
+          {!collapsed && (
+            <div className="md:hidden absolute right-4 top-4">
+              <GhostButton
+                size="md"
+                iconOnly="ico-arrow-left-outline"
+                aria-label="Close sidebar"
+                onClick={() => setCollapsed(true)}
+              />
+            </div>
+          )}
+          <div className="pt-2 pb-2 mb-10 flex items-center justify-center">
+            <Link href="/" className="flex items-center gap-2">
+              {!collapsed ? (
+                <Image
+                  src="/assets/gamecave-logo-beta.svg"
+                  alt="GameCave logo"
+                  width={200}
+                  height={60}
+                  priority
+                />
+              ) : (
+                <Icon
+                  name="ico-controller-outline"
+                  size={24}
+                  viewBox="0 0 24 24"
+                  className="text-neutral-100"
+                />
+              )}
+            </Link>
+          </div>
+
+          <nav className="mt-4 pb-8 space-y-2 body-18 weight-medium">
+            <SidebarNavItem
+              href="/"
+              label="Dashboard"
+              iconName="ico-home-outline"
+              collapsed={collapsed}
+            />
+            <SidebarNavItem
+              href="#"
+              label="Wishlist"
+              iconName="ico-heart-outline"
+              collapsed={collapsed}
+            />
+            <SidebarNavItem
+              href="#"
+              label="New collection"
+              iconName="ico-add-outline"
+              collapsed={collapsed}
+            />
+          </nav>
+
+          <nav className="pt-8 border-t border-neutral-800 space-y-2 body-18 weight-medium">
+            <SidebarNavItem
+              href="#"
+              label="SNES"
+              iconName="ico-collection-outline"
+              collapsed={collapsed}
+            />
+            <SidebarNavItem
+              href="#"
+              label="Mega Drive"
+              iconName="ico-collection-outline"
+              collapsed={collapsed}
+            />
+            <SidebarNavItem
+              href="#"
+              label="Master System"
+              iconName="ico-collection-outline"
+              collapsed={collapsed}
+            />
+          </nav>
+        </aside>
       </div>
     </div>
   );

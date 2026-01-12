@@ -122,7 +122,7 @@ export default function GamePage() {
 
   return (
     <MainLayout>
-      <div className="drawer drawer-end">
+      <div className="drawer drawer-end h-full min-h-0">
         <input
           id="add-to-collection-drawer"
           type="checkbox"
@@ -130,23 +130,22 @@ export default function GamePage() {
           checked={isDrawerOpen}
           onChange={(event) => setIsDrawerOpen(event.target.checked)}
         />
-        <div className="drawer-content w-full min-h-[100dvh] md:min-h-screen bg-neutral-950 text-neutral-100 overflow-y-auto gc-scrollbar">
+        <div className="drawer-content w-full h-full min-h-0 bg-neutral-950 text-neutral-100">
           {/* ===== HERO ===== */}
-          <section className="relative">
+          <section className="relative isolate">
             {game.background && (
-              <div className="absolute inset-0 overflow-hidden">
-                <Image
-                  src={game.background}
-                  alt=""
-                  fill
-                  className="object-cover opacity-15 blur-sm"
+              <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+                <div
+                  className="absolute inset-0 bg-cover bg-center opacity-15"
+                  style={{ backgroundImage: `url(${game.background})` }}
                 />
+                <div className="absolute inset-0 bg-neutral-950/20 backdrop-blur-sm" />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent" />
               </div>
             )}
 
-            <div className="relative flex flex-col items-center gap-6 pt-14 px-6 max-w-6xl mx-auto text-center lg:gap-4 xl:gap-5 2xl:gap-6 lg:pt-14 xl:pt-16 2xl:pt-20">
+            <div className="relative z-10 flex flex-col items-center gap-6 pt-14 px-6 max-w-6xl mx-auto text-center lg:gap-4 xl:gap-5 2xl:gap-6 lg:pt-14 xl:pt-16 2xl:pt-20">
               {/* ===== COVER ===== */}
               <div className="relative">
                 {/* Compact desktops get a smaller cover so title/CTA/metadata land above the fold. */}
@@ -255,7 +254,7 @@ export default function GamePage() {
             className="drawer-overlay"
             onClick={() => setIsDrawerOpen(false)}
           />
-          <aside className="w-full md:w-[460px] h-[100dvh] md:h-screen bg-neutral-950 text-neutral-100 border-l border-neutral-800 flex flex-col">
+          <aside className="w-full md:w-[460px] h-full bg-neutral-950 text-neutral-100 border-l border-neutral-800 flex flex-col">
             <div className="sticky top-0 z-10 bg-neutral-950 border-b border-neutral-900 px-4 py-3">
               <div className="flex items-center justify-between">
                 <h3 className="heading-4 text-white">Add to</h3>
