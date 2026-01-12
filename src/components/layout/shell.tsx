@@ -24,6 +24,7 @@ export default function MainLayout({
 }) {
   const { open, setOpen } = useCommandPalette();
   const [collapsed, setCollapsed] = React.useState(false);
+  const [isHydrated, setIsHydrated] = React.useState(false);
 
   // Em mobile (< md) sidebar começa collapsed
   React.useEffect(() => {
@@ -31,6 +32,7 @@ export default function MainLayout({
 
     // define o estado inicial invertido
     setCollapsed(!mediaQuery.matches);
+    setIsHydrated(true);
 
     // atualiza automaticamente quando redimensionar
     const handleChange = (e: MediaQueryListEvent) => setCollapsed(!e.matches);
@@ -43,7 +45,13 @@ export default function MainLayout({
     <div className="flex h-screen bg-neutral-950 text-neutral-100 relative">
       {/* Sidebar fixa */}
       <aside
-        className={`${collapsed ? "hidden md:block md:w-[80px]" : "w-full md:w-[300px]"} ${
+        className={`${
+          !isHydrated
+            ? "invisible pointer-events-none md:visible md:pointer-events-auto"
+            : ""
+        } ${
+          collapsed ? "hidden md:block md:w-[80px]" : "w-full md:w-[300px]"
+        } ${
           collapsed
             ? "static"
             : "absolute left-0 top-0 z-50 h-full md:static md:h-auto"
@@ -132,18 +140,41 @@ export default function MainLayout({
             <button
               onClick={() => setCollapsed(!collapsed)}
               className="cursor-pointer absolute left-6 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-neutral-800 transition-colors"
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={
+                isHydrated
+                  ? collapsed
+                    ? "Expand sidebar"
+                    : "Collapse sidebar"
+                  : "Toggle sidebar"
+              }
             >
-              <Icon
-                name={
-                  collapsed
-                    ? "ico-arrow-right-outline"
-                    : "ico-arrow-left-outline"
-                }
-                size={20}
-                viewBox="0 0 24 24"
-                className="w-5 h-5 text-neutral-100"
-              />
+              {isHydrated ? (
+                <Icon
+                  name={
+                    collapsed
+                      ? "ico-arrow-right-outline"
+                      : "ico-arrow-left-outline"
+                  }
+                  size={24}
+                  viewBox="0 0 24 24"
+                  className="w-5 h-5 text-neutral-100"
+                />
+              ) : (
+                <>
+                  <Icon
+                    name="ico-arrow-right-outline"
+                    size={24}
+                    viewBox="0 0 24 24"
+                    className="w-5 h-5 text-neutral-100 md:hidden"
+                  />
+                  <Icon
+                    name="ico-arrow-left-outline"
+                    size={24}
+                    viewBox="0 0 24 24"
+                    className="hidden md:block w-5 h-5 text-neutral-100"
+                  />
+                </>
+              )}
             </button>
 
             {/* reserva espaço para o botão (w-9 + gap ~ 3.5rem) */}
