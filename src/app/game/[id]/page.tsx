@@ -29,6 +29,9 @@ export default function GamePage() {
     "Dreamcast",
     "Nintendo 64",
     "Game Boy",
+    "Batman collection",
+    "Crash Bandicoot set",
+    "GTA collection",
   ];
   const sortedCollections = [...userCollections].sort((a, b) =>
     a.localeCompare(b)
@@ -249,12 +252,12 @@ export default function GamePage() {
           </section>
         </div>
 
-        <div className="drawer-side z-50">
+        <div className="drawer-side z-50 bg-neutral-950">
           <div
             className="drawer-overlay"
             onClick={() => setIsDrawerOpen(false)}
           />
-          <aside className="w-full md:w-[460px] h-full bg-neutral-950 text-neutral-100 border-l border-neutral-800 flex flex-col">
+          <aside className="w-full md:w-[460px] h-full text-neutral-100 border-l-0 md:border-l border-neutral-800 flex flex-col">
             <div className="sticky top-0 z-10 bg-neutral-950 border-b border-neutral-900 px-4 py-3">
               <div className="flex items-center justify-between">
                 <h3 className="heading-4 text-white">Add to</h3>
@@ -268,7 +271,7 @@ export default function GamePage() {
             </div>
 
             <div className="flex-1 px-4 pt-6 pb-0 md:pb-6">
-              <div className="flex h-full flex-col space-y-6">
+              <div className="flex h-full flex-col space-y-6 pb-4">
                 <GhostButton
                   size="md"
                   leftIcon="ico-add-outline"

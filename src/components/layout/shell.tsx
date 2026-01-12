@@ -165,7 +165,7 @@ export default function MainLayout({
         </main>
       </div>
 
-      <div className="drawer-side bg-neutral-900 border-r border-neutral-800 md:order-1 md:static md:visible md:opacity-100 md:pointer-events-auto md:overflow-visible md:flex-none md:w-auto">
+      <div className="drawer-side bg-neutral-900 border-r-0 md:border-r border-neutral-800 md:order-1 md:static md:visible md:opacity-100 md:pointer-events-auto md:overflow-visible md:flex-none md:w-auto">
         <label
           htmlFor="shell-drawer"
           className={`drawer-overlay md:hidden ${
