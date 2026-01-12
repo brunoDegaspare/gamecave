@@ -36,24 +36,6 @@ export default function GamePage() {
   const sortedCollections = [...userCollections].sort((a, b) =>
     a.localeCompare(b)
   );
-  const statusOptions = [
-    {
-      value: "not-played",
-      label: "Not played",
-    },
-    {
-      value: "played-not-finished",
-      label: "Played but not finished",
-    },
-    {
-      value: "playing",
-      label: "Currently playing",
-    },
-    {
-      value: "finished",
-      label: "Finished",
-    },
-  ] as const;
   const game = {
     id: 1,
     title: "Sonic the Hedgehog 2",
@@ -252,12 +234,12 @@ export default function GamePage() {
           </section>
         </div>
 
-        <div className="drawer-side z-50 bg-neutral-950">
+        <div className="drawer-side z-50">
           <div
             className="drawer-overlay"
             onClick={() => setIsDrawerOpen(false)}
           />
-          <aside className="w-full md:w-[460px] h-full text-neutral-100 border-l-0 md:border-l border-neutral-800 flex flex-col">
+          <aside className="w-full md:w-[460px] h-full  bg-neutral-950 text-neutral-100 border-l-0 md:border-l border-neutral-800 flex flex-col">
             <div className="sticky top-0 z-10 bg-neutral-950 border-b border-neutral-900 px-4 py-3">
               <div className="flex items-center justify-between">
                 <h3 className="heading-4 text-white">Add to</h3>
@@ -309,7 +291,7 @@ export default function GamePage() {
               </div>
             </div>
 
-            <div className="sticky bottom-0 border-t border-neutral-900 bg-neutral-950/95 px-4 py-6 backdrop-blur relative">
+            <div className="sticky bottom-0 border-t border-neutral-900 bg-neutral-950/95 px-4 py-6 backdrop-blur">
               <div
                 className={`absolute inset-x-0 bottom-full mb-3 px-4 transition-all duration-200 ease-out ${
                   showCollectionError
