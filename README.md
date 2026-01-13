@@ -1,13 +1,8 @@
-## What is this?
+## What is GameCave?
 
 GameCave is a personal video game collection manager designed to help players organize, track, and revisit their game libraries across multiple platforms.
 
-## What is GameCave?
-
-GameCave focuses on helping players manage their physical and digital game collections in a simple and structured way.  
-The app allows users to organize games by platform, track play status, and manage collection details without unnecessary complexity.
-
-This project is being built as a personal product and learning project, with a strong focus on UX, performance, and clean architecture.
+The app is being built as a personal product and learning project, with a strong emphasis on UX quality, performance, and clean, maintainable architecture.
 
 ## Current features
 
