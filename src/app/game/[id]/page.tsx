@@ -33,9 +33,13 @@ export default function GamePage() {
     "Crash Bandicoot set",
     "GTA collection",
   ];
-  const sortedCollections = [...userCollections].sort((a, b) =>
-    a.localeCompare(b)
-  );
+  const sortedCollections = [...userCollections].sort((a, b) => {
+    const left = a.toLowerCase();
+    const right = b.toLowerCase();
+    if (left < right) return -1;
+    if (left > right) return 1;
+    return 0;
+  });
   const game = {
     id: 1,
     title: "Sonic the Hedgehog 2",
@@ -121,7 +125,7 @@ export default function GamePage() {
             {game.background && (
               <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
                 <div
-                  className="absolute inset-0 bg-cover bg-center opacity-15"
+                  className="absolute inset-0 bg-cover bg-center opacity-25"
                   style={{ backgroundImage: `url(${game.background})` }}
                 />
                 <div className="absolute inset-0 bg-neutral-950/20 backdrop-blur-sm" />
@@ -132,14 +136,15 @@ export default function GamePage() {
 
             <div className="relative z-10 flex flex-col items-center gap-6 pt-14 px-6 max-w-6xl mx-auto text-center lg:gap-4 xl:gap-5 2xl:gap-6 lg:pt-14 xl:pt-16 2xl:pt-20">
               {/* ===== COVER ===== */}
-              <div className="relative">
+              <div className="relative w-[220px] md:w-[280px] lg:w-[190px] xl:w-[230px] 2xl:w-[280px] rounded-xl shadow-xl">
                 {/* Compact desktops get a smaller cover so title/CTA/metadata land above the fold. */}
                 <Image
                   src={game.boxart}
                   alt={game.title}
                   width={280}
                   height={340}
-                  className="w-[220px] h-auto rounded-xl shadow-xl object-cover md:w-[280px] lg:w-[190px] lg:max-h-[270px] xl:w-[230px] xl:max-h-[330px] 2xl:w-[280px] 2xl:max-h-[420px]"
+                  sizes="(min-width: 1536px) 280px, (min-width: 1280px) 230px, (min-width: 1024px) 190px, (min-width: 768px) 280px, 220px"
+                  className="h-auto w-full rounded-xl object-contain"
                 />
               </div>
 
@@ -226,6 +231,7 @@ export default function GamePage() {
                     src={img}
                     alt={`Screenshot ${index + 1}`}
                     fill
+                    sizes="(min-width: 1024px) 25vw, 50vw"
                     className="object-cover hover:scale-105 transition-transform duration-500 opacity-0 animate-fadeIn"
                   />
                 </div>
@@ -252,7 +258,7 @@ export default function GamePage() {
               </div>
             </div>
 
-            <div className="flex-1 px-4 pt-6 pb-0 md:pb-6">
+            <div className=" bg-neutral-950 flex-1 px-4 pt-6 pb-0 md:pb-6">
               <div className="flex h-full flex-col space-y-6 pb-4">
                 <GhostButton
                   size="md"
