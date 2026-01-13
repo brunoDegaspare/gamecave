@@ -100,6 +100,8 @@ export default function GamePage() {
     );
   };
 
+  const handleOpenDrawer = () => setIsDrawerOpen(true);
+
   const handleApplyCollections = () => {
     if (pendingCollections.length === 0) {
       setShowCollectionError(true);
@@ -108,6 +110,34 @@ export default function GamePage() {
     setIsDrawerOpen(false);
     setSelectedCollections(pendingCollections);
   };
+
+  const renderAddToCollectionButton = (className?: string) =>
+    selectedCollections.length > 0 ? (
+      <InvertedButton
+        size="md"
+        leftIcon="ico-tick-outline"
+        onClick={handleOpenDrawer}
+        className={className}
+      >
+        Added (in {selectedCollections.length}{" "}
+        {selectedCollections.length === 1 ? "collection" : "collections"})
+      </InvertedButton>
+    ) : (
+      <PrimaryButton
+        size="md"
+        leftIcon="ico-add-outline"
+        onClick={handleOpenDrawer}
+        className={className}
+      >
+        Add to collection
+      </PrimaryButton>
+    );
+
+  const renderWishlistButton = () => (
+    <GhostButton size="md" iconOnly="ico-heart-outline" aria-label="Wishlist">
+      Wishlist
+    </GhostButton>
+  );
 
   return (
     <MainLayout>
@@ -119,7 +149,7 @@ export default function GamePage() {
           checked={isDrawerOpen}
           onChange={(event) => setIsDrawerOpen(event.target.checked)}
         />
-        <div className="drawer-content w-full h-full min-h-0 bg-neutral-950 text-neutral-100">
+        <div className="drawer-content w-full h-full min-h-0 bg-neutral-950 text-neutral-100 pb-20 md:pb-0">
           {/* ===== HERO ===== */}
           <section className="relative isolate">
             {game.background && (
@@ -134,7 +164,7 @@ export default function GamePage() {
               </div>
             )}
 
-            <div className="relative z-10 flex flex-col items-center gap-6 pt-14 px-6 max-w-6xl mx-auto text-center lg:gap-4 xl:gap-5 2xl:gap-6 lg:pt-14 xl:pt-16 2xl:pt-20">
+            <div className="relative z-10 flex flex-col items-center gap-6 pt-14 px-4 md:px-6 max-w-6xl mx-auto text-center lg:gap-4 xl:gap-5 2xl:gap-6 lg:pt-14 xl:pt-16 2xl:pt-20">
               {/* ===== COVER ===== */}
               <div className="relative w-[220px] md:w-[280px] lg:w-[190px] xl:w-[230px] 2xl:w-[280px] rounded-xl shadow-xl">
                 {/* Compact desktops get a smaller cover so title/CTA/metadata land above the fold. */}
@@ -150,35 +180,13 @@ export default function GamePage() {
 
               {/* ===== INFO ===== */}
               <div className="w-full flex flex-col items-center">
-                <h1 className="heading-3 2xl:heading-2 lg:heading-3 xl:heading-4">
+                <h1 className="pb-4 md:pb-0 heading-3 2xl:heading-2 lg:heading-3 xl:heading-4">
                   {game.title}
                 </h1>
                 {/* Tighter hero spacing boosts above-the-fold visibility on smaller desktops. */}
-                <div className="actions flex items-center justify-center gap-4 py-8 lg:gap-3 lg:py-4 xl:py-5 2xl:py-8">
-                  {selectedCollections.length > 0 ? (
-                    <InvertedButton
-                      size="md"
-                      leftIcon="ico-tick-outline"
-                      onClick={() => setIsDrawerOpen(true)}
-                    >
-                      Added (in {selectedCollections.length}{" "}
-                      {selectedCollections.length === 1
-                        ? "collection"
-                        : "collections"}
-                      )
-                    </InvertedButton>
-                  ) : (
-                    <PrimaryButton
-                      size="md"
-                      leftIcon="ico-add-outline"
-                      onClick={() => setIsDrawerOpen(true)}
-                    >
-                      Add to collection
-                    </PrimaryButton>
-                  )}
-                  <GhostButton size="md" iconOnly="ico-heart-outline">
-                    Wishlist
-                  </GhostButton>
+                <div className="actions hidden items-center justify-center gap-4 py-8 md:flex lg:gap-3 lg:py-4 xl:py-5 2xl:py-8">
+                  {renderAddToCollectionButton()}
+                  {renderWishlistButton()}
                 </div>
                 <p className="body-18 text-neutral-300 leading-relaxed">
                   {game.overview}
@@ -219,7 +227,7 @@ export default function GamePage() {
           </section>
 
           {/* ===== MEDIA GALLERY ===== */}
-          <section className="px-6 pb-10 max-w-7xl mx-auto mt-10">
+          <section className="px-4 pb-10 md:px-6 max-w-7xl mx-auto mt-10">
             <h2 className="heading-5 mb-4">Screenshots</h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {game.images.map((img, index) => (
@@ -238,6 +246,13 @@ export default function GamePage() {
               ))}
             </div>
           </section>
+
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-800 bg-neutral-950/95 backdrop-blur md:hidden">
+            <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-4 py-4">
+              {renderAddToCollectionButton("flex-1")}
+              {renderWishlistButton()}
+            </div>
+          </div>
         </div>
 
         <div className="drawer-side z-50">
