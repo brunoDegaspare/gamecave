@@ -223,6 +223,12 @@ export default function MainLayout({
               collapsed={collapsed}
             />
             <SidebarNavItem
+              href="/account"
+              label="Account"
+              iconName="ico-user-outline"
+              collapsed={collapsed}
+            />
+            <SidebarNavItem
               href="#"
               label="Wishlist"
               iconName="ico-heart-outline"

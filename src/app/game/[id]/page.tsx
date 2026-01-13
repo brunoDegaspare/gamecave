@@ -7,6 +7,7 @@ A client component for an individual game’s detail view, presenting hero image
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import MainLayout from "@/components/layout/shell";
+import AuthGate from "@/components/auth/auth-gate";
 import PrimaryButton from "@/components/ui/primary-button";
 import GhostButton from "@/components/ui/ghost-button";
 import InvertedButton from "@/components/ui/inverted-button";
@@ -140,7 +141,8 @@ export default function GamePage() {
   );
 
   return (
-    <MainLayout>
+    <AuthGate>
+      <MainLayout>
       <div className="drawer drawer-end h-full min-h-0">
         <input
           id="add-to-collection-drawer"
@@ -339,6 +341,7 @@ export default function GamePage() {
           </aside>
         </div>
       </div>
-    </MainLayout>
+      </MainLayout>
+    </AuthGate>
   );
 }
