@@ -47,10 +47,12 @@ export default function SignupPage() {
   const { user } = useAuth();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [repeatPassword, setRepeatPassword] = React.useState("");
   const [error, setError] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState({
     email: "",
     password: "",
+    repeatPassword: "",
   });
   const [hasSubmitted, setHasSubmitted] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -77,10 +79,12 @@ export default function SignupPage() {
     const nextErrors = {
       email: validateEmail(email, SIGNUP_REQUIRED_MESSAGES.email),
       password: validatePassword(password, SIGNUP_REQUIRED_MESSAGES.password),
+      repeatPassword:
+        password !== repeatPassword ? "Passwords do not match." : "",
     };
     setFieldErrors(nextErrors);
     setHasSubmitted(true);
-    if (nextErrors.email || nextErrors.password) {
+    if (nextErrors.email || nextErrors.password || nextErrors.repeatPassword) {
       return;
     }
 
@@ -133,19 +137,36 @@ export default function SignupPage() {
           nextValue,
           SIGNUP_REQUIRED_MESSAGES.password
         ),
+        repeatPassword:
+          nextValue !== repeatPassword ? "Passwords do not match." : "",
+      }));
+    }
+  };
+
+  const handleRepeatPasswordChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const nextValue = event.target.value;
+    setRepeatPassword(nextValue);
+    if (hasSubmitted) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        repeatPassword:
+          password !== nextValue ? "Passwords do not match." : "",
       }));
     }
   };
 
   const emailErrorId = "signup-email-error";
   const passwordErrorId = "signup-password-error";
+  const repeatPasswordErrorId = "signup-repeat-password-error";
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="heading-3 text-white">Create your account</h1>
         <p className="body-16 text-neutral-400">
-          Start tracking your collection with GameCave.
+          Your personal space to organize and revisit your game collection.
         </p>
       </div>
 
@@ -220,6 +241,44 @@ export default function SignupPage() {
                   className="mt-0.5"
                 />
                 {fieldErrors.password}
+              </span>
+            ) : null}
+          </label>
+
+          <label className="block space-y-2">
+            <span className="body-14 text-neutral-300">Repeat password</span>
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={repeatPassword}
+              onChange={handleRepeatPasswordChange}
+              aria-invalid={hasSubmitted && Boolean(fieldErrors.repeatPassword)}
+              aria-describedby={
+                hasSubmitted && fieldErrors.repeatPassword
+                  ? repeatPasswordErrorId
+                  : undefined
+              }
+              className={clsx(
+                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2",
+                hasSubmitted && fieldErrors.repeatPassword
+                  ? "border-red-400 focus:ring-red-400"
+                  : "border-neutral-800 focus:ring-purple-500"
+              )}
+              placeholder="Repeat your password"
+            />
+            {hasSubmitted && fieldErrors.repeatPassword ? (
+              <span
+                id={repeatPasswordErrorId}
+                className="flex items-start gap-2 body-14 text-red-400"
+                role="alert"
+              >
+                <Icon
+                  name="ico-cross-circle-outline"
+                  size={20}
+                  className="mt-0.5"
+                />
+                {fieldErrors.repeatPassword}
               </span>
             ) : null}
           </label>
