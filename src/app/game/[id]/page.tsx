@@ -8,20 +8,24 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import MainLayout from "@/components/layout/shell";
 import AuthGate from "@/components/auth/auth-gate";
+import { useAuth } from "@/components/auth/auth-provider";
 import PrimaryButton from "@/components/ui/primary-button";
 import GhostButton from "@/components/ui/ghost-button";
 import InvertedButton from "@/components/ui/inverted-button";
 import Alert from "@/components/ui/alert";
 
 export default function GamePage() {
+  const { user } = useAuth();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [pendingCollections, setPendingCollections] = useState<string[]>([]);
   const [showCollectionError, setShowCollectionError] = useState(false);
   const [showCollectionsScrollbar, setShowCollectionsScrollbar] =
     useState(false);
+  const [showVerificationToast, setShowVerificationToast] = useState(false);
   const collectionsScrollTimeout = useRef<number | null>(null);
   const collectionsScrollRef = useRef<HTMLDivElement | null>(null);
+  const verificationToastTimeout = useRef<number | null>(null);
   const userCollections = [
     "Mega Drive",
     "SNES",
@@ -80,6 +84,9 @@ export default function GamePage() {
       if (collectionsScrollTimeout.current !== null) {
         window.clearTimeout(collectionsScrollTimeout.current);
       }
+      if (verificationToastTimeout.current !== null) {
+        window.clearTimeout(verificationToastTimeout.current);
+      }
     };
   }, []);
 
@@ -101,7 +108,19 @@ export default function GamePage() {
     );
   };
 
-  const handleOpenDrawer = () => setIsDrawerOpen(true);
+  const handleOpenDrawer = () => {
+    if (user && !user.emailVerified) {
+      setShowVerificationToast(true);
+      if (verificationToastTimeout.current !== null) {
+        window.clearTimeout(verificationToastTimeout.current);
+      }
+      verificationToastTimeout.current = window.setTimeout(() => {
+        setShowVerificationToast(false);
+      }, 2400);
+      return;
+    }
+    setIsDrawerOpen(true);
+  };
 
   const handleApplyCollections = () => {
     if (pendingCollections.length === 0) {
@@ -143,7 +162,16 @@ export default function GamePage() {
   return (
     <AuthGate>
       <MainLayout>
-      <div className="drawer drawer-end h-full min-h-0">
+        {showVerificationToast ? (
+          <div className="toast toast-top toast-end z-50" aria-live="polite">
+            <div className="alert alert-soft alert-warning shadow-lg">
+              <span className="body-14 text-white">
+                Please verify your email address to use this feature.
+              </span>
+            </div>
+          </div>
+        ) : null}
+        <div className="drawer drawer-end h-full min-h-0">
         <input
           id="add-to-collection-drawer"
           type="checkbox"
@@ -242,7 +270,7 @@ export default function GamePage() {
                     alt={`Screenshot ${index + 1}`}
                     fill
                     sizes="(min-width: 1024px) 25vw, 50vw"
-                    className="object-cover hover:scale-105 transition-transform duration-500 opacity-0 animate-fadeIn"
+                    className="object-cover hover:scale-105 transition-transform duration-500"
                   />
                 </div>
               ))}

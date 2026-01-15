@@ -38,7 +38,9 @@ export default function AccountPage() {
       await deleteAccount();
       router.replace("/signup");
     } catch (err) {
-      setError("Unable to delete account. Please re-authenticate and try again.");
+      setError(
+        "For security reasons, we need you to sign in again before deleting your account."
+      );
     } finally {
       setDeleting(false);
     }

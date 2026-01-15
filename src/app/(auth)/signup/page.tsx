@@ -7,12 +7,13 @@ import clsx from "clsx";
 import PrimaryButton from "@/components/ui/primary-button";
 import Alert from "@/components/ui/alert";
 import Icon from "@/components/ui/icon";
-import { signUp } from "@/lib/auth";
+import { sendVerificationEmail, signUp } from "@/lib/auth";
 import { useAuth } from "@/components/auth/auth-provider";
 import { validateEmail, validatePassword } from "@/lib/auth/validation";
 
 const SIGNUP_MESSAGES = {
-  success: "Account created successfully.",
+  verificationFallback:
+    "Account created, but we couldn’t send the verification email. Please try again later.",
   fallback: "Oops! We're unable to create your account. Please try again.",
   errors: {
     "auth/email-already-in-use": "Oops! This email is already registered.",
@@ -26,14 +27,15 @@ const SIGNUP_REQUIRED_MESSAGES = {
   password: "Please create a password",
 };
 
-const TOAST_DURATION_MS = 2400;
-const REDIRECT_DELAY_MS = 1600;
+const REDIRECT_DELAY_MS = 3000;
 
 const getSignupErrorMessage = (error: unknown) => {
   if (error && typeof error === "object" && "code" in error) {
     const code = (error as { code?: string }).code;
     if (code && code in SIGNUP_MESSAGES.errors) {
-      return SIGNUP_MESSAGES.errors[code as keyof typeof SIGNUP_MESSAGES.errors];
+      return SIGNUP_MESSAGES.errors[
+        code as keyof typeof SIGNUP_MESSAGES.errors
+      ];
     }
   }
 
@@ -52,21 +54,17 @@ export default function SignupPage() {
   });
   const [hasSubmitted, setHasSubmitted] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [showToast, setShowToast] = React.useState(false);
-  const toastTimeoutRef = React.useRef<number | null>(null);
+  const [suppressAutoRedirect, setSuppressAutoRedirect] = React.useState(false);
   const redirectTimeoutRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
-    if (user) {
+    if (user && !suppressAutoRedirect) {
       router.replace("/");
     }
-  }, [router, user]);
+  }, [router, suppressAutoRedirect, user]);
 
   React.useEffect(() => {
     return () => {
-      if (toastTimeoutRef.current !== null) {
-        window.clearTimeout(toastTimeoutRef.current);
-      }
       if (redirectTimeoutRef.current !== null) {
         window.clearTimeout(redirectTimeoutRef.current);
       }
@@ -86,25 +84,27 @@ export default function SignupPage() {
       return;
     }
 
+    setSuppressAutoRedirect(true);
     setError("");
     setLoading(true);
-    setShowToast(false);
 
     let didSucceed = false;
     try {
       await signUp(email, password);
       didSucceed = true;
-      setShowToast(true);
-
-      toastTimeoutRef.current = window.setTimeout(() => {
-        setShowToast(false);
-      }, TOAST_DURATION_MS);
+      try {
+        await sendVerificationEmail();
+      } catch (verificationError) {
+        console.error("Failed to send verification email.", verificationError);
+        setError(SIGNUP_MESSAGES.verificationFallback);
+      }
 
       redirectTimeoutRef.current = window.setTimeout(() => {
         router.replace("/");
       }, REDIRECT_DELAY_MS);
     } catch (err) {
       setError(getSignupErrorMessage(err));
+      setSuppressAutoRedirect(false);
     } finally {
       if (!didSucceed) {
         setLoading(false);
@@ -129,7 +129,10 @@ export default function SignupPage() {
     if (hasSubmitted) {
       setFieldErrors((prev) => ({
         ...prev,
-        password: validatePassword(nextValue, SIGNUP_REQUIRED_MESSAGES.password),
+        password: validatePassword(
+          nextValue,
+          SIGNUP_REQUIRED_MESSAGES.password
+        ),
       }));
     }
   };
@@ -139,14 +142,6 @@ export default function SignupPage() {
 
   return (
     <div className="space-y-6">
-      {showToast ? (
-        <div className="toast toast-top toast-end z-50" aria-live="polite">
-          <div className="alert alert-success shadow-lg">
-            <span className="body-14 text-white">{SIGNUP_MESSAGES.success}</span>
-          </div>
-        </div>
-      ) : null}
-
       <div className="space-y-2">
         <h1 className="heading-3 text-white">Create your account</h1>
         <p className="body-16 text-neutral-400">
@@ -158,30 +153,34 @@ export default function SignupPage() {
         <fieldset disabled={loading} className="space-y-4">
           <label className="block space-y-2">
             <span className="body-14 text-neutral-300">Email</span>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={handleEmailChange}
-            aria-invalid={hasSubmitted && Boolean(fieldErrors.email)}
-            aria-describedby={
-              hasSubmitted && fieldErrors.email ? emailErrorId : undefined
-            }
-            className={clsx(
-              "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2",
-              hasSubmitted && fieldErrors.email
-                ? "border-red-400 focus:ring-red-400"
-                : "border-neutral-800 focus:ring-purple-500"
-            )}
-            placeholder="you@email.com"
-          />
-          {hasSubmitted && fieldErrors.email ? (
-            <span
-              id={emailErrorId}
-              className="flex items-start gap-2 body-14 text-red-400"
-              role="alert"
-            >
-                <Icon name="ico-warning-outline" size={20} className="mt-0.5" />
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={handleEmailChange}
+              aria-invalid={hasSubmitted && Boolean(fieldErrors.email)}
+              aria-describedby={
+                hasSubmitted && fieldErrors.email ? emailErrorId : undefined
+              }
+              className={clsx(
+                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2",
+                hasSubmitted && fieldErrors.email
+                  ? "border-red-400 focus:ring-red-400"
+                  : "border-neutral-800 focus:ring-purple-500"
+              )}
+              placeholder="you@email.com"
+            />
+            {hasSubmitted && fieldErrors.email ? (
+              <span
+                id={emailErrorId}
+                className="flex items-start gap-2 body-14 text-red-400"
+                role="alert"
+              >
+                <Icon
+                  name="ico-cross-circle-outline"
+                  size={20}
+                  className="mt-0.5"
+                />
                 {fieldErrors.email}
               </span>
             ) : null}
@@ -189,38 +188,44 @@ export default function SignupPage() {
 
           <label className="block space-y-2">
             <span className="body-14 text-neutral-300">Password</span>
-          <input
-            type="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={handlePasswordChange}
-            aria-invalid={hasSubmitted && Boolean(fieldErrors.password)}
-            aria-describedby={
-              hasSubmitted && fieldErrors.password ? passwordErrorId : undefined
-            }
-            className={clsx(
-              "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2",
-              hasSubmitted && fieldErrors.password
-                ? "border-red-400 focus:ring-red-400"
-                : "border-neutral-800 focus:ring-purple-500"
-            )}
-            placeholder="Create a password"
-          />
-          {hasSubmitted && fieldErrors.password ? (
-            <span
-              id={passwordErrorId}
-              className="flex items-start gap-2 body-14 text-red-400"
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={handlePasswordChange}
+              aria-invalid={hasSubmitted && Boolean(fieldErrors.password)}
+              aria-describedby={
+                hasSubmitted && fieldErrors.password
+                  ? passwordErrorId
+                  : undefined
+              }
+              className={clsx(
+                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2",
+                hasSubmitted && fieldErrors.password
+                  ? "border-red-400 focus:ring-red-400"
+                  : "border-neutral-800 focus:ring-purple-500"
+              )}
+              placeholder="Create a password"
+            />
+            {hasSubmitted && fieldErrors.password ? (
+              <span
+                id={passwordErrorId}
+                className="flex items-start gap-2 body-14 text-red-400"
                 role="alert"
               >
-                <Icon name="ico-warning-outline" size={20} className="mt-0.5" />
+                <Icon
+                  name="ico-cross-circle-outline"
+                  size={20}
+                  className="mt-0.5"
+                />
                 {fieldErrors.password}
               </span>
             ) : null}
           </label>
 
           {error ? (
-            <Alert variant="error" icon="ico-warning-outline">
+            <Alert variant="error" icon="ico-cross-circle-outline">
               <span>{error}</span>
             </Alert>
           ) : null}

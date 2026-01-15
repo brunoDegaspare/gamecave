@@ -6,6 +6,7 @@ import {
   ensureAuthPersistence,
   onAuthStateChangedListener,
 } from "@/lib/auth";
+import { firebaseAuth } from "@/lib/firebase/client";
 
 type AuthContextValue = {
   user: User | null;
@@ -26,6 +27,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     return () => unsubscribe();
   }, []);
+
+  const refreshUser = React.useCallback(async () => {
+    if (!firebaseAuth.currentUser) {
+      setUser(null);
+      return;
+    }
+
+    try {
+      await firebaseAuth.currentUser.reload();
+      setUser(firebaseAuth.currentUser);
+    } catch (error) {
+      console.error("Failed to refresh auth user.", error);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const handleFocus = () => refreshUser();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshUser();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [refreshUser]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>

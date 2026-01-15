@@ -121,7 +121,11 @@ export default function LoginPage() {
               className="flex items-start gap-2 body-14 text-red-400"
               role="alert"
             >
-              <Icon name="ico-warning-outline" size={20} className="mt-0.5" />
+              <Icon
+                name="ico-cross-circle-outline"
+                size={20}
+                className="mt-0.5"
+              />
               {fieldErrors.email}
             </span>
           ) : null}
@@ -152,7 +156,11 @@ export default function LoginPage() {
               className="flex items-start gap-2 body-14 text-red-400"
               role="alert"
             >
-              <Icon name="ico-warning-outline" size={20} className="mt-0.5" />
+              <Icon
+                name="ico-cross-circle-outline"
+                size={20}
+                className="mt-0.5"
+              />
               {fieldErrors.password}
             </span>
           ) : null}

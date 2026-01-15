@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   deleteUser,
   onAuthStateChanged,
+  sendEmailVerification,
   setPersistence,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -27,6 +28,14 @@ export const deleteAccount = async () => {
   }
 
   return deleteUser(firebaseAuth.currentUser);
+};
+
+export const sendVerificationEmail = async () => {
+  if (!firebaseAuth.currentUser) {
+    throw new Error("No authenticated user to verify.");
+  }
+
+  return sendEmailVerification(firebaseAuth.currentUser);
 };
 
 export const onAuthStateChangedListener = (callback: (user: User | null) => void) =>

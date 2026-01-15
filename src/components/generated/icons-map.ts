@@ -25,7 +25,7 @@ import IcoConsoleOutline from "@/icons/gamecave/icons/ico-console-outline.svg";
 import IcoControllerBold from "@/icons/gamecave/icons/ico-controller-bold.svg";
 import IcoControllerOutline from "@/icons/gamecave/icons/ico-controller-outline.svg";
 import IcoCrossCircleBold from "@/icons/gamecave/icons/ico-cross-circle-bold.svg";
-import IcoCrossOutline1 from "@/icons/gamecave/icons/ico-cross-outline-1.svg";
+import IcoCrossCircleOutline from "@/icons/gamecave/icons/ico-cross-circle-outline.svg";
 import IcoCrossOutline from "@/icons/gamecave/icons/ico-cross-outline.svg";
 import IcoDirectionalBold from "@/icons/gamecave/icons/ico-directional-bold.svg";
 import IcoDirectionalOutline from "@/icons/gamecave/icons/ico-directional-outline.svg";
@@ -103,7 +103,7 @@ export const iconsMap = {
   "ico-controller-bold": IcoControllerBold,
   "ico-controller-outline": IcoControllerOutline,
   "ico-cross-circle-bold": IcoCrossCircleBold,
-  "ico-cross-outline-1": IcoCrossOutline1,
+  "ico-cross-circle-outline": IcoCrossCircleOutline,
   "ico-cross-outline": IcoCrossOutline,
   "ico-directional-bold": IcoDirectionalBold,
   "ico-directional-outline": IcoDirectionalOutline,

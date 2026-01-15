@@ -10,18 +10,21 @@ import Link from "next/link";
 import SidebarNavItem from "@/components/ui/sidebar-nav-item";
 import Icon from "@/components/ui/icon";
 import GhostButton from "@/components/ui/ghost-button";
+import Alert from "@/components/ui/alert";
 import {
   SearchPalette,
   useCommandPalette,
 } from "@/components/ui/search-palette/search-palette";
 import SearchPaletteTrigger from "@/components/ui/search-palette/search-palette-trigger";
 import { screens } from "@root/types/tailwind-breakpoints";
+import { useAuth } from "@/components/auth/auth-provider";
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user } = useAuth();
   const { open, setOpen } = useCommandPalette();
   const [collapsed, setCollapsed] = React.useState(false);
   const [isHydrated, setIsHydrated] = React.useState(false);
@@ -158,6 +161,14 @@ export default function MainLayout({
             </div>
           </div>
         </header>
+
+        {user && !user.emailVerified ? (
+          <div className="px-6 pt-4">
+            <Alert variant="warning" icon="ico-warning-outline">
+              <span>Please verify your email to unlock all features.</span>
+            </Alert>
+          </div>
+        ) : null}
 
         {/* Content */}
         <main className="flex-1 min-h-0 overflow-visible md:overflow-y-auto gc-scrollbar">
