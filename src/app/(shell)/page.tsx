@@ -106,16 +106,6 @@ export default function HomePage() {
         </form>
       </dialog>
 
-      <div className="flex items-center justify-end">
-        <button
-          type="button"
-          className="btn btn-sm btn-ghost"
-          onClick={() => setShowVerificationModal(true)}
-        >
-          Test modal
-        </button>
-      </div>
-
       <HomeHighlights />
 
       <section className="w-full max-w-full overflow-hidden">
