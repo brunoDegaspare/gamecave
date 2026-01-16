@@ -25,6 +25,7 @@ const SIGNUP_MESSAGES = {
 const SIGNUP_REQUIRED_MESSAGES = {
   email: "Please enter your email",
   password: "Please create a password",
+  repeatPassword: "Please repeat your password",
 };
 
 const REDIRECT_DELAY_MS = 3000;
@@ -79,8 +80,11 @@ export default function SignupPage() {
     const nextErrors = {
       email: validateEmail(email, SIGNUP_REQUIRED_MESSAGES.email),
       password: validatePassword(password, SIGNUP_REQUIRED_MESSAGES.password),
-      repeatPassword:
-        password !== repeatPassword ? "Passwords do not match." : "",
+      repeatPassword: repeatPassword
+        ? password !== repeatPassword
+          ? "Passwords do not match."
+          : ""
+        : SIGNUP_REQUIRED_MESSAGES.repeatPassword,
     };
     setFieldErrors(nextErrors);
     setHasSubmitted(true);
@@ -119,28 +123,11 @@ export default function SignupPage() {
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
     setEmail(nextValue);
-    if (hasSubmitted) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        email: validateEmail(nextValue, SIGNUP_REQUIRED_MESSAGES.email),
-      }));
-    }
   };
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
     setPassword(nextValue);
-    if (hasSubmitted) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        password: validatePassword(
-          nextValue,
-          SIGNUP_REQUIRED_MESSAGES.password
-        ),
-        repeatPassword:
-          nextValue !== repeatPassword ? "Passwords do not match." : "",
-      }));
-    }
   };
 
   const handleRepeatPasswordChange = (
@@ -148,13 +135,6 @@ export default function SignupPage() {
   ) => {
     const nextValue = event.target.value;
     setRepeatPassword(nextValue);
-    if (hasSubmitted) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        repeatPassword:
-          password !== nextValue ? "Passwords do not match." : "",
-      }));
-    }
   };
 
   const emailErrorId = "signup-email-error";
@@ -162,12 +142,9 @@ export default function SignupPage() {
   const repeatPasswordErrorId = "signup-repeat-password-error";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] backdrop-blur-[6px]">
       <div className="space-y-2">
-        <h1 className="heading-3 text-white">Create your account</h1>
-        <p className="body-16 text-neutral-400">
-          Your personal space to organize and revisit your game collection.
-        </p>
+        <h1 className="heading-4 text-white">Create your account</h1>
       </div>
 
       <form className="relative space-y-4" onSubmit={handleSubmit} noValidate>
@@ -184,10 +161,10 @@ export default function SignupPage() {
                 hasSubmitted && fieldErrors.email ? emailErrorId : undefined
               }
               className={clsx(
-                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2",
+                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 transition-opacity duration-200 ease-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
                 hasSubmitted && fieldErrors.email
-                  ? "border-red-400 focus:ring-red-400"
-                  : "border-neutral-800 focus:ring-purple-500"
+                  ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
+                  : "border-neutral-800 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
               )}
               placeholder="you@email.com"
             />
@@ -222,10 +199,10 @@ export default function SignupPage() {
                   : undefined
               }
               className={clsx(
-                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2",
+                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 transition-opacity duration-200 ease-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
                 hasSubmitted && fieldErrors.password
-                  ? "border-red-400 focus:ring-red-400"
-                  : "border-neutral-800 focus:ring-purple-500"
+                  ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
+                  : "border-neutral-800 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
               )}
               placeholder="Create a password"
             />
@@ -260,10 +237,10 @@ export default function SignupPage() {
                   : undefined
               }
               className={clsx(
-                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2",
+                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 transition-opacity duration-200 ease-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
                 hasSubmitted && fieldErrors.repeatPassword
-                  ? "border-red-400 focus:ring-red-400"
-                  : "border-neutral-800 focus:ring-purple-500"
+                  ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
+                  : "border-neutral-800 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
               )}
               placeholder="Repeat your password"
             />
