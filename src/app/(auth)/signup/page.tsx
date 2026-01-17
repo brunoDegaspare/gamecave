@@ -49,6 +49,11 @@ export default function SignupPage() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [repeatPassword, setRepeatPassword] = React.useState("");
+  const [isVisible, setIsVisible] = React.useState(false);
+  const enterFrom: "left" | "right" = "right";
+  const [exitDirection, setExitDirection] = React.useState<
+    "left" | "right" | null
+  >(null);
   const [error, setError] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState({
     email: "",
@@ -59,6 +64,7 @@ export default function SignupPage() {
   const [loading, setLoading] = React.useState(false);
   const [suppressAutoRedirect, setSuppressAutoRedirect] = React.useState(false);
   const redirectTimeoutRef = React.useRef<number | null>(null);
+  const transitionTimeoutRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     if (user && !suppressAutoRedirect) {
@@ -71,6 +77,19 @@ export default function SignupPage() {
       if (redirectTimeoutRef.current !== null) {
         window.clearTimeout(redirectTimeoutRef.current);
       }
+      if (transitionTimeoutRef.current !== null) {
+        window.clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
     };
   }, []);
 
@@ -140,11 +159,47 @@ export default function SignupPage() {
   const emailErrorId = "signup-email-error";
   const passwordErrorId = "signup-password-error";
   const repeatPasswordErrorId = "signup-repeat-password-error";
+  const transitionDurationMs = 300;
+
+  const handleAuthLinkClick =
+    (href: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.shiftKey
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      setExitDirection("right");
+      transitionTimeoutRef.current = window.setTimeout(() => {
+        router.push(href);
+      }, transitionDurationMs);
+    };
+
+  const cardTranslateClass = exitDirection
+    ? exitDirection === "left"
+      ? "-translate-x-full"
+      : "translate-x-full"
+    : !isVisible
+      ? enterFrom === "left"
+        ? "-translate-x-full"
+        : "translate-x-full"
+      : "translate-x-0";
 
   return (
-    <div className="space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] backdrop-blur-[6px]">
+    <div
+      className={clsx(
+        "space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] backdrop-blur-[6px] transition-transform duration-300 ease-in-out",
+        cardTranslateClass
+      )}
+    >
       <div className="space-y-2">
-        <h1 className="heading-4 text-white">Create your account</h1>
+        <h1 className="heading-3 text-white">Create your account</h1>
       </div>
 
       <form className="relative space-y-4" onSubmit={handleSubmit} noValidate>
@@ -161,10 +216,10 @@ export default function SignupPage() {
                 hasSubmitted && fieldErrors.email ? emailErrorId : undefined
               }
               className={clsx(
-                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 transition-opacity duration-200 ease-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
                 hasSubmitted && fieldErrors.email
                   ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                  : "border-neutral-800 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
               )}
               placeholder="you@email.com"
             />
@@ -199,10 +254,10 @@ export default function SignupPage() {
                   : undefined
               }
               className={clsx(
-                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 transition-opacity duration-200 ease-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
                 hasSubmitted && fieldErrors.password
                   ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                  : "border-neutral-800 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
               )}
               placeholder="Create a password"
             />
@@ -237,10 +292,10 @@ export default function SignupPage() {
                   : undefined
               }
               className={clsx(
-                "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 transition-opacity duration-200 ease-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
                 hasSubmitted && fieldErrors.repeatPassword
                   ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                  : "border-neutral-800 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
               )}
               placeholder="Repeat your password"
             />
@@ -291,7 +346,11 @@ export default function SignupPage() {
 
       <p className="body-14 text-neutral-400">
         Already have an account?{" "}
-        <Link href="/login" className="text-purple-300 hover:text-purple-200">
+        <Link
+          href="/login"
+          className="text-purple-300 hover:text-purple-200"
+          onClick={handleAuthLinkClick("/login")}
+        >
           Sign in
         </Link>
         .

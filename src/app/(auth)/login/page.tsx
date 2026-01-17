@@ -15,6 +15,11 @@ export default function LoginPage() {
   const { user } = useAuth();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [isVisible, setIsVisible] = React.useState(false);
+  const enterFrom: "left" | "right" = "right";
+  const [exitDirection, setExitDirection] = React.useState<
+    "left" | "right" | null
+  >(null);
   const [error, setError] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState({
     email: "",
@@ -22,6 +27,7 @@ export default function LoginPage() {
   });
   const [hasSubmitted, setHasSubmitted] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const transitionTimeoutRef = React.useRef<number | null>(null);
   const requiredMessages = React.useMemo(
     () => ({
       email: "Please enter your email",
@@ -35,6 +41,19 @@ export default function LoginPage() {
       router.replace("/");
     }
   }, [router, user]);
+
+  React.useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (transitionTimeoutRef.current !== null) {
+        window.clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -85,16 +104,52 @@ export default function LoginPage() {
 
   const emailErrorId = "login-email-error";
   const passwordErrorId = "login-password-error";
+  const transitionDurationMs = 300;
+
+  const handleAuthLinkClick =
+    (href: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.shiftKey
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      setExitDirection("right");
+      transitionTimeoutRef.current = window.setTimeout(() => {
+        router.push(href);
+      }, transitionDurationMs);
+    };
+
+  const cardTranslateClass = exitDirection
+    ? exitDirection === "left"
+      ? "-translate-x-full"
+      : "translate-x-full"
+    : !isVisible
+      ? enterFrom === "left"
+        ? "-translate-x-full"
+        : "translate-x-full"
+      : "translate-x-0";
 
   return (
-    <div className="space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] backdrop-blur-[6px]">
+    <div
+      className={clsx(
+        "space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] backdrop-blur-[6px] transition-transform duration-300 ease-in-out",
+        cardTranslateClass
+      )}
+    >
       <div className="space-y-2">
-        <h1 className="heading-4 text-white">Welcome back</h1>
+        <h1 className="heading-3 text-neutral-100">Login</h1>
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         <label className="block space-y-2">
-          <span className="body-14 text-neutral-300">Email</span>
+          <div className="body-16 text-neutral-300">Email</div>
           <input
             type="email"
             required
@@ -105,10 +160,10 @@ export default function LoginPage() {
               hasSubmitted && fieldErrors.email ? emailErrorId : undefined
             }
             className={clsx(
-              "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 transition-opacity duration-200 ease-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+              "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
               hasSubmitted && fieldErrors.email
                 ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                : "border-neutral-600 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
             )}
             placeholder="you@email.com"
           />
@@ -129,7 +184,7 @@ export default function LoginPage() {
         </label>
 
         <label className="block space-y-2">
-          <span className="body-14 text-neutral-300">Password</span>
+          <div className="body-16 text-neutral-300">Password</div>
           <input
             type="password"
             required
@@ -140,10 +195,10 @@ export default function LoginPage() {
               hasSubmitted && fieldErrors.password ? passwordErrorId : undefined
             }
             className={clsx(
-              "w-full rounded-lg border bg-neutral-900 px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 transition-opacity duration-200 ease-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+              "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
               hasSubmitted && fieldErrors.password
                 ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                : "border-neutral-800 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
             )}
             placeholder="••••••••"
           />
@@ -176,7 +231,11 @@ export default function LoginPage() {
 
       <p className="body-14 text-neutral-400">
         No account yet?{" "}
-        <Link href="/signup" className="text-purple-300 hover:text-purple-200">
+        <Link
+          href="/signup"
+          className="text-purple-300 hover:text-purple-200"
+          onClick={handleAuthLinkClick("/signup")}
+        >
           Create one
         </Link>
         .

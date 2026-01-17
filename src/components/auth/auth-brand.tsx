@@ -9,9 +9,9 @@ export default function AuthBrand({ className }: AuthBrandProps) {
     <Image
       src="/assets/gamecave-logo-beta.svg"
       alt="GameCave logo"
-      width={350}
-      height={70}
-      className={`h-auto w-[min(350px,80vw)] ${className ?? ""}`}
+      width={320}
+      height={40}
+      className={`h-auto w-[min(320px,40vw)] ${className ?? ""}`}
     />
   );
 }
