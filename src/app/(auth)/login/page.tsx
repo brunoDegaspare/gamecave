@@ -33,7 +33,7 @@ export default function LoginPage() {
       email: "Please enter your email",
       password: "Please enter your password",
     }),
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -139,16 +139,16 @@ export default function LoginPage() {
   return (
     <div
       className={clsx(
-        "space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] backdrop-blur-[6px] transition-transform duration-300 ease-in-out",
-        cardTranslateClass
+        "space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-in-out",
+        cardTranslateClass,
       )}
     >
       <div className="space-y-2">
-        <h1 className="heading-3 text-neutral-100">Login</h1>
+        <h1 className="heading-3 text-neutral-100">Welcome back</h1>
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-        <label className="block space-y-2">
+        <label className="block space-y-2 mb-6">
           <div className="body-16 text-neutral-300">Email</div>
           <input
             type="email"
@@ -160,10 +160,11 @@ export default function LoginPage() {
               hasSubmitted && fieldErrors.email ? emailErrorId : undefined
             }
             className={clsx(
-              "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+              "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+              email ? "bg-neutral-800" : "bg-transparent",
               hasSubmitted && fieldErrors.email
                 ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
             )}
             placeholder="you@email.com"
           />
@@ -183,7 +184,7 @@ export default function LoginPage() {
           ) : null}
         </label>
 
-        <label className="block space-y-2">
+        <label className="block space-y-2 mb-6">
           <div className="body-16 text-neutral-300">Password</div>
           <input
             type="password"
@@ -195,10 +196,11 @@ export default function LoginPage() {
               hasSubmitted && fieldErrors.password ? passwordErrorId : undefined
             }
             className={clsx(
-              "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+              "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+              password ? "bg-neutral-800" : "bg-transparent",
               hasSubmitted && fieldErrors.password
                 ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
             )}
             placeholder="••••••••"
           />
@@ -224,12 +226,12 @@ export default function LoginPage() {
           </p>
         ) : null}
 
-        <PrimaryButton size="md" className="w-full" disabled={loading}>
-          {loading ? "Signing in..." : "Sign in"}
+        <PrimaryButton size="lg" className="w-full" disabled={loading}>
+          {loading ? "Signing you in..." : "Login"}
         </PrimaryButton>
       </form>
 
-      <p className="body-14 text-neutral-400">
+      <p className="body-16 text-neutral-400">
         No account yet?{" "}
         <Link
           href="/signup"

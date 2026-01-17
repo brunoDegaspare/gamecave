@@ -68,6 +68,11 @@ export default function HomePage() {
     }
   };
 
+  const userEmail =
+    user?.email ??
+    user?.providerData?.find((provider) => provider?.email)?.email ??
+    "email";
+
   return (
     <div className="flex flex-col gap-12 p-6 max-w-[1440px] mx-auto">
       <dialog
@@ -87,9 +92,10 @@ export default function HomePage() {
           </button>
           <h3 className="heading-4 text-white">Verify your email</h3>
           <p className="body-16 text-neutral-300 mt-3">
-            We’ve sent a verification link to your email. Check your inbox (and
-            your spam folder just in case) to confirm it and start creating your
-            collections.
+            We’ve sent a verification link to your{" "}
+            <span className="text-white weight-medium">{userEmail}</span>. Check
+            your inbox (and your spam folder just in case) to confirm it and
+            start creating your collections.
           </p>
           <div className="modal-action">
             <PrimaryButton size="md" onClick={handleDismissModal}>

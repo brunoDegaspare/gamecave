@@ -150,7 +150,7 @@ export default function SignupPage() {
   };
 
   const handleRepeatPasswordChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const nextValue = event.target.value;
     setRepeatPassword(nextValue);
@@ -194,18 +194,18 @@ export default function SignupPage() {
   return (
     <div
       className={clsx(
-        "space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] backdrop-blur-[6px] transition-transform duration-300 ease-in-out",
-        cardTranslateClass
+        "space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-in-out",
+        cardTranslateClass,
       )}
     >
-      <div className="space-y-2">
+      <div className="space-y-3">
         <h1 className="heading-3 text-white">Create your account</h1>
       </div>
 
       <form className="relative space-y-4" onSubmit={handleSubmit} noValidate>
-        <fieldset disabled={loading} className="space-y-4">
-          <label className="block space-y-2">
-            <span className="body-14 text-neutral-300">Email</span>
+        <fieldset disabled={loading}>
+          <label className="block space-y-2 mb-6">
+            <div className="body-16 text-neutral-300">Email address</div>
             <input
               type="email"
               required
@@ -216,10 +216,11 @@ export default function SignupPage() {
                 hasSubmitted && fieldErrors.email ? emailErrorId : undefined
               }
               className={clsx(
-                "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                email ? "bg-neutral-800/40" : "bg-transparent",
                 hasSubmitted && fieldErrors.email
                   ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
               )}
               placeholder="you@email.com"
             />
@@ -239,8 +240,8 @@ export default function SignupPage() {
             ) : null}
           </label>
 
-          <label className="block space-y-2">
-            <span className="body-14 text-neutral-300">Password</span>
+          <label className="block space-y-2 mb-6">
+            <div className="body-16 text-neutral-300">Password</div>
             <input
               type="password"
               required
@@ -254,10 +255,11 @@ export default function SignupPage() {
                   : undefined
               }
               className={clsx(
-                "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                password ? "bg-neutral-800" : "bg-transparent",
                 hasSubmitted && fieldErrors.password
                   ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
               )}
               placeholder="Create a password"
             />
@@ -277,8 +279,8 @@ export default function SignupPage() {
             ) : null}
           </label>
 
-          <label className="block space-y-2">
-            <span className="body-14 text-neutral-300">Repeat password</span>
+          <label className="block space-y-2 mb-6">
+            <div className="body-16 text-neutral-300">Repeat password</div>
             <input
               type="password"
               required
@@ -292,10 +294,11 @@ export default function SignupPage() {
                   : undefined
               }
               className={clsx(
-                "w-full rounded-lg border bg-transparent px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                repeatPassword ? "bg-neutral-800" : "bg-transparent",
                 hasSubmitted && fieldErrors.repeatPassword
                   ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40"
+                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
               )}
               placeholder="Repeat your password"
             />
@@ -321,14 +324,14 @@ export default function SignupPage() {
             </Alert>
           ) : null}
 
-          <PrimaryButton size="md" className="w-full" disabled={loading}>
+          <PrimaryButton size="lg" className="w-full" disabled={loading}>
             {loading ? (
               <>
                 <span
                   className="loading loading-spinner loading-sm"
                   aria-hidden
                 />
-                Loading...
+                Creating your account...
               </>
             ) : (
               "Create account"
@@ -338,13 +341,13 @@ export default function SignupPage() {
 
         {loading ? (
           <div
-            className="absolute inset-0 z-10 rounded-lg bg-neutral-950/60 backdrop-blur-[1px]"
+            className="absolute inset-0 z-10 rounded-lg bg-neutral-950/60"
             aria-hidden="true"
           />
         ) : null}
       </form>
 
-      <p className="body-14 text-neutral-400">
+      <p className="body-16 text-neutral-400">
         Already have an account?{" "}
         <Link
           href="/login"
