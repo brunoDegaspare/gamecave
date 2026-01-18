@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import PrimaryButton from "@/components/ui/primary-button";
 import Icon from "@/components/ui/icon";
+import AuthField from "@/components/auth/auth-field";
 import { signIn } from "@/lib/auth";
 import { useAuth } from "@/components/auth/auth-provider";
 import { validateEmail, validatePassword } from "@/lib/auth/validation";
@@ -81,7 +82,9 @@ export default function LoginPage() {
       await signIn(email, password);
       router.replace("/");
     } catch (err) {
-      setError("Unable to sign in. Check your credentials and try again.");
+      setError(
+        "Ops! Something didn’t match. Check your email and password and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -151,41 +154,17 @@ export default function LoginPage() {
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-        <label className="block space-y-2 mb-6">
-          <div className="body-16 text-neutral-300">Email</div>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={handleEmailChange}
-            aria-invalid={hasSubmitted && Boolean(fieldErrors.email)}
-            aria-describedby={
-              hasSubmitted && fieldErrors.email ? emailErrorId : undefined
-            }
-            className={clsx(
-              "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
-              email ? "bg-neutral-800" : "bg-transparent",
-              hasSubmitted && fieldErrors.email
-                ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
-            )}
-            placeholder="you@email.com"
-          />
-          {hasSubmitted && fieldErrors.email ? (
-            <span
-              id={emailErrorId}
-              className="flex items-start gap-2 body-14 text-red-400"
-              role="alert"
-            >
-              <Icon
-                name="ico-cross-circle-outline"
-                size={20}
-                className="mt-0.5"
-              />
-              {fieldErrors.email}
-            </span>
-          ) : null}
-        </label>
+        <AuthField
+          label="Email"
+          type="email"
+          required
+          value={email}
+          onChange={handleEmailChange}
+          placeholder="you@email.com"
+          error={fieldErrors.email}
+          showError={hasSubmitted}
+          errorId={emailErrorId}
+        />
 
         <label className="block space-y-2 mb-6">
           <div className="flex items-center justify-between gap-4">
@@ -219,13 +198,13 @@ export default function LoginPage() {
           {hasSubmitted && fieldErrors.password ? (
             <span
               id={passwordErrorId}
-              className="flex items-start gap-2 body-14 text-red-400"
+              className="flex items-center gap-2 body-14 text-red-400"
               role="alert"
             >
               <Icon
                 name="ico-cross-circle-outline"
-                size={20}
-                className="mt-0.5"
+                size={24}
+                className="mt-0.5 h-6 w-6 shrink-0"
               />
               {fieldErrors.password}
             </span>
@@ -233,9 +212,17 @@ export default function LoginPage() {
         </label>
 
         {error ? (
-          <p className="body-14 text-red-400" role="alert">
+          <span
+            className="flex items-center gap-2 body-14 text-red-400"
+            role="alert"
+          >
+            <Icon
+              name="ico-cross-circle-outline"
+              size={24}
+              className="mt-0.5 h-6 w-6 shrink-0"
+            />
             {error}
-          </p>
+          </span>
         ) : null}
 
         <PrimaryButton size="lg" className="w-full" disabled={loading}>

@@ -229,13 +229,13 @@ export default function SignupPage() {
             {hasSubmitted && fieldErrors.email ? (
               <span
                 id={emailErrorId}
-                className="flex items-start gap-2 body-14 text-red-400"
+                className="flex items-center gap-2 body-14 text-red-400"
                 role="alert"
               >
                 <Icon
                   name="ico-cross-circle-outline"
-                  size={20}
-                  className="mt-0.5"
+                  size={24}
+                  className="mt-0.5 h-6 w-6 shrink-0"
                 />
                 {fieldErrors.email}
               </span>
@@ -268,13 +268,13 @@ export default function SignupPage() {
             {hasSubmitted && fieldErrors.password ? (
               <span
                 id={passwordErrorId}
-                className="flex items-start gap-2 body-14 text-red-400"
+                className="flex items-center gap-2 body-14 text-red-400"
                 role="alert"
               >
                 <Icon
                   name="ico-cross-circle-outline"
-                  size={20}
-                  className="mt-0.5"
+                  size={24}
+                  className="mt-0.5 h-6 w-6 shrink-0"
                 />
                 {fieldErrors.password}
               </span>
@@ -307,13 +307,13 @@ export default function SignupPage() {
             {hasSubmitted && fieldErrors.repeatPassword ? (
               <span
                 id={repeatPasswordErrorId}
-                className="flex items-start gap-2 body-14 text-red-400"
+                className="flex items-center gap-2 body-14 text-red-400"
                 role="alert"
               >
                 <Icon
                   name="ico-cross-circle-outline"
-                  size={20}
-                  className="mt-0.5"
+                  size={24}
+                  className="mt-0.5 h-6 w-6 shrink-0"
                 />
                 {fieldErrors.repeatPassword}
               </span>
