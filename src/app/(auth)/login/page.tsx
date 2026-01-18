@@ -10,16 +10,23 @@ import { signIn } from "@/lib/auth";
 import { useAuth } from "@/components/auth/auth-provider";
 import { validateEmail, validatePassword } from "@/lib/auth/validation";
 
+type Direction = "left" | "right";
+
+const translateByDirection: Record<Direction, string> = {
+  left: "-translate-x-full",
+  right: "translate-x-full",
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [isVisible, setIsVisible] = React.useState(false);
-  const enterFrom: "left" | "right" = "right";
-  const [exitDirection, setExitDirection] = React.useState<
-    "left" | "right" | null
-  >(null);
+  const enterFrom: Direction = "right";
+  const [exitDirection, setExitDirection] = React.useState<Direction | null>(
+    null,
+  );
   const [error, setError] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState({
     email: "",
@@ -127,13 +134,9 @@ export default function LoginPage() {
     };
 
   const cardTranslateClass = exitDirection
-    ? exitDirection === "left"
-      ? "-translate-x-full"
-      : "translate-x-full"
+    ? translateByDirection[exitDirection]
     : !isVisible
-      ? enterFrom === "left"
-        ? "-translate-x-full"
-        : "translate-x-full"
+      ? translateByDirection[enterFrom]
       : "translate-x-0";
 
   return (
@@ -185,7 +188,16 @@ export default function LoginPage() {
         </label>
 
         <label className="block space-y-2 mb-6">
-          <div className="body-16 text-neutral-300">Password</div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="body-16 text-neutral-300">Password</div>
+            <Link
+              href="/forgot-password"
+              className="body-16 link-accent"
+              onClick={handleAuthLinkClick("/forgot-password")}
+            >
+              Forgot password?
+            </Link>
+          </div>
           <input
             type="password"
             required
@@ -231,11 +243,11 @@ export default function LoginPage() {
         </PrimaryButton>
       </form>
 
-      <p className="body-16 text-neutral-400">
+      <p className="body-16 text-muted">
         No account yet?{" "}
         <Link
           href="/signup"
-          className="text-purple-300 hover:text-purple-200"
+          className="link-accent"
           onClick={handleAuthLinkClick("/signup")}
         >
           Create one

@@ -11,6 +11,8 @@ import { sendVerificationEmail, signUp } from "@/lib/auth";
 import { useAuth } from "@/components/auth/auth-provider";
 import { validateEmail, validatePassword } from "@/lib/auth/validation";
 
+type Direction = "left" | "right";
+
 const SIGNUP_MESSAGES = {
   verificationFallback:
     "Account created, but we couldn’t send the verification email. Please try again later.",
@@ -50,10 +52,10 @@ export default function SignupPage() {
   const [password, setPassword] = React.useState("");
   const [repeatPassword, setRepeatPassword] = React.useState("");
   const [isVisible, setIsVisible] = React.useState(false);
-  const enterFrom: "left" | "right" = "right";
-  const [exitDirection, setExitDirection] = React.useState<
-    "left" | "right" | null
-  >(null);
+  const enterFrom: Direction = "right";
+  const [exitDirection, setExitDirection] = React.useState<Direction | null>(
+    null,
+  );
   const [error, setError] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState({
     email: "",
@@ -199,7 +201,7 @@ export default function SignupPage() {
       )}
     >
       <div className="space-y-3">
-        <h1 className="heading-3 text-white">Create your account</h1>
+        <h1 className="heading-3 text-strong">Create your account</h1>
       </div>
 
       <form className="relative space-y-4" onSubmit={handleSubmit} noValidate>
@@ -347,11 +349,11 @@ export default function SignupPage() {
         ) : null}
       </form>
 
-      <p className="body-16 text-neutral-400">
+      <p className="body-16 text-muted">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="text-purple-300 hover:text-purple-200"
+          className="link-accent"
           onClick={handleAuthLinkClick("/login")}
         >
           Sign in

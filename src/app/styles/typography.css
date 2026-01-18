@@ -76,6 +76,22 @@
     @apply text-white;
   }
 
+  /* ===== Links ===== */
+  .link-accent {
+    @apply relative text-purple-400 hover:text-purple-200
+         transition-colors duration-200 ease-in-out;
+  }
+
+  .link-accent::after {
+    content: "";
+    @apply absolute left-0 -bottom-0.5 h-px w-0 bg-current
+         transition-all duration-200 ease-in-out;
+  }
+
+  .link-accent:hover::after {
+    @apply w-full;
+  }
+
   /* ===== Stats / Display ===== */
   /* 32px > md:28px */
   .stat-32 {
