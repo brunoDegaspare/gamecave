@@ -1,5 +1,8 @@
 /* eslint-disable no-console */
 
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+
 type IgdbGame = {
   id: number;
   name?: string;
@@ -28,13 +31,6 @@ type NormalizedGame = {
   source: "igdb";
 };
 
-type DbClient = {
-  query: <T = unknown>(
-    sql: string,
-    params?: Array<unknown>,
-  ) => Promise<{ rows: T[] }>;
-};
-
 const IGDB_API_URL = "https://api.igdb.com/v4/games";
 
 const requiredEnv = ["IGDB_CLIENT_ID", "IGDB_ACCESS_TOKEN"] as const;
@@ -58,35 +54,20 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-// Provide a DB client with a `query(sql, params)` method before running.
-const getDbClient = (): DbClient => {
-  const db = (globalThis as { gamecaveDb?: DbClient }).gamecaveDb;
-  if (!db) {
-    throw new Error(
-      "Missing database client. Set globalThis.gamecaveDb with a query(sql, params) function.",
-    );
-  }
-  return db;
-};
-
-const getDialect = () => {
-  const value = env("DB_DIALECT", "postgres");
-  return value === "sqlite" ? "sqlite" : "postgres";
-};
-
-const placeholder = (index: number, dialect: "postgres" | "sqlite") =>
-  dialect === "sqlite" ? "?" : `$${index}`;
-
-const makePlaceholders = (count: number, dialect: "postgres" | "sqlite") =>
-  Array.from({ length: count }, (_, i) => placeholder(i + 1, dialect)).join(
-    ", ",
-  );
 
 const normalizeUrl = (url?: string) => {
   if (!url) {
     return null;
   }
   return url.startsWith("//") ? `https:${url}` : url;
+};
+
+const normalizeIgdbImageUrl = (url: string | undefined, size: string) => {
+  const normalized = normalizeUrl(url);
+  if (!normalized) {
+    return null;
+  }
+  return normalized.replace("/t_thumb/", `/${size}/`);
 };
 
 const toUniqueList = (values: Array<string | undefined>) => {
@@ -102,15 +83,16 @@ const normalizeGame = (game: IgdbGame): NormalizedGame => {
     : null;
 
   const screenshots =
-    game.screenshots?.map((shot) => normalizeUrl(shot.url)).filter(Boolean) ??
-    [];
+    game.screenshots
+      ?.map((shot) => normalizeIgdbImageUrl(shot.url, "t_screenshot_big"))
+      .filter(Boolean) ?? [];
 
   return {
     igdb_id: game.id,
     title: game.name ?? "",
     overview: game.summary ?? null,
     release_year: releaseYear,
-    cover_url: normalizeUrl(game.cover?.url),
+    cover_url: normalizeIgdbImageUrl(game.cover?.url, "t_cover_big"),
     screenshots: screenshots as string[],
     platforms: toUniqueList(game.platforms?.map((p) => p.name) ?? []),
     developers: toUniqueList(
@@ -125,86 +107,6 @@ const normalizeGame = (game: IgdbGame): NormalizedGame => {
     ),
     source: "igdb",
   };
-};
-
-const upsertGame = async (
-  db: DbClient,
-  game: NormalizedGame,
-  dialect: "postgres" | "sqlite",
-) => {
-  const existsQuery = `select 1 as exists from games where igdb_id = ${placeholder(
-    1,
-    dialect,
-  )} limit 1`;
-  const existsResult = await db.query<{ exists: number }>(existsQuery, [
-    game.igdb_id,
-  ]);
-  const existed = existsResult.rows.length > 0;
-
-  const columns = [
-    "igdb_id",
-    "title",
-    "overview",
-    "release_year",
-    "cover_url",
-    "screenshots",
-    "platforms",
-    "developers",
-    "publishers",
-    "source",
-  ];
-  const values = [
-    game.igdb_id,
-    game.title,
-    game.overview,
-    game.release_year,
-    game.cover_url,
-    game.screenshots,
-    game.platforms,
-    game.developers,
-    game.publishers,
-    game.source,
-  ];
-  const placeholders = makePlaceholders(values.length, dialect);
-  const updates = columns
-    .filter((column) => column !== "igdb_id")
-    .map((column) => `${column} = excluded.${column}`)
-    .join(", ");
-
-  const upsertSql = `insert into games (${columns.join(
-    ", ",
-  )}) values (${placeholders}) on conflict (igdb_id) do update set ${updates}`;
-
-  await db.query(upsertSql, values);
-
-  return existed ? "updated" : "inserted";
-};
-
-const persistBatch = async (
-  db: DbClient,
-  games: NormalizedGame[],
-  dialect: "postgres" | "sqlite",
-) => {
-  let inserted = 0;
-  let updated = 0;
-
-  for (const game of games) {
-    try {
-      const action = await upsertGame(db, game, dialect);
-      if (action === "inserted") {
-        inserted += 1;
-      } else {
-        updated += 1;
-      }
-    } catch (error) {
-      console.error(
-        `Failed to upsert IGDB ${game.igdb_id} (${game.title}).`,
-        error,
-      );
-    }
-  }
-
-  return { inserted, updated };
 };
 
 const buildQuery = (limit: number, offset: number) => {
@@ -235,15 +137,16 @@ const main = async () => {
 
   const clientId = env("IGDB_CLIENT_ID") as string;
   const accessToken = env("IGDB_ACCESS_TOKEN") as string;
-  const db = getDbClient();
-  const dialect = getDialect();
 
   const limit = parseIntEnv("IGDB_LIMIT", 100);
   const maxBatches = parseIntEnv("IGDB_MAX_BATCHES", 5);
   const startOffset = parseIntEnv("IGDB_OFFSET", 0);
   const delayMs = parseIntEnv("IGDB_RATE_LIMIT_MS", 350);
+  const maxGames = parseIntEnv("IGDB_MAX_GAMES", 20);
+  const outputPath = env("IGDB_OUTPUT_PATH", "data/igdb-games.json") as string;
 
   let totalFetched = 0;
+  const collected: NormalizedGame[] = [];
 
   for (let batch = 0; batch < maxBatches; batch += 1) {
     const offset = startOffset + batch * limit;
@@ -267,7 +170,14 @@ const main = async () => {
     const results = (await response.json()) as IgdbGame[];
     totalFetched += results.length;
     const normalized = results.map(normalizeGame);
-    const persisted = await persistBatch(db, normalized, dialect);
+    const valid = normalized.filter((game) => game.title.trim().length > 0);
+
+    for (const game of valid) {
+      if (collected.length >= maxGames) {
+        break;
+      }
+      collected.push(game);
+    }
 
     console.log(
       `Batch ${batch + 1}/${maxBatches} fetched ${results.length} games (offset ${offset}).`,
@@ -277,8 +187,12 @@ const main = async () => {
       JSON.stringify(normalized.slice(0, 2), null, 2),
     );
     console.log(
-      `Persisted batch: inserted ${persisted.inserted}, updated ${persisted.updated}.`,
+      `Collected ${collected.length}/${maxGames} normalized games so far.`,
     );
+
+    if (collected.length >= maxGames) {
+      break;
+    }
 
     if (results.length < limit) {
       console.log("Pagination finished (received less than limit).");
@@ -290,6 +204,10 @@ const main = async () => {
     }
   }
 
+  const outputDir = path.dirname(outputPath);
+  await mkdir(outputDir, { recursive: true });
+  await writeFile(outputPath, JSON.stringify(collected, null, 2), "utf8");
+  console.log(`Wrote ${collected.length} games to ${outputPath}.`);
   console.log(`Done. Total games fetched: ${totalFetched}.`);
 };
 
