@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id          Int      @id @default(autoincrement())
+  igdbId      Int?     @unique
+  title       String
+  overview    String   @db.Text
+  releaseYear Int
+  coverUrl    String
+  createdAt   DateTime @default(now())
+
+  screenshots Screenshot[]
+  platforms   GamePlatform[]
+  developers  GameDeveloper[]
+  publishers  GamePublisher[]
+}
+
+model Platform {
+  id    Int    @id @default(autoincrement())
+  name  String
+
+  games GamePlatform[]
+}
+
+model Developer {
+  id    Int    @id @default(autoincrement())
+  name  String
+
+  games GameDeveloper[]
+}
+
+model Publisher {
+  id    Int    @id @default(autoincrement())
+  name  String
+
+  games GamePublisher[]
+}
+
+model Screenshot {
+  id     Int    @id @default(autoincrement())
+  url    String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  gameId Int
+}
+
+model GamePlatform {
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  gameId     Int
+  platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  platformId Int
+
+  @@id([gameId, platformId])
+}
+
+model GameDeveloper {
+  game        Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  gameId      Int
+  developer   Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  developerId Int
+
+  @@id([gameId, developerId])
+}
+
+model GamePublisher {
+  game        Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  gameId      Int
+  publisher   Publisher @relation(fields: [publisherId], references: [id], onDelete: Cascade)
+  publisherId Int
+
+  @@id([gameId, publisherId])
+}
