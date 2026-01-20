@@ -268,7 +268,7 @@ export function SearchPalette({
           label="Global Search"
           className="w-full text-zinc-200"
           loop
-          shouldFilter
+          shouldFilter={false}
         >
           <div className="relative">
             <Command.Input
