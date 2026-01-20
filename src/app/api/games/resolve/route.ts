@@ -19,6 +19,15 @@ type IgdbGame = {
 
 const IGDB_API_URL = "https://api.igdb.com/v4/games";
 
+const parseIgdbId = (raw: string | null) => {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!/^\d+$/.test(trimmed)) return null;
+  const parsed = Number(trimmed);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) return null;
+  return parsed;
+};
+
 const normalizeUrl = (url?: string) => {
   if (!url) return null;
   return url.startsWith("//") ? `https:${url}` : url;
@@ -57,7 +66,7 @@ const fetchIgdbGameById = async (igdbId: number) => {
   const clientId = process.env.IGDB_CLIENT_ID;
   const accessToken = process.env.IGDB_ACCESS_TOKEN;
   if (!clientId || !accessToken) {
-    return null as IgdbGame | null;
+    throw new Error("IGDB credentials are missing.");
   }
 
   const fields =
@@ -75,7 +84,9 @@ const fetchIgdbGameById = async (igdbId: number) => {
   });
 
   if (!response.ok) {
-    return null;
+    throw new Error(
+      `IGDB request failed with status ${response.status} ${response.statusText}`
+    );
   }
 
   const data = (await response.json()) as IgdbGame[];
@@ -180,17 +191,16 @@ const persistIgdbGame = async (game: IgdbGame) => {
 };
 
 export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const raw = searchParams.get("igdbId");
-    const igdbId = raw ? Number(raw) : NaN;
-    if (!Number.isFinite(igdbId)) {
-      return Response.json(
-        { ok: false, error: "Missing igdbId" },
-        { status: 400 }
-      );
-    }
+  const { searchParams } = new URL(request.url);
+  const igdbId = parseIgdbId(searchParams.get("igdbId"));
+  if (!igdbId) {
+    return Response.json(
+      { ok: false, error: "Invalid igdbId" },
+      { status: 400 }
+    );
+  }
 
+  try {
     const existing = await prisma.game.findUnique({
       where: { igdbId },
       select: { id: true },
@@ -198,15 +208,33 @@ export async function GET(request: Request) {
     if (existing) {
       return Response.json({ ok: true, id: existing.id });
     }
+  } catch (error) {
+    console.error("resolve-game: db lookup failed", { igdbId, error });
+    return Response.json(
+      { ok: false, error: "Database lookup failed" },
+      { status: 500 }
+    );
+  }
 
-    const igdbGame = await fetchIgdbGameById(igdbId);
-    if (!igdbGame) {
-      return Response.json(
-        { ok: false, error: "IGDB game not found" },
-        { status: 404 }
-      );
-    }
+  let igdbGame: IgdbGame | null = null;
+  try {
+    igdbGame = await fetchIgdbGameById(igdbId);
+  } catch (error) {
+    console.error("resolve-game: IGDB request failed", { igdbId, error });
+    return Response.json(
+      { ok: false, error: "IGDB request failed" },
+      { status: 500 }
+    );
+  }
 
+  if (!igdbGame) {
+    return Response.json(
+      { ok: false, error: "IGDB game not found" },
+      { status: 404 }
+    );
+  }
+
+  try {
     const dbGame = await persistIgdbGame(igdbGame);
     if (!dbGame) {
       return Response.json(
@@ -216,9 +244,10 @@ export async function GET(request: Request) {
     }
 
     return Response.json({ ok: true, id: dbGame.id });
-  } catch {
+  } catch (error) {
+    console.error("resolve-game: persist failed", { igdbId, error });
     return Response.json(
-      { ok: false, error: "Failed to resolve game" },
+      { ok: false, error: "Failed to persist game" },
       { status: 500 }
     );
   }

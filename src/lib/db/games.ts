@@ -1,5 +1,4 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { prisma } from "@/lib/prisma";
 
 export type Game = {
   igdb_id: number;
@@ -14,35 +13,48 @@ export type Game = {
   source: "igdb";
 };
 
-const LOCAL_DATA_PATH = path.join(process.cwd(), "data", "igdb-games.json");
-let cachedGames: Game[] | null = null;
+const joinNames = (names: string[]) =>
+  names.length > 0 ? names.join(", ") : null;
 
-const loadLocalGames = async (): Promise<Game[]> => {
-  if (cachedGames) {
-    return cachedGames;
-  }
-
-  try {
-    const raw = await readFile(LOCAL_DATA_PATH, "utf8");
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      cachedGames = parsed as Game[];
-      return cachedGames;
-    }
-  } catch {
-    // Local data not available yet.
-  }
-
-  cachedGames = [];
-  return cachedGames;
-};
-
-export const getGameById = async (igdbId: number): Promise<Game | null> => {
-  if (!Number.isFinite(igdbId)) {
+export const getGameById = async (id: number): Promise<Game | null> => {
+  if (!Number.isFinite(id)) {
     return null;
   }
 
-  const games = await loadLocalGames();
-  const game = games.find((item) => item.igdb_id === igdbId);
-  return game ?? null;
+  const game = await prisma.game.findUnique({
+    where: { id },
+    include: {
+      screenshots: true,
+      platforms: { include: { platform: true } },
+      developers: { include: { developer: true } },
+      publishers: { include: { publisher: true } },
+    },
+  });
+
+  if (!game) {
+    return null;
+  }
+
+  const platforms = joinNames(
+    game.platforms.map((entry) => entry.platform.name)
+  );
+  const developers = joinNames(
+    game.developers.map((entry) => entry.developer.name)
+  );
+  const publishers = joinNames(
+    game.publishers.map((entry) => entry.publisher.name)
+  );
+
+  return {
+    igdb_id: game.igdbId ?? game.id,
+    title: game.title,
+    overview: game.overview ?? null,
+    release_year: game.releaseYear > 0 ? game.releaseYear : null,
+    cover_url: game.coverUrl?.trim() ? game.coverUrl : null,
+    screenshots: game.screenshots.map((shot) => shot.url),
+    platforms,
+    developers,
+    publishers,
+    source: "igdb",
+  };
 };
