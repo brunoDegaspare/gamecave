@@ -20,41 +20,19 @@ type SearchResult = {
 
 const IGDB_API_URL = "https://api.igdb.com/v4/games";
 
-const normalizeSearchQuery = (value: string) => {
-  const lower = value.toLowerCase().trim();
-  const cleaned = lower.replace(/[^a-z0-9\s]/g, " ");
-  const collapsed = cleaned.replace(/\s+/g, " ").trim();
-  if (!collapsed) {
-    return { full: "", loose: "" };
-  }
-
-  const tokens = collapsed.split(" ");
-  let looseTokens = tokens;
-  if (tokens.length > 1) {
-    const last = tokens[tokens.length - 1];
-    const isNumber = /^\d+$/.test(last);
-    const isRoman =
-      /^(?:i|ii|iii|iv|v|vi|vii|viii|ix|x|xi|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)$/i.test(
-        last
-      );
-    if (isNumber || isRoman) {
-      looseTokens = tokens.slice(0, -1);
-    }
-  }
-
-  const loose = looseTokens.join(" ").trim();
-  return { full: collapsed, loose: loose || collapsed };
+const normalizeText = (value: string) => {
+  const lower = value.toLowerCase();
+  const withAnd = lower.replace(/&/g, " and ");
+  const cleaned = withAnd.replace(/[^a-z0-9\s]/g, " ");
+  return cleaned.replace(/\s+/g, " ").trim();
 };
 
-const buildNameMatch = (full: string, loose: string) => {
-  const patterns = new Set<string>();
-  if (full) patterns.add(full);
-  if (loose) patterns.add(loose);
-  const escaped = (text: string) => text.replace(/"/g, '\\"');
-  const clauses = Array.from(patterns).map(
-    (text) => `name ~ *"${escaped(text)}"*`
-  );
-  return clauses.length > 0 ? `(${clauses.join(" | ")})` : "";
+const normalizeSearchQuery = (value: string) => {
+  const normalized = normalizeText(value);
+  const tokens = normalized
+    ? Array.from(new Set(normalized.split(" ").filter(Boolean)))
+    : [];
+  return { query: normalized, tokens };
 };
 
 const normalizeUrl = (url?: string) => {
@@ -75,7 +53,7 @@ const mapCategory = (gameType?: number): SearchResult["category"] | null => {
   return null;
 };
 
-const fetchIgdbSearch = async (query: string) => {
+const fetchIgdbSearch = async (normalizedQuery: string) => {
   const clientId = process.env.IGDB_CLIENT_ID;
   const accessToken = process.env.IGDB_ACCESS_TOKEN;
   if (!clientId || !accessToken) {
@@ -86,19 +64,12 @@ const fetchIgdbSearch = async (query: string) => {
     return [] as IgdbGame[];
   }
 
-  const normalized = normalizeSearchQuery(query);
-  if (!normalized.full) {
+  if (!normalizedQuery) {
     return [] as IgdbGame[];
   }
 
-  const nameMatch = buildNameMatch(normalized.full, normalized.loose);
   const whereParts = ["name != null", "game_type = (0, 8, 11)"];
-  if (nameMatch) {
-    whereParts.push(nameMatch);
-  }
-
-  const searchQuery = normalized.loose || normalized.full;
-  const safeSearch = searchQuery.replace(/"/g, '\\"');
+  const safeSearch = normalizedQuery.replace(/"/g, '\\"');
   const fields = "id,name,first_release_date,cover.url,game_type";
   const body = [
     `fields ${fields}`,
@@ -149,6 +120,37 @@ const mapSearchResult = (game: IgdbGame): SearchResult | null => {
   };
 };
 
+const scoreTitleMatch = (
+  title: string,
+  normalizedQuery: string,
+  tokens: string[]
+) => {
+  const normalizedTitle = normalizeText(title);
+  if (!normalizedTitle) return 0;
+
+  let score = 0;
+  if (normalizedTitle === normalizedQuery) {
+    score += 1000;
+  } else if (normalizedTitle.startsWith(normalizedQuery)) {
+    score += 600;
+  } else if (normalizedTitle.includes(normalizedQuery)) {
+    score += 300;
+  }
+
+  const titleTokens = normalizedTitle.split(" ");
+  for (const token of tokens) {
+    if (titleTokens.includes(token)) {
+      score += 30;
+    } else if (titleTokens.some((part) => part.startsWith(token))) {
+      score += 20;
+    } else if (normalizedTitle.includes(token)) {
+      score += 10;
+    }
+  }
+
+  return score;
+};
+
 const mapDbSearchResult = (game: {
   igdbId: number | null;
   title: string;
@@ -171,15 +173,24 @@ const mapDbSearchResult = (game: {
   };
 };
 
-const fetchDbSearchResults = async (query: string) => {
+const fetchDbSearchResults = async (
+  normalizedQuery: string,
+  tokens: string[]
+) => {
   try {
+    if (tokens.length === 0) {
+      return [] as SearchResult[];
+    }
+
     const dbGames = await prisma.game.findMany({
       where: {
-        title: {
-          contains: query,
-          mode: "insensitive",
-        },
         igdbId: { not: null },
+        AND: tokens.map((token) => ({
+          title: {
+            contains: token,
+            mode: "insensitive",
+          },
+        })),
       },
       select: {
         igdbId: true,
@@ -189,9 +200,20 @@ const fetchDbSearchResults = async (query: string) => {
       },
     });
 
-    return dbGames
+    const scored = dbGames
       .map(mapDbSearchResult)
-      .filter((game): game is SearchResult => Boolean(game));
+      .filter((game): game is SearchResult => Boolean(game))
+      .map((game) => ({
+        game,
+        score: scoreTitleMatch(game.title, normalizedQuery, tokens),
+      }))
+      .sort((a, b) => {
+        if (a.score !== b.score) return b.score - a.score;
+        return a.game.title.localeCompare(b.game.title);
+      })
+      .map(({ game }) => game);
+
+    return scored;
   } catch {
     return [] as SearchResult[];
   }
@@ -200,14 +222,19 @@ const fetchDbSearchResults = async (query: string) => {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = (searchParams.get("q") || "").trim();
-    if (query.length < 2) {
+    const rawQuery = (searchParams.get("q") || "").trim();
+    if (rawQuery.length < 2) {
+      return Response.json({ ok: true, games: [] });
+    }
+
+    const normalized = normalizeSearchQuery(rawQuery);
+    if (normalized.query.length < 2 || normalized.tokens.length === 0) {
       return Response.json({ ok: true, games: [] });
     }
 
     const [dbResults, igdbResults] = await Promise.all([
-      fetchDbSearchResults(query),
-      fetchIgdbSearch(query)
+      fetchDbSearchResults(normalized.query, normalized.tokens),
+      fetchIgdbSearch(normalized.query)
         .then((games) =>
           games
             .map(mapSearchResult)
