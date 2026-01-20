@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
+import GhostButton from "@/components/ui/ghost-button";
 
 type Item = {
   id: string;
@@ -66,11 +67,13 @@ export function SearchPalette({
   setOpen,
   items,
   panelClassName,
+  onSeeMore,
 }: {
   open: boolean;
   setOpen: (v: boolean) => void;
   items: Item[];
   panelClassName?: string;
+  onSeeMore?: () => void;
 }) {
   const router = useRouter();
   const [isMounted, setIsMounted] = React.useState(false);
@@ -209,9 +212,15 @@ export function SearchPalette({
     };
   }, [open, query]);
 
+  const maxResults = 10;
+  const visibleSearchItems =
+    searchItems.length > maxResults
+      ? searchItems.slice(0, maxResults)
+      : searchItems;
+  const hasMoreResults = searchItems.length > maxResults;
   const combinedItems = React.useMemo(
-    () => [...items, ...searchItems],
-    [items, searchItems],
+    () => [...items, ...visibleSearchItems],
+    [items, visibleSearchItems],
   );
   const combinedGroups = groupBy(combinedItems);
   const trimmedQuery = query.trim();
@@ -312,6 +321,25 @@ export function SearchPalette({
                 ))}
               </Command.Group>
             ))}
+            {hasMoreResults && (
+              <Command.Item
+                value="see-more"
+                forceMount
+                onSelect={() => {
+                  setOpen(false);
+                  onSeeMore?.();
+                }}
+                asChild
+              >
+                <GhostButton
+                  size="md"
+                  type="button"
+                  className="w-full justify-center"
+                >
+                  See more
+                </GhostButton>
+              </Command.Item>
+            )}
           </Command.List>
         </Command>
       </div>
