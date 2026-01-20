@@ -301,7 +301,7 @@ export function SearchPalette({
                 {groupItems.map((it) => (
                   <Command.Item
                     key={it.id}
-                    value={it.label}
+                    value={`${it.label}__${it.id}`}
                     onSelect={() => {
                       setOpen(false);
                       it.action?.();
