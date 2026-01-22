@@ -282,11 +282,6 @@ export default function MainLayout({
       <CreateCollectionModal
         open={isCreateCollectionOpen}
         onClose={() => setIsCreateCollectionOpen(false)}
-        onCreate={({ name }) => {
-          setCollections((prev) =>
-            prev.includes(name) ? prev : [name, ...prev]
-          );
-        }}
       />
     </div>
   );

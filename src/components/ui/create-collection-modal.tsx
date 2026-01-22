@@ -1,20 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/components/auth/auth-provider";
 import AuthField from "@/components/auth/auth-field";
 import GhostButton from "@/components/ui/ghost-button";
 import ModalLayout from "@/components/ui/modal-layout";
 import PrimaryButton from "@/components/ui/primary-button";
 
-type CreateCollectionPayload = {
+type CreateCollectionResponse = {
+  id: number;
   name: string;
   description: string | null;
+  createdAt: string;
 };
 
 type CreateCollectionModalProps = {
   open: boolean;
   onClose: () => void;
-  onCreate: (payload: CreateCollectionPayload) => void;
+  onCreate?: (collection: CreateCollectionResponse) => void;
 };
 
 export default function CreateCollectionModal({
@@ -22,6 +25,7 @@ export default function CreateCollectionModal({
   onClose,
   onCreate,
 }: CreateCollectionModalProps) {
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,14 +46,47 @@ export default function CreateCollectionModal({
 
   const handleCreate = () => {
     if (!trimmedName || isSubmitting) return;
+    const payload = {
+      name: trimmedName,
+      description: description.trim() || undefined,
+    };
     setIsSubmitting(true);
     window.setTimeout(() => {
-      onCreate({
-        name: trimmedName,
-        description: description.trim() || null,
-      });
-      setIsSubmitting(false);
-      onClose();
+      void (async () => {
+        try {
+          if (!user) {
+            throw new Error("No authenticated user.");
+          }
+
+          const token = await user.getIdToken();
+          const response = await fetch("/api/collections", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            const errorBody = await response.json().catch(() => null);
+            console.error("Failed to create collection.", {
+              status: response.status,
+              error: errorBody,
+            });
+            return;
+          }
+
+          const created = (await response.json()) as CreateCollectionResponse;
+          console.info("collection-created", created);
+          onCreate?.(created);
+          onClose();
+        } catch (error) {
+          console.error("Failed to create collection.", error);
+        } finally {
+          setIsSubmitting(false);
+        }
+      })();
     }, 700);
   };
 
