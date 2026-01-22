@@ -20,6 +20,7 @@ export default function GameDetailsClient({ game }: GameDetailsClientProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [pendingCollections, setPendingCollections] = useState<string[]>([]);
+  const [collections, setCollections] = useState<string[]>([]);
   const [showCollectionError, setShowCollectionError] = useState(false);
   const [showCollectionsScrollbar, setShowCollectionsScrollbar] =
     useState(false);
@@ -27,19 +28,7 @@ export default function GameDetailsClient({ game }: GameDetailsClientProps) {
   const collectionsScrollTimeout = useRef<number | null>(null);
   const collectionsScrollRef = useRef<HTMLDivElement | null>(null);
   const verificationToastTimeout = useRef<number | null>(null);
-  const userCollections = [
-    "Mega Drive",
-    "SNES",
-    "PC Engine",
-    "PlayStation",
-    "Dreamcast",
-    "Nintendo 64",
-    "Game Boy",
-    "Batman collection",
-    "Crash Bandicoot set",
-    "GTA collection",
-  ];
-  const sortedCollections = [...userCollections].sort((a, b) => {
+  const sortedCollections = [...collections].sort((a, b) => {
     const left = a.toLowerCase();
     const right = b.toLowerCase();
     if (left < right) return -1;
@@ -53,6 +42,55 @@ export default function GameDetailsClient({ game }: GameDetailsClientProps) {
       setShowCollectionError(false);
     }
   }, [isDrawerOpen, selectedCollections]);
+
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+    if (!user) {
+      setCollections([]);
+      return;
+    }
+
+    let isActive = true;
+
+    const loadCollections = async () => {
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch("/api/collections", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => null);
+          console.error("Failed to load collections.", {
+            status: response.status,
+            error: errorBody,
+          });
+          return;
+        }
+
+        const data = (await response.json()) as Array<{ name?: string }>;
+        const nextCollections = Array.isArray(data)
+          ? data
+              .map((collection) => collection.name?.trim())
+              .filter(Boolean) as string[]
+          : [];
+
+        if (isActive) {
+          setCollections(nextCollections);
+        }
+      } catch (error) {
+        console.error("Failed to load collections.", error);
+      }
+    };
+
+    void loadCollections();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isDrawerOpen, user]);
 
   useEffect(() => {
     if (pendingCollections.length > 0 && showCollectionError) {

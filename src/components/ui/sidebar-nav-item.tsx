@@ -21,6 +21,7 @@ type SidebarNavItemProps = {
   isActive?: boolean;
   collapsed?: boolean;
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  className?: string;
 };
 
 export default function SidebarNavItem({
@@ -31,6 +32,7 @@ export default function SidebarNavItem({
   isActive,
   collapsed = false,
   onClick,
+  className,
 }: SidebarNavItemProps) {
   const pathname = usePathname();
 
@@ -51,7 +53,8 @@ export default function SidebarNavItem({
         active
           ? "bg-neutral-800 text-purple-400"
           : "text-neutral-300 hover:bg-neutral-800",
-        collapsed ? "justify-center" : "gap-3"
+        collapsed ? "justify-center" : "gap-3",
+        className
       )}
       aria-current={active ? "page" : undefined}
     >

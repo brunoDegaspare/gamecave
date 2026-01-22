@@ -32,11 +32,24 @@ export default function MainLayout({
   const [isMobile, setIsMobile] = React.useState(false);
   const [isCreateCollectionOpen, setIsCreateCollectionOpen] =
     React.useState(false);
-  const [collections, setCollections] = React.useState<string[]>([
-    "SNES",
-    "Mega Drive",
-    "Master System",
-  ]);
+  const [collections, setCollections] = React.useState<
+    Array<{
+      id: number;
+      name: string;
+      description: string | null;
+      createdAt: string;
+    }>
+  >([]);
+  const sortedCollections = React.useMemo(
+    () =>
+      [...collections].sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+      ),
+    [collections],
+  );
+  const [recentCollectionIds, setRecentCollectionIds] = React.useState(
+    () => new Set<number>(),
+  );
   const scrollLockPosition = React.useRef(0);
 
   // Em mobile (< md) sidebar começa collapsed
@@ -57,6 +70,54 @@ export default function MainLayout({
 
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
+
+  React.useEffect(() => {
+    let isActive = true;
+
+    const loadCollections = async () => {
+      if (!user) {
+        setCollections([]);
+        return;
+      }
+
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch("/api/collections", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => null);
+          console.error("Failed to load collections.", {
+            status: response.status,
+            error: errorBody,
+          });
+          return;
+        }
+
+        const data = (await response.json()) as Array<{
+          id: number;
+          name: string;
+          description: string | null;
+          createdAt: string;
+        }>;
+
+        if (isActive) {
+          setCollections(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error("Failed to load collections.", error);
+      }
+    };
+
+    void loadCollections();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user]);
 
   React.useEffect(() => {
     if (!isHydrated) return;
@@ -265,23 +326,51 @@ export default function MainLayout({
             />
           </nav>
 
-          <nav className="pt-8 border-t border-neutral-800 space-y-2 body-18 weight-medium">
-            {collections.map((collection) => (
-              <SidebarNavItem
-                key={collection}
-                href="#"
-                label={collection}
-                iconName="ico-collection-outline"
-                collapsed={collapsed}
-              />
-            ))}
-          </nav>
+          {sortedCollections.length > 0 ? (
+            <nav className="pt-8 border-t border-neutral-800 space-y-2 body-18 weight-medium">
+              {sortedCollections.map((collection) => (
+                <SidebarNavItem
+                  key={collection.id}
+                  href="#"
+                  label={collection.name}
+                  iconName="ico-collection-outline"
+                  collapsed={collapsed}
+                  className={`transition-opacity duration-300 ease-out ${
+                    recentCollectionIds.has(collection.id)
+                      ? "opacity-0"
+                      : "opacity-100"
+                  }`}
+                />
+              ))}
+            </nav>
+          ) : null}
         </aside>
       </div>
 
       <CreateCollectionModal
         open={isCreateCollectionOpen}
         onClose={() => setIsCreateCollectionOpen(false)}
+        onCreate={(created) => {
+          setCollections((prev) =>
+            prev.some((collection) => collection.id === created.id)
+              ? prev
+              : [created, ...prev],
+          );
+          setRecentCollectionIds((prev) => {
+            const next = new Set(prev);
+            next.add(created.id);
+            return next;
+          });
+          if (typeof window !== "undefined") {
+            window.requestAnimationFrame(() => {
+              setRecentCollectionIds((prev) => {
+                const next = new Set(prev);
+                next.delete(created.id);
+                return next;
+              });
+            });
+          }
+        }}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import AuthField from "@/components/auth/auth-field";
 import GhostButton from "@/components/ui/ghost-button";
@@ -26,6 +26,7 @@ export default function CreateCollectionModal({
   onCreate,
 }: CreateCollectionModalProps) {
   const { user } = useAuth();
+  const closeRef = useRef<(() => void) | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,6 +44,14 @@ export default function CreateCollectionModal({
     () => (isSubmitting ? "Creating..." : "Create"),
     [isSubmitting],
   );
+
+  const handleRequestClose = () => {
+    if (closeRef.current) {
+      closeRef.current();
+      return;
+    }
+    onClose();
+  };
 
   const handleCreate = () => {
     if (!trimmedName || isSubmitting) return;
@@ -80,7 +89,7 @@ export default function CreateCollectionModal({
           const created = (await response.json()) as CreateCollectionResponse;
           console.info("collection-created", created);
           onCreate?.(created);
-          onClose();
+          handleRequestClose();
         } catch (error) {
           console.error("Failed to create collection.", error);
         } finally {
@@ -93,7 +102,7 @@ export default function CreateCollectionModal({
   if (!open) return null;
 
   return (
-    <ModalLayout onClose={onClose}>
+    <ModalLayout onClose={onClose} closeRef={closeRef}>
       <div className="space-y-6">
         <h3 className="heading-4 text-white">New collection</h3>
 
@@ -119,7 +128,7 @@ export default function CreateCollectionModal({
       </div>
 
       <div className="modal-action mt-6">
-        <GhostButton size="md" type="button" onClick={onClose}>
+        <GhostButton size="md" type="button" onClick={handleRequestClose}>
           Cancel
         </GhostButton>
         <PrimaryButton

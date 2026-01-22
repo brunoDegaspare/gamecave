@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, MutableRefObject, ReactNode } from "react";
 
 const FADE_DURATION_MS = 300;
 
@@ -15,6 +15,7 @@ type ModalLayoutProps = {
   closeAriaLabel?: string;
   showCloseButton?: boolean;
   closeButtonClassName?: string;
+  closeRef?: MutableRefObject<(() => void) | null>;
 };
 
 export default function ModalLayout({
@@ -26,6 +27,7 @@ export default function ModalLayout({
   closeAriaLabel = "Close",
   showCloseButton = true,
   closeButtonClassName,
+  closeRef,
 }: ModalLayoutProps) {
   const [isVisible, setIsVisible] = useState(false);
   const closeTimeoutRef = useRef<number | null>(null);
@@ -49,6 +51,10 @@ export default function ModalLayout({
       onClose();
     }, FADE_DURATION_MS);
   };
+
+  if (closeRef) {
+    closeRef.current = handleClose;
+  }
 
   return (
     <dialog
