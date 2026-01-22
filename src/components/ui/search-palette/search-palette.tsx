@@ -246,10 +246,8 @@ export function SearchPalette({
       {/* Backdrop: dim + blur */}
       <div
         className={[
-          "absolute inset-0 bg-black/60 transition-[opacity,backdrop-filter] duration-300 ease-out",
-          isVisible
-            ? "opacity-100 backdrop-blur-[2px]"
-            : "opacity-0 backdrop-blur-0",
+          "absolute inset-0 bg-black/60 transition-opacity duration-300 ease-out",
+          isVisible ? "opacity-100" : "opacity-0",
         ].join(" ")}
       />
 

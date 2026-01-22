@@ -1,5 +1,6 @@
 "use client";
 
+import type { MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
@@ -19,6 +20,7 @@ type SidebarNavItemProps = {
   showIcon?: boolean;
   isActive?: boolean;
   collapsed?: boolean;
+  onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
 };
 
 export default function SidebarNavItem({
@@ -28,6 +30,7 @@ export default function SidebarNavItem({
   showIcon = true,
   isActive,
   collapsed = false,
+  onClick,
 }: SidebarNavItemProps) {
   const pathname = usePathname();
 
@@ -42,6 +45,7 @@ export default function SidebarNavItem({
   const linkContent = (
     <Link
       href={href}
+      onClick={onClick}
       className={clsx(
         "group flex items-center rounded-xl py-3 px-3 text-base font-medium transition-colors",
         active

@@ -1,7 +1,10 @@
 "use client";
 
 import clsx from "clsx";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+
+const FADE_DURATION_MS = 300;
 
 type ModalLayoutProps = {
   children: ReactNode;
@@ -24,17 +27,45 @@ export default function ModalLayout({
   showCloseButton = true,
   closeButtonClassName,
 }: ModalLayoutProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const closeTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setIsVisible(true);
+    return () => {
+      if (closeTimeoutRef.current !== null) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleClose = () => {
+    if (!isVisible) return;
+    setIsVisible(false);
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+    }
+    closeTimeoutRef.current = window.setTimeout(() => {
+      onClose();
+    }, FADE_DURATION_MS);
+  };
+
   return (
     <dialog
-      className={clsx("modal modal-open grid place-items-center", dialogClassName)}
+      className={clsx(
+        "modal modal-open grid place-items-center transition-opacity duration-300 ease-out",
+        isVisible ? "opacity-100" : "opacity-0 pointer-events-none",
+        dialogClassName,
+      )}
       role="dialog"
       aria-modal="true"
       open
     >
       <div
         className={clsx(
-          "modal-box w-full max-w-3xl bg-base-100 text-base-content",
-          contentClassName
+          "modal-box w-full max-w-3xl bg-zinc-900 text-base-content transition-[opacity,transform] duration-300 ease-out",
+          isVisible ? "opacity-100 scale-100" : "opacity-0 scale-[0.98]",
+          contentClassName,
         )}
         style={contentStyle}
       >
@@ -43,9 +74,9 @@ export default function ModalLayout({
             type="button"
             className={clsx(
               "btn btn-sm btn-circle btn-ghost absolute right-4 top-4",
-              closeButtonClassName
+              closeButtonClassName,
             )}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label={closeAriaLabel}
           >
             ✕
@@ -55,7 +86,7 @@ export default function ModalLayout({
         {children}
       </div>
 
-      <form method="dialog" className="modal-backdrop" onClick={onClose}>
+      <form method="dialog" className="modal-backdrop" onClick={handleClose}>
         <button aria-label={closeAriaLabel}>close</button>
       </form>
     </dialog>

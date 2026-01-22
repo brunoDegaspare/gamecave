@@ -11,6 +11,7 @@ import SidebarNavItem from "@/components/ui/sidebar-nav-item";
 import Icon from "@/components/ui/icon";
 import GhostButton from "@/components/ui/ghost-button";
 import Alert from "@/components/ui/alert";
+import CreateCollectionModal from "@/components/ui/create-collection-modal";
 import {
   SearchPalette,
   useCommandPalette,
@@ -29,6 +30,13 @@ export default function MainLayout({
   const [collapsed, setCollapsed] = React.useState(false);
   const [isHydrated, setIsHydrated] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
+  const [isCreateCollectionOpen, setIsCreateCollectionOpen] =
+    React.useState(false);
+  const [collections, setCollections] = React.useState<string[]>([
+    "SNES",
+    "Mega Drive",
+    "Master System",
+  ]);
   const scrollLockPosition = React.useRef(0);
 
   // Em mobile (< md) sidebar começa collapsed
@@ -250,31 +258,36 @@ export default function MainLayout({
               label="New collection"
               iconName="ico-add-outline"
               collapsed={collapsed}
+              onClick={(event) => {
+                event.preventDefault();
+                setIsCreateCollectionOpen(true);
+              }}
             />
           </nav>
 
           <nav className="pt-8 border-t border-neutral-800 space-y-2 body-18 weight-medium">
-            <SidebarNavItem
-              href="#"
-              label="SNES"
-              iconName="ico-collection-outline"
-              collapsed={collapsed}
-            />
-            <SidebarNavItem
-              href="#"
-              label="Mega Drive"
-              iconName="ico-collection-outline"
-              collapsed={collapsed}
-            />
-            <SidebarNavItem
-              href="#"
-              label="Master System"
-              iconName="ico-collection-outline"
-              collapsed={collapsed}
-            />
+            {collections.map((collection) => (
+              <SidebarNavItem
+                key={collection}
+                href="#"
+                label={collection}
+                iconName="ico-collection-outline"
+                collapsed={collapsed}
+              />
+            ))}
           </nav>
         </aside>
       </div>
+
+      <CreateCollectionModal
+        open={isCreateCollectionOpen}
+        onClose={() => setIsCreateCollectionOpen(false)}
+        onCreate={({ name }) => {
+          setCollections((prev) =>
+            prev.includes(name) ? prev : [name, ...prev]
+          );
+        }}
+      />
     </div>
   );
 }

@@ -47,11 +47,11 @@ export default function AuthField({
         aria-invalid={shouldShowError}
         aria-describedby={shouldShowError && errorId ? errorId : undefined}
         className={clsx(
-          "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+          "gc-placeholder w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
           hasValue ? "bg-neutral-800" : "bg-transparent",
           shouldShowError
             ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-            : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
+            : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100",
           inputClassName,
         )}
       />

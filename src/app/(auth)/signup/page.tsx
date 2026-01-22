@@ -302,7 +302,7 @@ export default function SignupPage() {
                   ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
                   : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
               )}
-              placeholder="Repeat your password"
+              placeholder="Re-enter your password"
             />
             {hasSubmitted && fieldErrors.repeatPassword ? (
               <span
