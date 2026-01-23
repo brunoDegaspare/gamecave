@@ -12,6 +12,7 @@ import Icon from "@/components/ui/icon";
 import GhostButton from "@/components/ui/ghost-button";
 import Alert from "@/components/ui/alert";
 import CreateCollectionModal from "@/components/ui/create-collection-modal";
+import Toast from "@/components/ui/toast";
 import {
   SearchPalette,
   useCommandPalette,
@@ -19,6 +20,10 @@ import {
 import SearchPaletteTrigger from "@/components/ui/search-palette/search-palette-trigger";
 import { screens } from "@root/types/tailwind-breakpoints";
 import { useAuth } from "@/components/auth/auth-provider";
+import {
+  CollectionsProvider,
+  type CollectionSummary,
+} from "@/components/collections/collections-context";
 
 export default function MainLayout({
   children,
@@ -32,14 +37,7 @@ export default function MainLayout({
   const [isMobile, setIsMobile] = React.useState(false);
   const [isCreateCollectionOpen, setIsCreateCollectionOpen] =
     React.useState(false);
-  const [collections, setCollections] = React.useState<
-    Array<{
-      id: number;
-      name: string;
-      description: string | null;
-      createdAt: string;
-    }>
-  >([]);
+  const [collections, setCollections] = React.useState<CollectionSummary[]>([]);
   const sortedCollections = React.useMemo(
     () =>
       [...collections].sort((a, b) =>
@@ -50,6 +48,11 @@ export default function MainLayout({
   const [recentCollectionIds, setRecentCollectionIds] = React.useState(
     () => new Set<number>(),
   );
+  const [lastCreatedCollectionId, setLastCreatedCollectionId] = React.useState<
+    number | null
+  >(null);
+  const [showCollectionToast, setShowCollectionToast] = React.useState(false);
+  const [toastKey, setToastKey] = React.useState(0);
   const scrollLockPosition = React.useRef(0);
 
   // Em mobile (< md) sidebar começa collapsed
@@ -71,53 +74,89 @@ export default function MainLayout({
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  React.useEffect(() => {
-    let isActive = true;
+  const refreshCollections = React.useCallback(async () => {
+    if (!user) {
+      setCollections([]);
+      return;
+    }
 
-    const loadCollections = async () => {
-      if (!user) {
-        setCollections([]);
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch("/api/collections", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        console.error("Failed to load collections.", {
+          status: response.status,
+          error: errorBody,
+        });
         return;
       }
 
-      try {
-        const token = await user.getIdToken();
-        const response = await fetch("/api/collections", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          const errorBody = await response.json().catch(() => null);
-          console.error("Failed to load collections.", {
-            status: response.status,
-            error: errorBody,
-          });
-          return;
-        }
-
-        const data = (await response.json()) as Array<{
-          id: number;
-          name: string;
-          description: string | null;
-          createdAt: string;
-        }>;
-
-        if (isActive) {
-          setCollections(Array.isArray(data) ? data : []);
-        }
-      } catch (error) {
-        console.error("Failed to load collections.", error);
-      }
-    };
-
-    void loadCollections();
-
-    return () => {
-      isActive = false;
-    };
+      const data = (await response.json()) as CollectionSummary[];
+      setCollections(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to load collections.", error);
+    }
   }, [user]);
+
+  React.useEffect(() => {
+    void refreshCollections();
+  }, [refreshCollections]);
+
+  const registerCollectionCreated = React.useCallback(
+    (created: CollectionSummary) => {
+      setCollections((prev) =>
+        prev.some((collection) => collection.id === created.id)
+          ? prev
+          : [created, ...prev],
+      );
+      setLastCreatedCollectionId(created.id);
+      setToastKey((prev) => prev + 1);
+      setShowCollectionToast(true);
+      setRecentCollectionIds((prev) => {
+        const next = new Set(prev);
+        next.add(created.id);
+        return next;
+      });
+      if (typeof window !== "undefined") {
+        window.requestAnimationFrame(() => {
+          setRecentCollectionIds((prev) => {
+            const next = new Set(prev);
+            next.delete(created.id);
+            return next;
+          });
+        });
+      }
+    },
+  );
+
+  const openCreateCollection = React.useCallback(() => {
+    setIsCreateCollectionOpen(true);
+  }, []);
+
+  const collectionsContextValue = React.useMemo(
+    () => ({
+      collections,
+      recentCollectionIds,
+      lastCreatedCollectionId,
+      refreshCollections,
+      registerCollectionCreated,
+      openCreateCollection,
+    }),
+    [
+      collections,
+      recentCollectionIds,
+      lastCreatedCollectionId,
+      refreshCollections,
+      registerCollectionCreated,
+      openCreateCollection,
+    ],
+  );
 
   React.useEffect(() => {
     if (!isHydrated) return;
@@ -157,221 +196,212 @@ export default function MainLayout({
   }, [collapsed, isHydrated, isMobile]);
 
   return (
-    <div className="drawer min-h-[100dvh] md:h-screen bg-neutral-950 text-neutral-100 relative md:flex md:overflow-hidden">
-      <input
-        id="shell-drawer"
-        type="checkbox"
-        className="drawer-toggle md:hidden"
-        checked={!collapsed && isHydrated && isMobile}
-        disabled={!isMobile}
-        onChange={(event) => setCollapsed(!event.target.checked)}
-      />
-
-      <div className="drawer-content flex flex-1 flex-col min-h-0 min-w-0 md:order-2 md:overflow-x-hidden transition-all duration-300 ease-in-out">
-        {/* Header */}
-        <header className="sticky top-0 z-40 bg-neutral-900/70 backdrop-blur-md border-b border-neutral-800">
-          <div className="relative mx-auto w-full px-6 py-3">
-            {/* botão fixo na esquerda da header */}
-            <button
-              onClick={() => setCollapsed(!collapsed)}
-              className="cursor-pointer absolute left-6 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-neutral-800 transition-colors"
-              aria-label={
-                isHydrated
-                  ? collapsed
-                    ? "Expand sidebar"
-                    : "Collapse sidebar"
-                  : "Toggle sidebar"
-              }
-            >
-              {isHydrated ? (
-                <Icon
-                  name={
-                    collapsed
-                      ? "ico-arrow-right-outline"
-                      : "ico-arrow-left-outline"
-                  }
-                  size={24}
-                  viewBox="0 0 24 24"
-                  className="w-5 h-5 text-neutral-100"
-                />
-              ) : (
-                <>
-                  <Icon
-                    name="ico-arrow-right-outline"
-                    size={24}
-                    viewBox="0 0 24 24"
-                    className="w-5 h-5 text-neutral-100 md:hidden"
-                  />
-                  <Icon
-                    name="ico-arrow-left-outline"
-                    size={24}
-                    viewBox="0 0 24 24"
-                    className="hidden md:block w-5 h-5 text-neutral-100"
-                  />
-                </>
-              )}
-            </button>
-
-            {/* reserva espaço para o botão (w-9 + gap ~ 3.5rem) */}
-            <div className="flex justify-center-safe pl-14">
-              <SearchPaletteTrigger
-                onClick={() => setOpen(true)}
-                leftIconName="ico-search-outline"
-                widthClassName="w-full max-w-[860px]"
-                heightClassName="h-11"
-              />
-
-              <SearchPalette
-                open={open}
-                setOpen={setOpen}
-                items={[]}
-                panelClassName="!max-w-3xl md:!max-w-[680px] w-[92vw]"
-              />
-            </div>
-          </div>
-        </header>
-
-        {user && !user.emailVerified ? (
-          <div className="px-6 pt-4">
-            <Alert variant="warning" icon="ico-warning-outline">
-              <span>Please verify your email to unlock all features.</span>
-            </Alert>
-          </div>
-        ) : null}
-
-        {/* Content */}
-        <main className="flex-1 min-h-0 overflow-visible md:overflow-y-auto gc-scrollbar">
-          {children}
-        </main>
-      </div>
-
-      <div className="drawer-side bg-neutral-900 border-r-0 md:border-r border-neutral-800 md:order-1 md:static md:visible md:opacity-100 md:pointer-events-auto md:overflow-visible md:flex-none md:w-auto">
-        <label
-          htmlFor="shell-drawer"
-          className={`drawer-overlay md:hidden ${
-            !isHydrated ? "invisible" : ""
-          }`}
-          onClick={() => setCollapsed(true)}
-          aria-label="Close sidebar"
+    <CollectionsProvider value={collectionsContextValue}>
+      <div className="drawer min-h-[100dvh] md:h-screen bg-neutral-950 text-neutral-100 relative md:flex md:overflow-hidden">
+        <input
+          id="shell-drawer"
+          type="checkbox"
+          className="drawer-toggle md:hidden"
+          checked={!collapsed && isHydrated && isMobile}
+          disabled={!isMobile}
+          onChange={(event) => setCollapsed(!event.target.checked)}
         />
-        {/* Sidebar fixa */}
-        <aside
-          className={`${
-            !isHydrated
-              ? "invisible pointer-events-none md:visible md:pointer-events-auto"
-              : ""
-          } w-full ${
-            collapsed ? "md:w-[80px]" : "md:w-[300px]"
-          } md:[translate:0] p-4 pt-4 transition-all duration-300 ease-in-out`}
-        >
-          {!collapsed && (
-            <div className="md:hidden absolute right-4 top-4">
-              <GhostButton
-                size="md"
-                iconOnly="ico-arrow-left-outline"
-                aria-label="Close sidebar"
-                onClick={() => setCollapsed(true)}
-              />
+
+        <div className="drawer-content flex flex-1 flex-col min-h-0 min-w-0 md:order-2 md:overflow-x-hidden transition-all duration-300 ease-in-out">
+          {/* Header */}
+          <header className="sticky top-0 z-40 bg-neutral-900/70 backdrop-blur-md border-b border-neutral-800">
+            <div className="relative mx-auto w-full px-6 py-3">
+              {/* botão fixo na esquerda da header */}
+              <button
+                onClick={() => setCollapsed(!collapsed)}
+                className="cursor-pointer absolute left-6 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-neutral-800 transition-colors"
+                aria-label={
+                  isHydrated
+                    ? collapsed
+                      ? "Expand sidebar"
+                      : "Collapse sidebar"
+                    : "Toggle sidebar"
+                }
+              >
+                {isHydrated ? (
+                  <Icon
+                    name={
+                      collapsed
+                        ? "ico-arrow-right-outline"
+                        : "ico-arrow-left-outline"
+                    }
+                    size={24}
+                    viewBox="0 0 24 24"
+                    className="w-5 h-5 text-neutral-100"
+                  />
+                ) : (
+                  <>
+                    <Icon
+                      name="ico-arrow-right-outline"
+                      size={24}
+                      viewBox="0 0 24 24"
+                      className="w-5 h-5 text-neutral-100 md:hidden"
+                    />
+                    <Icon
+                      name="ico-arrow-left-outline"
+                      size={24}
+                      viewBox="0 0 24 24"
+                      className="hidden md:block w-5 h-5 text-neutral-100"
+                    />
+                  </>
+                )}
+              </button>
+
+              {/* reserva espaço para o botão (w-9 + gap ~ 3.5rem) */}
+              <div className="flex justify-center-safe pl-14">
+                <SearchPaletteTrigger
+                  onClick={() => setOpen(true)}
+                  leftIconName="ico-search-outline"
+                  widthClassName="w-full max-w-[860px]"
+                  heightClassName="h-11"
+                />
+
+                <SearchPalette
+                  open={open}
+                  setOpen={setOpen}
+                  items={[]}
+                  panelClassName="!max-w-3xl md:!max-w-[680px] w-[92vw]"
+                />
+              </div>
             </div>
-          )}
-          <div className="pt-2 pb-2 mb-10 flex items-center justify-center">
-            <Link href="/" className="flex items-center gap-2">
-              {!collapsed ? (
-                <Image
-                  src="/assets/gamecave-logo-beta.svg"
-                  alt="GameCave logo"
-                  width={200}
-                  height={60}
-                  priority
-                />
-              ) : (
-                <Icon
-                  name="ico-controller-outline"
-                  size={24}
-                  viewBox="0 0 24 24"
-                  className="text-neutral-100"
-                />
-              )}
-            </Link>
-          </div>
+          </header>
 
-          <nav className="mt-4 pb-8 space-y-2 body-18 weight-medium">
-            <SidebarNavItem
-              href="/"
-              label="Dashboard"
-              iconName="ico-home-outline"
-              collapsed={collapsed}
-            />
-            <SidebarNavItem
-              href="/account"
-              label="Account"
-              iconName="ico-user-outline"
-              collapsed={collapsed}
-            />
-            <SidebarNavItem
-              href="#"
-              label="Wishlist"
-              iconName="ico-heart-outline"
-              collapsed={collapsed}
-            />
-            <SidebarNavItem
-              href="#"
-              label="New collection"
-              iconName="ico-add-outline"
-              collapsed={collapsed}
-              onClick={(event) => {
-                event.preventDefault();
-                setIsCreateCollectionOpen(true);
-              }}
-            />
-          </nav>
-
-          {sortedCollections.length > 0 ? (
-            <nav className="pt-8 border-t border-neutral-800 space-y-2 body-18 weight-medium">
-              {sortedCollections.map((collection) => (
-                <SidebarNavItem
-                  key={collection.id}
-                  href="#"
-                  label={collection.name}
-                  iconName="ico-collection-outline"
-                  collapsed={collapsed}
-                  className={`transition-opacity duration-300 ease-out ${
-                    recentCollectionIds.has(collection.id)
-                      ? "opacity-0"
-                      : "opacity-100"
-                  }`}
-                />
-              ))}
-            </nav>
+          {user && !user.emailVerified ? (
+            <div className="px-6 pt-4">
+              <Alert variant="warning" icon="ico-warning-outline">
+                <span>Please verify your email to unlock all features.</span>
+              </Alert>
+            </div>
           ) : null}
-        </aside>
-      </div>
 
-      <CreateCollectionModal
-        open={isCreateCollectionOpen}
-        onClose={() => setIsCreateCollectionOpen(false)}
-        onCreate={(created) => {
-          setCollections((prev) =>
-            prev.some((collection) => collection.id === created.id)
-              ? prev
-              : [created, ...prev],
-          );
-          setRecentCollectionIds((prev) => {
-            const next = new Set(prev);
-            next.add(created.id);
-            return next;
-          });
-          if (typeof window !== "undefined") {
-            window.requestAnimationFrame(() => {
-              setRecentCollectionIds((prev) => {
-                const next = new Set(prev);
-                next.delete(created.id);
-                return next;
-              });
-            });
-          }
-        }}
-      />
-    </div>
+          {/* Content */}
+          <main className="flex-1 min-h-0 overflow-visible md:overflow-y-auto gc-scrollbar">
+            {children}
+          </main>
+        </div>
+
+        <div className="drawer-side bg-neutral-900 border-r-0 md:border-r border-neutral-800 md:order-1 md:static md:visible md:opacity-100 md:pointer-events-auto md:overflow-visible md:flex-none md:w-auto">
+          <label
+            htmlFor="shell-drawer"
+            className={`drawer-overlay md:hidden ${
+              !isHydrated ? "invisible" : ""
+            }`}
+            onClick={() => setCollapsed(true)}
+            aria-label="Close sidebar"
+          />
+          {/* Sidebar fixa */}
+          <aside
+            className={`${
+              !isHydrated
+                ? "invisible pointer-events-none md:visible md:pointer-events-auto"
+                : ""
+            } w-full ${
+              collapsed ? "md:w-[80px]" : "md:w-[300px]"
+            } md:[translate:0] p-4 pt-4 transition-all duration-300 ease-in-out`}
+          >
+            {!collapsed && (
+              <div className="md:hidden absolute right-4 top-4">
+                <GhostButton
+                  size="md"
+                  iconOnly="ico-arrow-left-outline"
+                  aria-label="Close sidebar"
+                  onClick={() => setCollapsed(true)}
+                />
+              </div>
+            )}
+            <div className="pt-2 pb-2 mb-10 flex items-center justify-center">
+              <Link href="/" className="flex items-center gap-2">
+                {!collapsed ? (
+                  <Image
+                    src="/assets/gamecave-logo-beta.svg"
+                    alt="GameCave logo"
+                    width={200}
+                    height={60}
+                    priority
+                  />
+                ) : (
+                  <Icon
+                    name="ico-controller-outline"
+                    size={24}
+                    viewBox="0 0 24 24"
+                    className="text-neutral-100"
+                  />
+                )}
+              </Link>
+            </div>
+
+            <nav className="mt-4 pb-8 space-y-2 body-18 weight-medium">
+              <SidebarNavItem
+                href="/"
+                label="Dashboard"
+                iconName="ico-home-outline"
+                collapsed={collapsed}
+              />
+              <SidebarNavItem
+                href="/account"
+                label="Account"
+                iconName="ico-user-outline"
+                collapsed={collapsed}
+              />
+              <SidebarNavItem
+                href="#"
+                label="Wishlist"
+                iconName="ico-heart-outline"
+                collapsed={collapsed}
+              />
+              <SidebarNavItem
+                href="#"
+                label="New collection"
+                iconName="ico-add-outline"
+                collapsed={collapsed}
+                onClick={(event) => {
+                  event.preventDefault();
+                  openCreateCollection();
+                }}
+              />
+            </nav>
+
+            {sortedCollections.length > 0 ? (
+              <nav className="pt-8 border-t border-neutral-800 space-y-2 body-18 weight-medium">
+                {sortedCollections.map((collection) => (
+                  <SidebarNavItem
+                    key={collection.id}
+                    href="#"
+                    label={collection.name}
+                    iconName="ico-collection-outline"
+                    collapsed={collapsed}
+                    className={`transition-opacity duration-300 ease-out ${
+                      recentCollectionIds.has(collection.id)
+                        ? "opacity-0"
+                        : "opacity-100"
+                    }`}
+                  />
+                ))}
+              </nav>
+            ) : null}
+          </aside>
+        </div>
+
+        <CreateCollectionModal
+          open={isCreateCollectionOpen}
+          onClose={() => setIsCreateCollectionOpen(false)}
+          onCreate={registerCollectionCreated}
+        />
+        {showCollectionToast ? (
+          <Toast
+            key={toastKey}
+            message="Collection created."
+            variant="success"
+            onClose={() => setShowCollectionToast(false)}
+            offset={0}
+          />
+        ) : null}
+      </div>
+    </CollectionsProvider>
   );
 }

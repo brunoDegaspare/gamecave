@@ -64,7 +64,7 @@ export default function CreateCollectionModal({
       void (async () => {
         try {
           if (!user) {
-            throw new Error("No authenticated user.");
+            throw new Error("Please sign in to create a collection.");
           }
 
           const token = await user.getIdToken();
@@ -79,10 +79,13 @@ export default function CreateCollectionModal({
 
           if (!response.ok) {
             const errorBody = await response.json().catch(() => null);
-            console.error("Failed to create collection.", {
-              status: response.status,
-              error: errorBody,
-            });
+            console.error(
+              "Oops, we couldn't create that collection. Please try again.",
+              {
+                status: response.status,
+                error: errorBody,
+              },
+            );
             return;
           }
 
