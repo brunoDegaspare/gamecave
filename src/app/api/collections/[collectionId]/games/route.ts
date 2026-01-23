@@ -214,11 +214,12 @@ const toServerError = (error: unknown) => {
 
 export async function POST(
   request: Request,
-  { params }: { params: { collectionId?: string } },
+  { params }: { params: Promise<{ collectionId?: string }> },
 ) {
   try {
     const user = await resolveAuthenticatedUser(request);
-    const collectionId = parseCollectionId(params.collectionId);
+    const { collectionId: rawCollectionId } = await params;
+    const collectionId = parseCollectionId(rawCollectionId);
     if (!collectionId) {
       return Response.json({ error: "Invalid collection id." }, { status: 400 });
     }

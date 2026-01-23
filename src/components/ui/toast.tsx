@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import Icon from "@/components/ui/icon";
 
-type ToastVariant = "success" | "error" | "info" | "warning";
+export type ToastVariant = "success" | "error" | "info" | "warning";
 
 type ToastProps = {
   message: string;

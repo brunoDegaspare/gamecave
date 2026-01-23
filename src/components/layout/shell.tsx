@@ -12,7 +12,7 @@ import Icon from "@/components/ui/icon";
 import GhostButton from "@/components/ui/ghost-button";
 import Alert from "@/components/ui/alert";
 import CreateCollectionModal from "@/components/ui/create-collection-modal";
-import Toast from "@/components/ui/toast";
+import Toast, { type ToastVariant } from "@/components/ui/toast";
 import {
   SearchPalette,
   useCommandPalette,
@@ -51,8 +51,11 @@ export default function MainLayout({
   const [lastCreatedCollectionId, setLastCreatedCollectionId] = React.useState<
     number | null
   >(null);
-  const [showCollectionToast, setShowCollectionToast] = React.useState(false);
   const [toastKey, setToastKey] = React.useState(0);
+  const [toastConfig, setToastConfig] = React.useState<{
+    message: string;
+    variant: ToastVariant;
+  } | null>(null);
   const scrollLockPosition = React.useRef(0);
 
   // Em mobile (< md) sidebar começa collapsed
@@ -117,7 +120,10 @@ export default function MainLayout({
       );
       setLastCreatedCollectionId(created.id);
       setToastKey((prev) => prev + 1);
-      setShowCollectionToast(true);
+      setToastConfig({
+        message: "Collection created successfully.",
+        variant: "success",
+      });
       setRecentCollectionIds((prev) => {
         const next = new Set(prev);
         next.add(created.id);
@@ -139,6 +145,14 @@ export default function MainLayout({
     setIsCreateCollectionOpen(true);
   }, []);
 
+  const showToast = React.useCallback(
+    (message: string, variant: ToastVariant) => {
+      setToastKey((prev) => prev + 1);
+      setToastConfig({ message, variant });
+    },
+    [],
+  );
+
   const collectionsContextValue = React.useMemo(
     () => ({
       collections,
@@ -147,6 +161,7 @@ export default function MainLayout({
       refreshCollections,
       registerCollectionCreated,
       openCreateCollection,
+      showToast,
     }),
     [
       collections,
@@ -155,6 +170,7 @@ export default function MainLayout({
       refreshCollections,
       registerCollectionCreated,
       openCreateCollection,
+      showToast,
     ],
   );
 
@@ -392,12 +408,12 @@ export default function MainLayout({
           onClose={() => setIsCreateCollectionOpen(false)}
           onCreate={registerCollectionCreated}
         />
-        {showCollectionToast ? (
+        {toastConfig ? (
           <Toast
             key={toastKey}
-            message="Collection created."
-            variant="success"
-            onClose={() => setShowCollectionToast(false)}
+            message={toastConfig.message}
+            variant={toastConfig.variant}
+            onClose={() => setToastConfig(null)}
             offset={0}
           />
         ) : null}

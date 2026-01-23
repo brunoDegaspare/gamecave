@@ -35,6 +35,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     lastCreatedCollectionId,
     refreshCollections,
     openCreateCollection,
+    showToast,
   } = useCollections();
   const [showCollectionError, setShowCollectionError] = useState(false);
   const [showCollectionsScrollbar, setShowCollectionsScrollbar] =
@@ -133,6 +134,75 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     }
     setIsDrawerOpen(false);
     setSelectedCollectionIds(pendingCollectionIds);
+    if (!game) {
+      showToast(
+        "We couldn’t add this to your collection. Please try again.",
+        "error"
+      );
+      return;
+    }
+
+    const gameId = Number(game.igdb_id);
+    const collectionIds = [...pendingCollectionIds];
+
+    if (!user) {
+      showToast(
+        "We couldn’t add this to your collection. Please try again.",
+        "error"
+      );
+      return;
+    }
+
+    void (async () => {
+      try {
+        const token = await user.getIdToken();
+        const results = await Promise.all(
+          collectionIds.map(async (collectionId) => {
+            const response = await fetch(
+              `/api/collections/${collectionId}/games`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ igdbId: gameId }),
+              }
+            );
+
+            if (!response.ok) {
+              const errorBody = await response.json().catch(() => null);
+              console.error("Failed to add game to collection.", {
+                status: response.status,
+                error: errorBody,
+              });
+              throw new Error("Add to collection failed");
+            }
+            return response.json();
+          })
+        );
+
+        if (results.length > 0) {
+          const collectionCount = collectionIds.length;
+          const gameCount = 1;
+          let message = "Game added to collection.";
+          if (gameCount === 1 && collectionCount > 1) {
+            message = `Game added to ${collectionCount} collections.`;
+          } else if (gameCount > 1) {
+            message = `${gameCount} games added to ${
+              collectionCount === 1 ? "collection" : "collections"
+            }.`;
+          }
+          showToast(message, "success");
+        }
+      } catch (error) {
+        console.error("Failed to add game to collection.", error);
+        showToast(
+          "We couldn’t add this to your collection. Please try again.",
+          "error"
+        );
+      }
+    })();
   };
 
   const renderAddToCollectionButton = (className?: string) =>
