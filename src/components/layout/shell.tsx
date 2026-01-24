@@ -139,6 +139,7 @@ export default function MainLayout({
         });
       }
     },
+    [],
   );
 
   const openCreateCollection = React.useCallback(() => {

@@ -28,16 +28,27 @@ export default function Toast({
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    setIsVisible(true);
+    const frame = window.requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
     if (!autoDismiss) {
       return;
     }
+    if (!isVisible) {
+      return;
+    }
+
     const timer = window.setTimeout(() => {
       setIsVisible(false);
     }, durationMs);
 
     return () => window.clearTimeout(timer);
-  }, [autoDismiss, durationMs]);
+  }, [autoDismiss, durationMs, isVisible]);
 
   useEffect(() => {
     if (isVisible) return;
