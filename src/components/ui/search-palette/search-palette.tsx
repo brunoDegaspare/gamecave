@@ -246,7 +246,7 @@ export function SearchPalette({
       {/* Backdrop: dim + blur */}
       <div
         className={[
-          "absolute inset-0 bg-black/60 transition-opacity duration-300 ease-out",
+          "absolute inset-0 bg-base-100/70 transition-opacity duration-300 ease-out",
           isVisible ? "opacity-100" : "opacity-0",
         ].join(" ")}
       />
@@ -254,7 +254,7 @@ export function SearchPalette({
       {/* Painel */}
       <div
         className={[
-          "absolute left-1/2 top-24 w-full max-w-[700px] p-4 -translate-x-1/2 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/95 shadow-2xl transition-[opacity,transform] duration-300 ease-out",
+          "absolute left-1/2 top-24 w-full max-w-[700px] p-4 -translate-x-1/2 overflow-hidden rounded-xl border border-base-300 bg-base-200/95 shadow-2xl transition-[opacity,transform] duration-300 ease-out",
           isVisible ? "opacity-100 scale-100" : "opacity-0 scale-[0.98]",
           panelClassName,
         ]
@@ -264,7 +264,7 @@ export function SearchPalette({
       >
         <Command
           label="Global Search"
-          className="w-full text-zinc-200"
+          className="w-full text-base-content"
           loop
           shouldFilter={false}
         >
@@ -274,22 +274,22 @@ export function SearchPalette({
               placeholder="Type to search..."
               value={query}
               onValueChange={setQuery}
-              className="w-full bg-transparent px-4 py-3 text-base placeholder-zinc-500 outline-none"
+              className="w-full bg-transparent px-4 py-3 text-base placeholder-base-content/50 outline-none"
             />
-            <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-400">
+            <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded bg-base-300 px-2 py-1 text-[10px] text-base-content/50">
               Esc
             </kbd>
           </div>
 
-          <Command.List className="max-h-[60vh] overflow-auto border-t border-zinc-800">
+          <Command.List className="max-h-[60vh] overflow-auto border-t border-base-300">
             {isLoading && (
-              <div className="flex items-center gap-2 px-4 py-4 text-sm text-zinc-500">
-                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-zinc-600 border-t-transparent" />
+              <div className="flex items-center gap-2 px-4 py-4 text-sm text-base-content/50">
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-base-content/30 border-t-transparent" />
                 Searching...
               </div>
             )}
             {showEmpty && (
-              <Command.Empty className="px-4 py-6 text-sm text-zinc-500">
+              <Command.Empty className="px-4 py-6 text-sm text-base-content/50">
                 No results found.
               </Command.Empty>
             )}
@@ -304,14 +304,14 @@ export function SearchPalette({
                       setOpen(false);
                       it.action?.();
                     }}
-                    className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm data-[selected=true]:bg-zinc-800 data-[selected=true]:text-white"
+                    className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm data-[selected=true]:bg-base-300 data-[selected=true]:text-base-content"
                   >
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-sm border border-zinc-700 text-[12px]">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-sm border border-base-300 text-[12px]">
                       {it.icon ?? "🔎"}
                     </span>
                     <span className="flex-1">{it.label}</span>
                     {it.shortcut && (
-                      <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400">
+                      <kbd className="rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/50">
                         {it.shortcut}
                       </kbd>
                     )}

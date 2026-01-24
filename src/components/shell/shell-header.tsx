@@ -21,11 +21,11 @@ export default function ShellHeader({
   const { open, setOpen } = useCommandPalette();
 
   return (
-    <header className="sticky top-0 z-40 bg-neutral-900/70 backdrop-blur-md border-b border-neutral-800">
+    <header className="sticky top-0 z-40 bg-base-200/70 backdrop-blur-md border-b border-base-200">
       <div className="relative mx-auto w-full px-6 py-3">
         <button
           onClick={onToggleSidebar}
-          className="cursor-pointer absolute left-6 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-neutral-800 transition-colors"
+          className="cursor-pointer absolute left-6 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-base-200 transition-colors"
           aria-label={
             isHydrated
               ? collapsed
@@ -37,13 +37,11 @@ export default function ShellHeader({
           {isHydrated ? (
             <Icon
               name={
-                collapsed
-                  ? "ico-arrow-right-outline"
-                  : "ico-arrow-left-outline"
+                collapsed ? "ico-arrow-right-outline" : "ico-arrow-left-outline"
               }
               size={24}
               viewBox="0 0 24 24"
-              className="w-5 h-5 text-neutral-100"
+              className="w-5 h-5 text-base-content"
             />
           ) : (
             <>
@@ -51,13 +49,13 @@ export default function ShellHeader({
                 name="ico-arrow-right-outline"
                 size={24}
                 viewBox="0 0 24 24"
-                className="w-5 h-5 text-neutral-100 md:hidden"
+                className="w-5 h-5 text-base-content md:hidden"
               />
               <Icon
                 name="ico-arrow-left-outline"
                 size={24}
                 viewBox="0 0 24 24"
-                className="hidden md:block w-5 h-5 text-neutral-100"
+                className="hidden md:block w-5 h-5 text-base-content"
               />
             </>
           )}

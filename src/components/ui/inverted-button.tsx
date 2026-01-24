@@ -37,8 +37,8 @@ export default function InvertedButton({
   const baseClasses = clsx(
     "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border border border-transparent transition-all duration-300 ease-out hover:cursor-pointer",
     sizeClasses,
-    "bg-white text-purple-600 hover:bg-purple-100 hover:shadow-[0_0_16px_rgba(255,255,255,0.25)]",
-    "disabled:bg-neutral-200 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-70",
+    "bg-base-content text-base-100 hover:bg-base-content/90 hover:shadow-[0_0_16px_oklch(var(--bc)/0.25)]",
+    "disabled:bg-base-content/70 disabled:text-base-100/60 disabled:cursor-not-allowed disabled:opacity-70",
     className
   );
 

@@ -81,7 +81,7 @@ export default function HomePage() {
         onClose={() => setShowVerificationModal(false)}
         onCancel={handleDismissModal}
       >
-        <div className="modal-box bg-slate-800 text-neutral-100">
+        <div className="modal-box bg-base-100 text-base-content">
           <button
             type="button"
             className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
@@ -90,12 +90,12 @@ export default function HomePage() {
           >
             ✕
           </button>
-          <h3 className="heading-4 text-white">Verify your email</h3>
-          <p className="body-16 text-neutral-300 mt-3">
+          <h3 className="heading-4 text-base-content">Verify your email</h3>
+          <p className="body-16 text-base-content/70 mt-3">
             We’ve sent a verification link to your{" "}
-            <span className="text-white weight-medium">{userEmail}</span>. Check
-            your inbox (and your spam folder just in case) to confirm it and
-            start creating your collections.
+            <span className="text-base-content weight-medium">{userEmail}</span>
+            . Check your inbox (and your spam folder just in case) to confirm it
+            and start creating your collections.
           </p>
           <div className="modal-action">
             <PrimaryButton size="md" onClick={handleDismissModal}>
@@ -116,7 +116,7 @@ export default function HomePage() {
 
       <section className="w-full max-w-full overflow-hidden">
         <div className="mb-4 flex items-center justify-between px-1">
-          <h2 className="heading-5 text-neutral-100">Your collections</h2>
+          <h2 className="heading-5 text-base-content">Your collections</h2>
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

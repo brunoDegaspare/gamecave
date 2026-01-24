@@ -1,8 +1,11 @@
 @import "tailwindcss";
-@plugin "tailwind-scrollbar";
 @plugin "daisyui";
 @import "./typography.css";
 @tailwind utilities;
+
+@plugin "daisyui" {
+  themes: dark;
+}
 
 @layer utilities {
   .light.gc-scrollbar {
@@ -20,8 +23,8 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: oklch(var(--b1));
+  --foreground: oklch(var(--bc));
   --modal-backdrop-color: #000000;
   --modal-backdrop-opacity: 0.6;
   --modal-backdrop-blur: 0;
@@ -34,20 +37,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  /* background: var(--background);
+  color: var(--foreground); */
   font-family: "Saira", sans-serif;
 }
 
-.modal.modal-open,
+/* .modal.modal-open,
 .modal[open],
 .modal:target,
 .modal-toggle:checked + .modal {
@@ -58,7 +54,7 @@ body {
   );
   backdrop-filter: blur(var(--modal-backdrop-blur));
   -webkit-backdrop-filter: blur(var(--modal-backdrop-blur));
-}
+} */
 
 .sidebarnav__icon svg {
   width: 100%;

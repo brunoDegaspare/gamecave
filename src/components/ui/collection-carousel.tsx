@@ -28,8 +28,8 @@ export default function CollectionCarousel({
 
   return (
     <section className="w-full max-w-full overflow-x-clip overflow-y-visible">
-      <div className="mb-3 pb-2 flex items-center justify-between px-1 border-b border-neutral-800">
-        <h2 className="heading-5 text-neutral-100">{title}</h2>
+      <div className="mb-3 pb-2 flex items-center justify-between px-1 border-b border-base-300">
+        <h2 className="heading-5 text-base-content">{title}</h2>
       </div>
 
       <div

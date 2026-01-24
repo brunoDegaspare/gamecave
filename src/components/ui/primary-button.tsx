@@ -37,8 +37,8 @@ export default function PrimaryButton({
   const baseClasses = clsx(
     "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border border border-transparent transition-all duration-300 ease-out hover:cursor-pointer",
     sizeClasses,
-    "bg-purple-600 hover:bg-purple-500 text-white hover:shadow-[0_0_16px_rgba(168,85,247,0.45)]",
-    "disabled:bg-neutral-700 disabled:text-neutral-300 disabled:cursor-not-allowed disabled:opacity-70",
+    "bg-primary text-primary-content hover:bg-primary-focus hover:shadow-[0_0_16px_oklch(var(--p)/0.45)]",
+    "disabled:cursor-not-allowed disabled:opacity-70",
     className
   );
 

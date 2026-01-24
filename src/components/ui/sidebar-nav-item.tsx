@@ -51,8 +51,8 @@ export default function SidebarNavItem({
       className={clsx(
         "group flex items-center rounded-xl py-3 px-3 text-base font-medium transition-colors",
         active
-          ? "bg-neutral-800 text-purple-400"
-          : "text-neutral-300 hover:bg-neutral-800",
+          ? "bg-base-300 text-primary"
+          : "text-base-content/70 hover:bg-base-300",
         collapsed ? "justify-center" : "gap-3",
         className
       )}

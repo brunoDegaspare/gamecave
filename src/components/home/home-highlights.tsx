@@ -14,7 +14,7 @@ export default function HomeHighlights() {
       ),
       title: "Total games",
       value: 124,
-      iconColor: "text-cyan-400",
+      iconColor: "text-info",
     },
     {
       icon: (
@@ -27,7 +27,7 @@ export default function HomeHighlights() {
       ),
       title: "Platforms",
       value: 32,
-      iconColor: "text-slate-400",
+      iconColor: "text-base-content/60",
     },
     {
       icon: (
@@ -40,7 +40,7 @@ export default function HomeHighlights() {
       ),
       title: "Playing now",
       value: 8,
-      iconColor: "text-green-400",
+      iconColor: "text-success",
     },
     {
       icon: (
@@ -53,7 +53,7 @@ export default function HomeHighlights() {
       ),
       title: "Finished games",
       value: 5,
-      iconColor: "text-yellow-400",
+      iconColor: "text-warning",
     },
   ];
 

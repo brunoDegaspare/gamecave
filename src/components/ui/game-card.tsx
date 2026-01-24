@@ -23,7 +23,7 @@ export default function GameCard({
     <div
       onClick={onClick}
       className={clsx(
-        "flex flex-col items-center rounded-xl p-3 transition-all duration-200 hover:bg-neutral-900/60 hover:cursor-pointer hover:scale-[1.02]",
+        "flex flex-col items-center rounded-xl p-3 transition-all duration-200 hover:bg-base-200/60 hover:cursor-pointer hover:scale-[1.02]",
         className
       )}
     >
@@ -38,10 +38,10 @@ export default function GameCard({
       </div>
 
       <div className="mt-3 w-full text-left space-y-0.5">
-        <h3 className="body-16 font-medium text-neutral-100 leading-tight line-clamp-2">
+        <h3 className="body-16 font-medium text-base-content leading-tight line-clamp-2">
           {name}
         </h3>
-        <p className="caption-12 text-neutral-500 mt-1">{platform}</p>
+        <p className="caption-12 text-base-content/50 mt-1">{platform}</p>
       </div>
     </div>
   );

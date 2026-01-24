@@ -69,7 +69,7 @@ export default function ModalLayout({
     >
       <div
         className={clsx(
-          "modal-box w-full max-w-3xl bg-zinc-900 text-base-content transition-[opacity,transform] duration-300 ease-out",
+          "modal-box w-full max-w-3xl transition-[opacity,transform] duration-300 ease-out",
           isVisible ? "opacity-100 scale-100" : "opacity-0 scale-[0.98]",
           contentClassName,
         )}

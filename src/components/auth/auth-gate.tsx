@@ -16,8 +16,10 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-neutral-950 text-neutral-100">
-        <span className="body-16 text-neutral-400">Loading session...</span>
+      <div className="flex min-h-screen items-center justify-center bg-base-100 text-base-content">
+        <span className="body-16 text-base-content/60">
+          Loading session...
+        </span>
       </div>
     );
   }

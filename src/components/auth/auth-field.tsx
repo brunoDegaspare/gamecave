@@ -35,11 +35,11 @@ export default function AuthField({
     <label className={clsx("block space-y-2 mb-6", containerClassName)}>
       {rightSlot ? (
         <div className="flex items-center justify-between gap-4">
-          <span className="body-16 text-neutral-300">{label}</span>
+          <span className="body-16 text-base-content/70">{label}</span>
           {rightSlot}
         </div>
       ) : (
-        <div className="body-16 text-neutral-300">{label}</div>
+        <div className="body-16 text-base-content/70">{label}</div>
       )}
       <input
         {...inputProps}
@@ -47,18 +47,18 @@ export default function AuthField({
         aria-invalid={shouldShowError}
         aria-describedby={shouldShowError && errorId ? errorId : undefined}
         className={clsx(
-          "gc-placeholder w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
-          hasValue ? "bg-neutral-800" : "bg-transparent",
+          "gc-placeholder w-full rounded-lg border px-3 py-2 text-base-content placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+          hasValue ? "bg-base-200" : "bg-transparent",
           shouldShowError
-            ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-            : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100",
+            ? "border-error focus:border-error focus:ring-error opacity-100"
+            : "border-base-300 focus:border-primary focus:ring-primary enabled:opacity-90 enabled:focus:opacity-100",
           inputClassName,
         )}
       />
       {shouldShowError ? (
         <span
           id={errorId}
-          className="flex items-center gap-2 body-14 text-red-400"
+          className="flex items-center gap-2 body-14 text-error"
           role="alert"
         >
           <Icon

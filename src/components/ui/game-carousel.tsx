@@ -43,14 +43,14 @@ export default function GameCarousel({
 
   return (
     <section className="w-full max-w-full overflow-x-clip overflow-y-visible">
-      <div className="mb-3 pb-2 flex items-center justify-between px-1 border-b border-neutral-800">
-        <h2 className="heading-5 text-neutral-100">{title}</h2>
+      <div className="mb-3 pb-2 flex items-center justify-between px-1 border-b border-base-300">
+        <h2 className="heading-5 text-base-content">{title}</h2>
 
         {/* 👇 View all link */}
         {viewAllLink && (
           <a
             href={viewAllLink}
-            className="text-sm text-neutral-400 hover:text-neutral-200 transition relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 hover:after:w-full after:bg-neutral-400 after:transition-all"
+            className="text-sm text-base-content/60 hover:text-base-content transition relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 hover:after:w-full after:bg-base-content/60 after:transition-all"
           >
             View all
           </a>

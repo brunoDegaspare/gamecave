@@ -246,7 +246,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
       {showVerificationToast ? (
         <div className="toast toast-top toast-end z-50" aria-live="polite">
           <div className="alert alert-soft alert-warning shadow-lg">
-            <span className="body-14 text-white">
+            <span className="body-14 text-base-content">
               Please verify your email address to use this feature.
             </span>
           </div>
@@ -260,7 +260,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
           checked={isDrawerOpen}
           onChange={(event) => setIsDrawerOpen(event.target.checked)}
         />
-        <div className="drawer-content w-full h-full min-h-0 bg-neutral-950 text-neutral-100 pb-20 md:pb-0">
+        <div className="drawer-content w-full h-full min-h-0 bg-base-100 text-base-content pb-20 md:pb-0">
           {/* ===== HERO ===== */}
           <section className="relative isolate">
             {heroBackground ? (
@@ -269,9 +269,9 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                   className="absolute inset-0 bg-cover bg-center opacity-25"
                   style={{ backgroundImage: `url(${heroBackground})` }}
                 />
-                <div className="absolute inset-0 bg-neutral-950/20 backdrop-blur-sm" />
+                <div className="absolute inset-0 bg-base-100/20 backdrop-blur-sm" />
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-base-100 via-base-100/60 to-transparent" />
               </div>
             ) : null}
 
@@ -301,36 +301,42 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                   {renderAddToCollectionButton()}
                   {renderWishlistButton()}
                 </div>
-                <p className="body-18 text-neutral-300 leading-relaxed">
+                <p className="body-18 text-base-content/70 leading-relaxed">
                   {game.overview}
                 </p>
 
                 {/* ===== STATS SECTION ===== */}
-                <section className="grid w-full grid-cols-2 md:grid-cols-4 text-center divide-x divide-neutral-800/40 border border-neutral-800/40 rounded-xl bg-neutral-900/25 backdrop-blur-sm mt-10 lg:mt-6 xl:mt-8 2xl:mt-10">
+                <section className="grid w-full grid-cols-2 md:grid-cols-4 text-center divide-x divide-base-300/40 border border-base-300/40 rounded-xl bg-base-200/25 backdrop-blur-sm mt-10 lg:mt-6 xl:mt-8 2xl:mt-10">
                   <div className="flex flex-col py-3 px-3">
-                    <span className="body-14 text-slate-500">Platform</span>
-                    <span className="body-16 font-medium text-neutral-100 mt-1">
+                    <span className="body-14 text-base-content/50">Platform</span>
+                    <span className="body-16 font-medium text-base-content mt-1">
                       {platforms}
                     </span>
                   </div>
 
                   <div className="flex flex-col py-3 px-3">
-                    <span className="body-14 text-slate-500">Release Year</span>
-                    <span className="body-18 font-medium text-neutral-100 mt-1">
+                    <span className="body-14 text-base-content/50">
+                      Release Year
+                    </span>
+                    <span className="body-18 font-medium text-base-content mt-1">
                       {releaseYear}
                     </span>
                   </div>
 
                   <div className="flex flex-col py-3 px-3">
-                    <span className="body-14 text-slate-500">Developer(s)</span>
-                    <span className="body-16 font-medium text-neutral-100 mt-1">
+                    <span className="body-14 text-base-content/50">
+                      Developer(s)
+                    </span>
+                    <span className="body-16 font-medium text-base-content mt-1">
                       {developers}
                     </span>
                   </div>
 
                   <div className="flex flex-col py-3 px-3">
-                    <span className="body-14 text-slate-500">Publisher(s)</span>
-                    <span className="body-16 font-medium text-neutral-100 mt-1">
+                    <span className="body-14 text-base-content/50">
+                      Publisher(s)
+                    </span>
+                    <span className="body-16 font-medium text-base-content mt-1">
                       {publishers}
                     </span>
                   </div>
@@ -360,7 +366,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
             </div>
           </section>
 
-          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-800 bg-neutral-950/95 backdrop-blur md:hidden">
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-base-300 bg-base-100/95 backdrop-blur md:hidden">
             <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-4 py-4">
               {renderAddToCollectionButton("flex-1")}
               {renderWishlistButton()}
@@ -373,10 +379,10 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
             className="drawer-overlay"
             onClick={() => setIsDrawerOpen(false)}
           />
-          <aside className="w-full md:w-[460px] h-full  bg-neutral-950 text-neutral-100 border-l-0 md:border-l border-neutral-800 flex flex-col">
-            <div className="sticky top-0 z-10 bg-neutral-950 border-b border-neutral-900 px-4 py-3">
+          <aside className="w-full md:w-[460px] h-full  bg-base-100 text-base-content border-l-0 md:border-l border-base-300 flex flex-col">
+            <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 px-4 py-3">
               <div className="flex items-center justify-between">
-                <h3 className="heading-4 text-white">Add to</h3>
+                <h3 className="heading-4 text-base-content">Add to</h3>
                 <GhostButton
                   size="md"
                   iconOnly="ico-cross-outline"
@@ -386,12 +392,12 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
               </div>
             </div>
 
-            <div className=" bg-neutral-950 flex-1 px-4 pt-6 pb-0 md:pb-6">
+            <div className=" bg-base-100 flex-1 px-4 pt-6 pb-0 md:pb-6">
               <div className="flex h-full flex-col space-y-6 pb-4">
                 <GhostButton
                   size="md"
                   leftIcon="ico-add-outline"
-                  className="w-full justify-start bg-neutral-900/60 hover:bg-neutral-900"
+                  className="w-full justify-start bg-base-200/60 hover:bg-base-200"
                   onClick={openCreateCollection}
                 >
                   New collection
@@ -400,7 +406,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                   ref={collectionsScrollRef}
                   className={`flex-1 space-y-3 overflow-y-auto pr-1 gc-scrollbar scrollbar-thin scrollbar-track-transparent ${
                     showCollectionsScrollbar
-                      ? "scrollbar-thumb-neutral-700/70"
+                      ? "scrollbar-thumb-base-content/30"
                       : "scrollbar-thumb-transparent"
                   }`}
                   onScroll={handleCollectionsScroll}
@@ -408,7 +414,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                   {sortedCollections.map((collection) => (
                     <label
                       key={collection.id}
-                      className={`relative flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/30 px-4 py-3 cursor-pointer transition-all duration-300 ease-out hover:bg-neutral-900 ${
+                      className={`relative flex items-center gap-3 rounded-xl border border-base-300 bg-base-200/30 px-4 py-3 cursor-pointer transition-all duration-300 ease-out hover:bg-base-200 ${
                         recentCollectionIds.has(collection.id)
                           ? "opacity-0"
                           : "opacity-100"
@@ -418,19 +424,19 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                         type="checkbox"
                         checked={pendingCollectionIds.includes(collection.id)}
                         onChange={() => handleCollectionToggle(collection.id)}
-                        className="checkbox peer border-neutral-600 bg-neutral-900/80 hover:bg-neutral-900 checked:border-transparent checked:bg-purple-600 checked:hover:bg-purple-600 focus:ring-0 [--chkfg:#ffffff] cursor-pointer transition-colors duration-300 ease-out"
+                        className="checkbox peer border-base-300 bg-base-200/80 hover:bg-base-200 checked:border-transparent checked:bg-primary checked:hover:bg-primary focus:ring-0 [--chkfg:oklch(var(--pc))] cursor-pointer transition-colors duration-300 ease-out"
                       />
-                      <span className="body-16 text-neutral-100">
+                      <span className="body-16 text-base-content">
                         {collection.name}
                       </span>
-                      <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-purple-500 peer-checked:shadow-[0_0_0_1px_rgba(168,85,247,0.6)]" />
+                      <span className="pointer-events-none absolute inset-0 rounded-xl transition-all duration-300 ease-out peer-checked:border peer-checked:border-primary peer-checked:shadow-[0_0_0_1px_oklch(var(--p)/0.6)]" />
                     </label>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="sticky bottom-0 border-t border-neutral-900 bg-neutral-950/95 px-4 py-6 backdrop-blur">
+            <div className="sticky bottom-0 border-t border-base-300 bg-base-100/95 px-4 py-6 backdrop-blur">
               <div
                 className={`absolute inset-x-0 bottom-full mb-3 px-4 transition-all duration-200 ease-out ${
                   showCollectionError
@@ -468,7 +474,7 @@ export default function GameDetailsClient({ game }: GameDetailsClientProps) {
         {game ? (
           <GameDetailsContent game={game} />
         ) : (
-          <div className="flex min-h-[60vh] items-center justify-center px-6 text-neutral-400">
+          <div className="flex min-h-[60vh] items-center justify-center px-6 text-base-content/60">
             <span className="body-16">Game not found.</span>
           </div>
         )}

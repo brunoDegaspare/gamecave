@@ -62,27 +62,27 @@ export default function Toast({
   const styleMap = {
     success: {
       icon: "ico-tick-circle-bold",
-      accent: "text-emerald-400 bg-emerald-500/15",
-      wash: "bg-neutral-900 bg-gradient-to-br from-emerald-500/10 to-transparent",
-      text: "text-emerald-100",
+      accent: "text-success bg-success/15",
+      wash: "bg-base-200 bg-gradient-to-br from-success/10 to-transparent",
+      text: "text-success",
     },
     error: {
       icon: "ico-cross-circle-bold",
-      accent: "text-rose-400 bg-rose-500/15",
-      wash: "bg-neutral-900 bg-gradient-to-br from-rose-500/10 to-transparent",
-      text: "text-rose-100",
+      accent: "text-error bg-error/15",
+      wash: "bg-base-200 bg-gradient-to-br from-error/10 to-transparent",
+      text: "text-error",
     },
     info: {
       icon: "ico-info-circle-bold",
-      accent: "text-blue-400 bg-blue-500/15",
-      wash: "bg-neutral-900 bg-gradient-to-br from-blue-500/10 to-transparent",
-      text: "text-blue-100",
+      accent: "text-info bg-info/15",
+      wash: "bg-base-200 bg-gradient-to-br from-info/10 to-transparent",
+      text: "text-info",
     },
     warning: {
       icon: "ico-warning-bold",
-      accent: "text-amber-400 bg-amber-500/15",
-      wash: "bg-neutral-900 bg-gradient-to-br from-amber-500/10 to-transparent",
-      text: "text-amber-100",
+      accent: "text-warning bg-warning/15",
+      wash: "bg-base-200 bg-gradient-to-br from-warning/10 to-transparent",
+      text: "text-warning",
     },
   } as const;
 
@@ -92,7 +92,7 @@ export default function Toast({
     <div className="pointer-events-none fixed inset-0 z-[1000] flex items-start justify-end p-4 sm:p-6">
       <div
         className={clsx(
-          "pointer-events-auto w-full max-w-sm rounded-xl px-4 py-3 shadow-lg ring-1 ring-white/10 transition-transform duration-300",
+          "pointer-events-auto w-full max-w-sm rounded-xl px-4 py-3 shadow-lg ring-1 ring-base-content/10 transition-transform duration-300",
           styles.wash,
           isVisible
             ? "translate-x-0 ease-out"
@@ -117,7 +117,7 @@ export default function Toast({
           {onClose ? (
             <button
               type="button"
-              className="rounded-md p-1 text-neutral-400 transition hover:text-neutral-200 cursor-pointer"
+              className="rounded-md p-1 text-base-content/50 transition hover:text-base-content cursor-pointer"
               onClick={() => setIsVisible(false)}
               aria-label="Dismiss notification"
             >

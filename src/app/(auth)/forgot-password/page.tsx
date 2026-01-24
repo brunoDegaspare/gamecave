@@ -108,15 +108,15 @@ export default function ForgotPasswordPage() {
   return (
     <div
       className={clsx(
-        "space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-in-out",
+        "space-y-6 rounded-2xl border border-base-content/10 bg-base-200/80 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-in-out",
         cardTranslateClass,
       )}
     >
       {hasSent ? (
         <>
           <div className="space-y-2">
-            <h1 className="heading-3 text-neutral-100">Check your email</h1>
-            <p className="body-16 text-neutral-300">
+            <h1 className="heading-3 text-base-content">Check your email</h1>
+            <p className="body-16 text-base-content/70">
               If an account exists for this email address, you’ll receive a
               password reset link shortly. Follow the instructions in the email
               to regain access to your GameCave account.
@@ -135,8 +135,8 @@ export default function ForgotPasswordPage() {
       ) : (
         <>
           <div className="space-y-2">
-            <h1 className="heading-3 text-neutral-100">Reset your password</h1>
-            <p className="body-16 text-neutral-300">
+            <h1 className="heading-3 text-base-content">Reset your password</h1>
+            <p className="body-16 text-base-content/70">
               Forgot your password? No worries. Enter your email below and we’ll
               send you a link to reset it.
             </p>

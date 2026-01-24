@@ -46,7 +46,7 @@ export default function MainLayout({
   return (
     // Provide collection state/actions to the rest of the app.
     <CollectionsProvider value={collectionsContextValue}>
-      <div className="drawer min-h-[100dvh] md:h-screen bg-neutral-950 text-neutral-100 relative md:flex md:overflow-hidden">
+      <div className="drawer min-h-[100dvh] md:h-screen bg-base-100 text-base-content relative md:flex md:overflow-hidden">
         {/* Drawer toggle for mobile sidebar state. */}
         <input
           id="shell-drawer"

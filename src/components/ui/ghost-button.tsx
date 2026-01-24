@@ -37,8 +37,8 @@ export default function GhostButton({
   const baseClasses = clsx(
     "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border border border-transparent transition-all duration-300 ease-out hover:cursor-pointer",
     sizeClasses,
-    "bg-transparent text-neutral-200 border border-transparent hover:bg-gray-800/60",
-    "disabled:bg-transparent disabled:text-neutral-500 disabled:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-70",
+    "bg-transparent text-base-content/80 border border-transparent hover:bg-base-200/60",
+    "disabled:text-base-content/40 disabled:border-base-300 disabled:cursor-not-allowed disabled:opacity-70",
     className
   );
 

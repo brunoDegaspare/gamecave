@@ -79,14 +79,14 @@ export default function GameCompletionModal({
 
         <div className="flex flex-1 flex-col gap-6">
           <div>
-            <p className="caption-12 text-neutral-500 uppercase tracking-wide">
+            <p className="caption-12 text-base-content/50 uppercase tracking-wide">
               {game.platform}
             </p>
-            <h3 className="heading-4 text-white">{game.name}</h3>
+            <h3 className="heading-4 text-base-content">{game.name}</h3>
           </div>
 
           <div>
-            <p className="body-16 font-medium text-neutral-300">
+            <p className="body-16 font-medium text-base-content/70">
               Is it complete?
             </p>
             <div className="mt-4 space-y-3">
@@ -97,11 +97,11 @@ export default function GameCompletionModal({
               ].map((item) => (
                 <label
                   key={item.key}
-                  className="flex items-center gap-3 rounded-xl border border-base-300 bg-base-200/50 px-4 py-3 cursor-pointer hover:bg-neutral-900/50 transition-colors duration-300"
+                  className="flex items-center gap-3 rounded-xl border border-base-300 bg-base-200/50 px-4 py-3 cursor-pointer hover:bg-base-200/70 transition-colors duration-300"
                 >
                   <input
                     type="checkbox"
-                    className="checkbox border-neutral-600 bg-neutral-900/80 checked:border-transparent checked:bg-purple-600 focus:ring-0 [--chkfg:#ffffff]"
+                    className="checkbox border-base-300 bg-base-200/80 checked:border-transparent checked:bg-primary focus:ring-0 [--chkfg:oklch(var(--pc))]"
                     checked={
                       localCompletion[item.key as keyof CompletionState]
                     }
@@ -109,7 +109,7 @@ export default function GameCompletionModal({
                       toggleCompletion(item.key as keyof CompletionState)
                     }
                   />
-                  <span className="body-16 text-white">{item.label}</span>
+                  <span className="body-16 text-base-content">{item.label}</span>
                 </label>
               ))}
             </div>

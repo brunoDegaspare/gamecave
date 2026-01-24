@@ -196,7 +196,7 @@ export default function SignupPage() {
   return (
     <div
       className={clsx(
-        "space-y-6 rounded-2xl border border-white/8 bg-[#0b0a12]/88 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-in-out",
+        "space-y-6 rounded-2xl border border-base-content/10 bg-base-200/80 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-in-out",
         cardTranslateClass,
       )}
     >
@@ -207,7 +207,7 @@ export default function SignupPage() {
       <form className="relative space-y-4" onSubmit={handleSubmit} noValidate>
         <fieldset disabled={loading}>
           <label className="block space-y-2 mb-6">
-            <div className="body-16 text-neutral-300">Email address</div>
+            <div className="body-16 text-base-content/70">Email address</div>
             <input
               type="email"
               required
@@ -218,18 +218,18 @@ export default function SignupPage() {
                 hasSubmitted && fieldErrors.email ? emailErrorId : undefined
               }
               className={clsx(
-                "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
-                email ? "bg-neutral-800/40" : "bg-transparent",
+                "w-full rounded-lg border px-3 py-2 text-base-content placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                email ? "bg-base-200/60" : "bg-transparent",
                 hasSubmitted && fieldErrors.email
-                  ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
+                  ? "border-error focus:border-error focus:ring-error opacity-100"
+                  : "border-base-300 focus:border-primary focus:ring-primary enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
               )}
               placeholder="you@email.com"
             />
             {hasSubmitted && fieldErrors.email ? (
               <span
                 id={emailErrorId}
-                className="flex items-center gap-2 body-14 text-red-400"
+                className="flex items-center gap-2 body-14 text-error"
                 role="alert"
               >
                 <Icon
@@ -243,7 +243,7 @@ export default function SignupPage() {
           </label>
 
           <label className="block space-y-2 mb-6">
-            <div className="body-16 text-neutral-300">Password</div>
+            <div className="body-16 text-base-content/70">Password</div>
             <input
               type="password"
               required
@@ -257,18 +257,18 @@ export default function SignupPage() {
                   : undefined
               }
               className={clsx(
-                "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
-                password ? "bg-neutral-800" : "bg-transparent",
+                "w-full rounded-lg border px-3 py-2 text-base-content placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                password ? "bg-base-200" : "bg-transparent",
                 hasSubmitted && fieldErrors.password
-                  ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
+                  ? "border-error focus:border-error focus:ring-error opacity-100"
+                  : "border-base-300 focus:border-primary focus:ring-primary enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
               )}
               placeholder="Create a password"
             />
             {hasSubmitted && fieldErrors.password ? (
               <span
                 id={passwordErrorId}
-                className="flex items-center gap-2 body-14 text-red-400"
+                className="flex items-center gap-2 body-14 text-error"
                 role="alert"
               >
                 <Icon
@@ -282,7 +282,7 @@ export default function SignupPage() {
           </label>
 
           <label className="block space-y-2 mb-6">
-            <div className="body-16 text-neutral-300">Repeat password</div>
+            <div className="body-16 text-base-content/70">Repeat password</div>
             <input
               type="password"
               required
@@ -296,18 +296,18 @@ export default function SignupPage() {
                   : undefined
               }
               className={clsx(
-                "w-full rounded-lg border px-3 py-2 text-neutral-100 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
-                repeatPassword ? "bg-neutral-800" : "bg-transparent",
+                "w-full rounded-lg border px-3 py-2 text-base-content placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
+                repeatPassword ? "bg-base-200" : "bg-transparent",
                 hasSubmitted && fieldErrors.repeatPassword
-                  ? "border-red-400 focus:border-red-400 focus:ring-red-400 opacity-100"
-                  : "border-neutral-700 focus:border-purple-500 focus:ring-purple-500 enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
+                  ? "border-error focus:border-error focus:ring-error opacity-100"
+                  : "border-base-300 focus:border-primary focus:ring-primary enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
               )}
               placeholder="Re-enter your password"
             />
             {hasSubmitted && fieldErrors.repeatPassword ? (
               <span
                 id={repeatPasswordErrorId}
-                className="flex items-center gap-2 body-14 text-red-400"
+                className="flex items-center gap-2 body-14 text-error"
                 role="alert"
               >
                 <Icon
@@ -343,7 +343,7 @@ export default function SignupPage() {
 
         {loading ? (
           <div
-            className="absolute inset-0 z-10 rounded-lg bg-neutral-950/60"
+            className="absolute inset-0 z-10 rounded-lg bg-base-100/60"
             aria-hidden="true"
           />
         ) : null}

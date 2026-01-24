@@ -8,7 +8,7 @@
  * <InfoCard>
  *   <InfoCardContent>
  *     <span className="text-2xl font-semibold">4.5</span>
- *     <span className="text-xs text-neutral-500">Rating</span>
+ *     <span className="text-xs text-base-content/50">Rating</span>
  *   </InfoCardContent>
  * </InfoCard>
  */
@@ -23,7 +23,7 @@ export function InfoCard({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-100 shadow-sm transition-colors hover:border-neutral-700 ${className}`}
+      className={`rounded-xl border border-base-300 bg-base-200 text-base-content shadow-sm transition-colors hover:border-base-content/20 ${className}`}
       {...props}
     />
   );

@@ -44,8 +44,8 @@ export default function SearchPaletteTrigger({
       onClick={onClick}
       aria-controls={ariaControlsId}
       className={[
-        "cursor-pointer inline-flex items-center gap-2 border border-neutral-700",
-        "bg-neutral-900 hover:bg-neutral-800 text-neutral-200 transition-colors",
+        "cursor-pointer inline-flex items-center gap-2 border border-base-300",
+        "bg-base-200 hover:bg-base-300 text-base-content/80 transition-colors",
         rounded,
         heightClassName,
         sizeMap[size],
@@ -57,12 +57,12 @@ export default function SearchPaletteTrigger({
         <Icon
           name={leftIconName}
           size={24}
-          className="shrink-0 text-neutral-400"
+          className="shrink-0 text-base-content/50"
         />
       )}
       <span className="flex-1 truncate text-left">{label}</span>
       {showShortcut && (
-        <kbd className="ml-1 rounded bg-neutral-800 px-1.5 py-0.5 body-14 text-neutral-400">
+        <kbd className="ml-1 rounded bg-base-300 px-1.5 py-0.5 body-14 text-base-content/50">
           {shortcutLabel}
         </kbd>
       )}

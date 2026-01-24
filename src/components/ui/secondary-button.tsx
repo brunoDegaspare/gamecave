@@ -37,8 +37,8 @@ export default function SecondaryButton({
   const baseClasses = clsx(
     "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border transition-all duration-300 ease-out hover:cursor-pointer",
     sizeClasses,
-    "bg-transparent border border-purple-100 text-purple-100 shadow-[0_0_12px_rgba(168,85,247,0.25)] hover:bg-purple-500/10 hover:border-purple-300/80 hover:shadow-[0_0_16px_rgba(168,85,247,0.4)]",
-    "disabled:bg-transparent disabled:text-neutral-500 disabled:border-neutral-700 disabled:shadow-none disabled:cursor-not-allowed disabled:opacity-70",
+    "bg-transparent border border-secondary text-secondary shadow-[0_0_12px_oklch(var(--s)/0.25)] hover:bg-secondary/10 hover:border-secondary-focus hover:shadow-[0_0_16px_oklch(var(--s)/0.4)]",
+    "disabled:border-base-300 disabled:text-base-content/40 disabled:shadow-none disabled:cursor-not-allowed disabled:opacity-70",
     className
   );
 

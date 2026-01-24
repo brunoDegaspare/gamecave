@@ -25,7 +25,7 @@ export default function ShellSidebar({
   onOpenCreateCollection,
 }: ShellSidebarProps) {
   return (
-    <div className="drawer-side bg-neutral-900 border-r-0 md:border-r border-neutral-800 md:order-1 md:static md:visible md:opacity-100 md:pointer-events-auto md:overflow-visible md:flex-none md:w-auto">
+    <div className="drawer-side bg-base-200 border-r-0 md:border-r border-base-200 md:order-1 md:static md:visible md:opacity-100 md:pointer-events-auto md:overflow-visible md:flex-none md:w-auto">
       <label
         htmlFor="shell-drawer"
         className={`drawer-overlay md:hidden ${!isHydrated ? "invisible" : ""}`}
@@ -66,7 +66,7 @@ export default function ShellSidebar({
                 name="ico-controller-outline"
                 size={24}
                 viewBox="0 0 24 24"
-                className="text-neutral-100"
+                className="text-base-content"
               />
             )}
           </Link>
@@ -104,7 +104,7 @@ export default function ShellSidebar({
         </nav>
 
         {sortedCollections.length > 0 ? (
-          <nav className="pt-8 border-t border-neutral-800 space-y-2 body-18 weight-medium">
+          <nav className="pt-8 border-t border-base-100 space-y-2 body-18 weight-medium">
             {sortedCollections.map((collection) => (
               <SidebarNavItem
                 key={collection.id}

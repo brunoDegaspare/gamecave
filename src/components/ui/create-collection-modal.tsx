@@ -107,7 +107,7 @@ export default function CreateCollectionModal({
   return (
     <ModalLayout onClose={onClose} closeRef={closeRef}>
       <div className="space-y-6">
-        <h3 className="heading-4 text-white">New collection</h3>
+        <h3 className="heading-4 text-base-content">New collection</h3>
 
         <AuthField
           label="Name"
@@ -119,13 +119,15 @@ export default function CreateCollectionModal({
         />
 
         <label className="block space-y-2">
-          <div className="body-16 text-neutral-300">Description (optional)</div>
+          <div className="body-16 text-base-content/70">
+            Description (optional)
+          </div>
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="What’s this collection about?"
             rows={4}
-            className="gc-placeholder w-full min-h-[120px] rounded-lg border border-neutral-700 bg-transparent px-3 py-2 text-neutral-300 placeholder-neutral-500 focus:bg-neutral-900/70 focus:outline-none focus:ring-2 focus:border-purple-500 focus:ring-purple-500 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out"
+            className="gc-placeholder w-full min-h-[120px] rounded-lg border border-base-300 bg-transparent px-3 py-2 text-base-content/70 placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 focus:border-primary focus:ring-primary transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out"
           />
         </label>
       </div>

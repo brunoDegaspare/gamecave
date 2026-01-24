@@ -70,16 +70,16 @@
 
   /* ===== Text tones ===== */
   .text-muted {
-    @apply text-neutral-400;
+    @apply text-base-content opacity-60;
   }
   .text-strong {
-    @apply text-white;
+    @apply text-base-content;
   }
 
   /* ===== Links ===== */
   .link-accent {
-    @apply relative text-purple-400 hover:text-purple-200
-         transition-colors duration-200 ease-in-out;
+    @apply relative text-primary hover:opacity-80
+         transition-opacity duration-200 ease-in-out;
   }
 
   .link-accent::after {
