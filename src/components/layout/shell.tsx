@@ -18,7 +18,9 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Auth state is used for collection fetching and email verification banner.
   const { user } = useAuth();
+  // Sidebar behavior + collection data orchestration live in dedicated hooks.
   const { collapsed, setCollapsed, isHydrated, isMobile } = useShellSidebar();
   const {
     sortedCollections,
@@ -42,8 +44,10 @@ export default function MainLayout({
   }, [setCollapsed]);
 
   return (
+    // Provide collection state/actions to the rest of the app.
     <CollectionsProvider value={collectionsContextValue}>
       <div className="drawer min-h-[100dvh] md:h-screen bg-neutral-950 text-neutral-100 relative md:flex md:overflow-hidden">
+        {/* Drawer toggle for mobile sidebar state. */}
         <input
           id="shell-drawer"
           type="checkbox"
@@ -53,6 +57,7 @@ export default function MainLayout({
           onChange={(event) => setCollapsed(!event.target.checked)}
         />
 
+        {/* Main content: header + page body. */}
         <ShellContent
           user={user}
           collapsed={collapsed}
@@ -62,6 +67,7 @@ export default function MainLayout({
           {children}
         </ShellContent>
 
+        {/* Left sidebar with navigation and collections list. */}
         <ShellSidebar
           collapsed={collapsed}
           isHydrated={isHydrated}
@@ -71,6 +77,7 @@ export default function MainLayout({
           onOpenCreateCollection={openCreateCollection}
         />
 
+        {/* Global overlays: create-collection modal + toast notifications. */}
         <ShellOverlays
           isCreateCollectionOpen={isCreateCollectionOpen}
           onCloseCreateCollection={closeCreateCollection}
