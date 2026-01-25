@@ -167,13 +167,15 @@ const mapSearchResult = (game: IgdbGame): SearchResult | null => {
   };
 };
 
-const scoreTitleMatch = (
+const evaluateTitleMatch = (
   title: string,
   normalizedQuery: string,
   tokens: string[],
 ) => {
   const normalizedTitle = normalizeText(title);
-  if (!normalizedTitle) return 0;
+  if (!normalizedTitle) {
+    return { score: 0, matchCount: 0 };
+  }
 
   let score = 0;
   if (normalizedTitle === normalizedQuery) {
@@ -185,17 +187,25 @@ const scoreTitleMatch = (
   }
 
   const titleTokens = normalizedTitle.split(" ");
+  let matchCount = 0;
   for (const token of tokens) {
+    let matched = false;
     if (titleTokens.includes(token)) {
       score += 30;
+      matched = true;
     } else if (titleTokens.some((part) => part.startsWith(token))) {
       score += 20;
+      matched = true;
     } else if (normalizedTitle.includes(token)) {
       score += 10;
+      matched = true;
+    }
+    if (matched) {
+      matchCount += 1;
     }
   }
 
-  return score;
+  return { score, matchCount };
 };
 
 const mapDbSearchResult = (game: {
@@ -230,12 +240,14 @@ const fetchDbSearchResults = async (
       return [] as SearchResult[];
     }
 
-    const andClauses: Prisma.GameWhereInput[] = tokens.map((token) => ({
+    const tokenClauses: Prisma.GameWhereInput[] = tokens.map((token) => ({
       title: {
         contains: token,
         mode: "insensitive",
       },
     }));
+
+    const andClauses: Prisma.GameWhereInput[] = [];
 
     if (platformNames.length > 0) {
       andClauses.push({
@@ -254,7 +266,12 @@ const fetchDbSearchResults = async (
 
     const where: Prisma.GameWhereInput = {
       igdbId: { not: null },
-      AND: andClauses,
+      AND: [
+        ...andClauses,
+        {
+          OR: tokenClauses,
+        },
+      ],
     };
 
     const dbGames = await prisma.game.findMany({
@@ -270,11 +287,18 @@ const fetchDbSearchResults = async (
     const scored = dbGames
       .map(mapDbSearchResult)
       .filter((game): game is SearchResult => Boolean(game))
-      .map((game) => ({
-        game,
-        score: scoreTitleMatch(game.title, normalizedQuery, tokens),
-      }))
+      .map((game) => {
+        const { score, matchCount } = evaluateTitleMatch(
+          game.title,
+          normalizedQuery,
+          tokens,
+        );
+        return { game, score, matchCount };
+      })
       .sort((a, b) => {
+        if (a.matchCount !== b.matchCount) {
+          return b.matchCount - a.matchCount;
+        }
         if (a.score !== b.score) return b.score - a.score;
         return a.game.title.localeCompare(b.game.title);
       })
