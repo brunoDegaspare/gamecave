@@ -41,10 +41,13 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
   const [showCollectionsScrollbar, setShowCollectionsScrollbar] =
     useState(false);
   const [showVerificationToast, setShowVerificationToast] = useState(false);
+  const [isCollectionStatusReady, setIsCollectionStatusReady] =
+    useState(false);
   const collectionsScrollTimeout = useRef<number | null>(null);
   const collectionsScrollRef = useRef<HTMLDivElement | null>(null);
   const lastHandledCollectionId = useRef<number | null>(null);
   const verificationToastTimeout = useRef<number | null>(null);
+  const hasLocalSelectionRef = useRef(false);
   const sortedCollections = [...collections].sort((a, b) => {
     const left = a.name.toLowerCase();
     const right = b.name.toLowerCase();
@@ -70,6 +73,62 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
       setShowCollectionError(false);
     }
   }, [pendingCollectionIds, showCollectionError]);
+
+  useEffect(() => {
+    hasLocalSelectionRef.current = false;
+    setSelectedCollectionIds([]);
+    setIsCollectionStatusReady(!user);
+  }, [game.igdb_id, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const controller = new AbortController();
+    let isActive = true;
+
+    const loadCollectionsForGame = async () => {
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch(
+          `/api/games/${game.igdb_id}/collections`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal,
+          },
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = (await response.json()) as {
+          collectionIds?: number[];
+        };
+
+        if (!hasLocalSelectionRef.current) {
+          setSelectedCollectionIds(
+            Array.isArray(data.collectionIds) ? data.collectionIds : [],
+          );
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to load collections for game.", error);
+      } finally {
+        if (isActive) {
+          setIsCollectionStatusReady(true);
+        }
+      }
+    };
+
+    setIsCollectionStatusReady(false);
+    void loadCollectionsForGame();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [game.igdb_id, user]);
 
   useEffect(() => {
     if (!isDrawerOpen || !lastCreatedCollectionId) return;
@@ -133,6 +192,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
       return;
     }
     setIsDrawerOpen(false);
+    hasLocalSelectionRef.current = true;
     setSelectedCollectionIds(pendingCollectionIds);
     if (!game) {
       showToast(
@@ -206,7 +266,14 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
   };
 
   const renderAddToCollectionButton = (className?: string) =>
-    selectedCollectionIds.length > 0 ? (
+    !isCollectionStatusReady ? (
+      <div
+        aria-hidden="true"
+        className={`h-10 ${
+          className ? className : "min-w-[180px]"
+        } rounded-full bg-base-200/60`}
+      />
+    ) : selectedCollectionIds.length > 0 ? (
       <InvertedButton
         size="md"
         leftIcon="ico-tick-outline"

@@ -34,7 +34,7 @@ export default function PrimaryButton({
     size === "lg" ? "px-5 py-4 body-18 leading-[26px]" : "px-4 py-2 body-16";
 
   const baseClasses = clsx(
-    "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border border border-transparent transition-all duration-300 ease-out hover:cursor-pointer",
+    "btn-primary inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border border border-transparent transition-all duration-300 ease-out hover:cursor-pointer",
     sizeClasses,
     "bg-primary text-primary-content hover:bg-primary hover:brightness-125 hover:shadow-[0_0_18px_oklch(var(--p)/0.35)]",
     "disabled:cursor-not-allowed disabled:opacity-70",

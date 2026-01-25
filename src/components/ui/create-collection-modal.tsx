@@ -6,6 +6,7 @@ import AuthField from "@/components/auth/auth-field";
 import GhostButton from "@/components/ui/ghost-button";
 import ModalLayout from "@/components/ui/modal-layout";
 import PrimaryButton from "@/components/ui/primary-button";
+import TextArea from "@/components/ui/text-area";
 
 type CreateCollectionResponse = {
   id: number;
@@ -118,18 +119,13 @@ export default function CreateCollectionModal({
           placeholder="Enter a name"
         />
 
-        <label className="block space-y-2">
-          <div className="body-16 text-base-content/70">
-            Description (optional)
-          </div>
-          <textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="What’s this collection about?"
-            rows={4}
-            className="gc-placeholder w-full min-h-[120px] rounded-lg border border-base-300 bg-transparent px-3 py-2 text-base-content/70 placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 focus:border-primary focus:ring-primary transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out"
-          />
-        </label>
+        <TextArea
+          label="Description (optional)"
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="What’s this collection about?"
+          rows={4}
+        />
       </div>
 
       <div className="modal-action mt-6">

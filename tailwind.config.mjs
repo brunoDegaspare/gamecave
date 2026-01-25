@@ -23,7 +23,8 @@ const config = {
   },
   plugins: [lineClamp, scrollbar({ nocompatible: true }), daisyui],
   daisyui: {
-    themes: ["dark"],
+    themes: true,
+    darkThemes: ["dark"],
   },
 };
 

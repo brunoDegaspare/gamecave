@@ -1,0 +1,64 @@
+:root {
+  /* Brand
+  -------------------- */
+  --gc-primary: #6321d4;
+  --gc-primary-hover: #752bf5;
+  --gc-action: #ab7ff6;
+}
+
+[data-theme="dark"] {
+  /* Text color
+  -------------------- */
+  .text-primary {
+    color: var(--gc-primary);
+  }
+
+  /* Button
+  -------------------- */
+  .btn-primary {
+    background-color: var(--gc-primary);
+  }
+  .btn-primary:hover {
+    background-color: var(--gc-primary-hover);
+  }
+
+  /* Link
+  -------------------- */
+  a.link-accent {
+    color: var(--gc-action);
+  }
+
+  /* Input
+  -------------------- */
+  .gc-input-surface {
+    background-color: #12121c;
+    border: none;
+    color: #e5e7eb;
+
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.875rem;
+
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .gc-input-surface::placeholder {
+    color: #9ca3af;
+  }
+
+  .gc-input-surface:focus {
+    outline: none;
+    background-color: #0f1020;
+    border-color: var(--gc-primary);
+  }
+
+  /* Modal */
+
+  .modal.modal-open,
+  .modal[open],
+  .modal:target,
+  .modal-toggle:checked + .modal {
+    background-color: rgba(93, 91, 97, 0.2);
+  }
+}

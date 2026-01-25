@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { sendPasswordResetEmail } from "firebase/auth";
 import PrimaryButton from "@/components/ui/primary-button";
-import AuthField from "@/components/auth/auth-field";
+import TextInput from "@/components/ui/text-input";
 import { firebaseAuth } from "@/lib/firebase/client";
 
 type Direction = "left" | "right";
@@ -122,7 +122,7 @@ export default function ForgotPasswordPage() {
               to regain access to your GameCave account.
             </p>
           </div>
-          <p className="body-16 text-muted">
+          <p className="body-16">
             <Link
               href="/login"
               className="link-accent"
@@ -143,7 +143,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-            <AuthField
+            <TextInput
               label="Email"
               type="email"
               required
@@ -160,7 +160,7 @@ export default function ForgotPasswordPage() {
             </PrimaryButton>
           </form>
 
-          <p className="body-16 text-muted">
+          <p className="body-16">
             <Link
               href="/login"
               className="link-accent"

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import PrimaryButton from "@/components/ui/primary-button";
 import Alert from "@/components/ui/alert";
-import Icon from "@/components/ui/icon";
+import TextInput from "@/components/ui/text-input";
 import { sendVerificationEmail, signUp } from "@/lib/auth";
 import { useAuth } from "@/components/auth/auth-provider";
 import { validateEmail, validatePassword } from "@/lib/auth/validation";
@@ -206,119 +206,43 @@ export default function SignupPage() {
 
       <form className="relative space-y-4" onSubmit={handleSubmit} noValidate>
         <fieldset disabled={loading}>
-          <label className="block space-y-2 mb-6">
-            <div className="body-16 text-base-content/70">Email address</div>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={handleEmailChange}
-              aria-invalid={hasSubmitted && Boolean(fieldErrors.email)}
-              aria-describedby={
-                hasSubmitted && fieldErrors.email ? emailErrorId : undefined
-              }
-              className={clsx(
-                "w-full rounded-lg border px-3 py-2 text-base-content placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
-                email ? "bg-base-200/60" : "bg-transparent",
-                hasSubmitted && fieldErrors.email
-                  ? "border-error focus:border-error focus:ring-error opacity-100"
-                  : "border-base-300 focus:border-primary focus:ring-primary enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
-              )}
-              placeholder="you@email.com"
-            />
-            {hasSubmitted && fieldErrors.email ? (
-              <span
-                id={emailErrorId}
-                className="flex items-center gap-2 body-14 text-error"
-                role="alert"
-              >
-                <Icon
-                  name="ico-cross-circle-outline"
-                  size={24}
-                  className="mt-0.5 h-6 w-6 shrink-0"
-                />
-                {fieldErrors.email}
-              </span>
-            ) : null}
-          </label>
+          <TextInput
+            label="Email address"
+            type="email"
+            required
+            value={email}
+            onChange={handleEmailChange}
+            placeholder="you@email.com"
+            error={fieldErrors.email}
+            showError={hasSubmitted}
+            errorId={emailErrorId}
+          />
 
-          <label className="block space-y-2 mb-6">
-            <div className="body-16 text-base-content/70">Password</div>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={handlePasswordChange}
-              aria-invalid={hasSubmitted && Boolean(fieldErrors.password)}
-              aria-describedby={
-                hasSubmitted && fieldErrors.password
-                  ? passwordErrorId
-                  : undefined
-              }
-              className={clsx(
-                "w-full rounded-lg border px-3 py-2 text-base-content placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
-                password ? "bg-base-200" : "bg-transparent",
-                hasSubmitted && fieldErrors.password
-                  ? "border-error focus:border-error focus:ring-error opacity-100"
-                  : "border-base-300 focus:border-primary focus:ring-primary enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
-              )}
-              placeholder="Create a password"
-            />
-            {hasSubmitted && fieldErrors.password ? (
-              <span
-                id={passwordErrorId}
-                className="flex items-center gap-2 body-14 text-error"
-                role="alert"
-              >
-                <Icon
-                  name="ico-cross-circle-outline"
-                  size={24}
-                  className="mt-0.5 h-6 w-6 shrink-0"
-                />
-                {fieldErrors.password}
-              </span>
-            ) : null}
-          </label>
+          <TextInput
+            label="Password"
+            type="password"
+            required
+            minLength={6}
+            value={password}
+            onChange={handlePasswordChange}
+            placeholder="Create a password"
+            error={fieldErrors.password}
+            showError={hasSubmitted}
+            errorId={passwordErrorId}
+          />
 
-          <label className="block space-y-2 mb-6">
-            <div className="body-16 text-base-content/70">Repeat password</div>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={repeatPassword}
-              onChange={handleRepeatPasswordChange}
-              aria-invalid={hasSubmitted && Boolean(fieldErrors.repeatPassword)}
-              aria-describedby={
-                hasSubmitted && fieldErrors.repeatPassword
-                  ? repeatPasswordErrorId
-                  : undefined
-              }
-              className={clsx(
-                "w-full rounded-lg border px-3 py-2 text-base-content placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
-                repeatPassword ? "bg-base-200" : "bg-transparent",
-                hasSubmitted && fieldErrors.repeatPassword
-                  ? "border-error focus:border-error focus:ring-error opacity-100"
-                  : "border-base-300 focus:border-primary focus:ring-primary enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
-              )}
-              placeholder="Re-enter your password"
-            />
-            {hasSubmitted && fieldErrors.repeatPassword ? (
-              <span
-                id={repeatPasswordErrorId}
-                className="flex items-center gap-2 body-14 text-error"
-                role="alert"
-              >
-                <Icon
-                  name="ico-cross-circle-outline"
-                  size={24}
-                  className="mt-0.5 h-6 w-6 shrink-0"
-                />
-                {fieldErrors.repeatPassword}
-              </span>
-            ) : null}
-          </label>
+          <TextInput
+            label="Repeat password"
+            type="password"
+            required
+            minLength={6}
+            value={repeatPassword}
+            onChange={handleRepeatPasswordChange}
+            placeholder="Re-enter your password"
+            error={fieldErrors.repeatPassword}
+            showError={hasSubmitted}
+            errorId={repeatPasswordErrorId}
+          />
 
           {error ? (
             <Alert variant="error" icon="ico-cross-circle-outline">
@@ -349,7 +273,7 @@ export default function SignupPage() {
         ) : null}
       </form>
 
-      <p className="body-16 text-muted">
+      <p className="body-16">
         Already have an account?{" "}
         <Link
           href="/login"

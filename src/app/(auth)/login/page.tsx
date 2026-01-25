@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import PrimaryButton from "@/components/ui/primary-button";
 import Icon from "@/components/ui/icon";
-import AuthField from "@/components/auth/auth-field";
+import TextInput from "@/components/ui/text-input";
 import { signIn } from "@/lib/auth";
 import { useAuth } from "@/components/auth/auth-provider";
 import { validateEmail, validatePassword } from "@/lib/auth/validation";
@@ -145,7 +145,7 @@ export default function LoginPage() {
   return (
     <div
       className={clsx(
-        "space-y-6 rounded-2xl border border-base-content/10 bg-base-200/80 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-in-out",
+        "space-y-6 rounded-2xl border border-base-content/10 bg-base-200 p-8 shadow-[0_0_32px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-in-out",
         cardTranslateClass,
       )}
     >
@@ -154,7 +154,7 @@ export default function LoginPage() {
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-        <AuthField
+        <TextInput
           label="Email"
           type="email"
           required
@@ -166,9 +166,17 @@ export default function LoginPage() {
           errorId={emailErrorId}
         />
 
-        <label className="block space-y-2 mb-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="body-16 text-base-content/70">Password</div>
+        <TextInput
+          label="Password"
+          type="password"
+          required
+          value={password}
+          onChange={handlePasswordChange}
+          placeholder="••••••••"
+          error={fieldErrors.password}
+          showError={hasSubmitted}
+          errorId={passwordErrorId}
+          rightSlot={
             <Link
               href="/forgot-password"
               className="body-16 link-accent"
@@ -176,40 +184,8 @@ export default function LoginPage() {
             >
               Forgot password?
             </Link>
-          </div>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={handlePasswordChange}
-            aria-invalid={hasSubmitted && Boolean(fieldErrors.password)}
-            aria-describedby={
-              hasSubmitted && fieldErrors.password ? passwordErrorId : undefined
-            }
-            className={clsx(
-              "w-full rounded-lg border px-3 py-2 text-base-content placeholder-base-content/50 focus:bg-base-200/70 focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",
-              password ? "bg-base-200" : "bg-transparent",
-              hasSubmitted && fieldErrors.password
-                ? "border-error focus:border-error focus:ring-error opacity-100"
-                : "border-base-300 focus:border-primary focus:ring-primary enabled:opacity-90 enabled:focus:opacity-100 placeholder:opacity-60 focus:placeholder:opacity-40",
-            )}
-            placeholder="••••••••"
-          />
-          {hasSubmitted && fieldErrors.password ? (
-            <span
-              id={passwordErrorId}
-              className="flex items-center gap-2 body-14 text-error"
-              role="alert"
-            >
-              <Icon
-                name="ico-cross-circle-outline"
-                size={24}
-                className="mt-0.5 h-6 w-6 shrink-0"
-              />
-              {fieldErrors.password}
-            </span>
-          ) : null}
-        </label>
+          }
+        />
 
         {error ? (
           <span
@@ -230,7 +206,7 @@ export default function LoginPage() {
         </PrimaryButton>
       </form>
 
-      <p className="body-16 text-muted">
+      <p className="body-16">
         No account yet?{" "}
         <Link
           href="/signup"
