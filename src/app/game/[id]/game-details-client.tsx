@@ -24,10 +24,10 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
   const { user } = useAuth();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<number[]>(
-    []
+    [],
   );
   const [pendingCollectionIds, setPendingCollectionIds] = useState<number[]>(
-    []
+    [],
   );
   const {
     collections,
@@ -75,11 +75,11 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     if (!isDrawerOpen || !lastCreatedCollectionId) return;
     if (lastHandledCollectionId.current === lastCreatedCollectionId) return;
     const created = collections.find(
-      (collection) => collection.id === lastCreatedCollectionId
+      (collection) => collection.id === lastCreatedCollectionId,
     );
     if (!created) return;
     setPendingCollectionIds((prev) =>
-      prev.includes(created.id) ? prev : [...prev, created.id]
+      prev.includes(created.id) ? prev : [...prev, created.id],
     );
     lastHandledCollectionId.current = lastCreatedCollectionId;
   }, [collections, isDrawerOpen, lastCreatedCollectionId]);
@@ -109,7 +109,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     setPendingCollectionIds((prev) =>
       prev.includes(collectionId)
         ? prev.filter((item) => item !== collectionId)
-        : [...prev, collectionId]
+        : [...prev, collectionId],
     );
   };
 
@@ -137,7 +137,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     if (!game) {
       showToast(
         "We couldn’t add this to your collection. Please try again.",
-        "error"
+        "error",
       );
       return;
     }
@@ -148,7 +148,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     if (!user) {
       showToast(
         "We couldn’t add this to your collection. Please try again.",
-        "error"
+        "error",
       );
       return;
     }
@@ -167,7 +167,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                   Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ igdbId: gameId }),
-              }
+              },
             );
 
             if (!response.ok) {
@@ -179,7 +179,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
               throw new Error("Add to collection failed");
             }
             return response.json();
-          })
+          }),
         );
 
         if (results.length > 0) {
@@ -199,7 +199,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
         console.error("Failed to add game to collection.", error);
         showToast(
           "We couldn’t add this to your collection. Please try again.",
-          "error"
+          "error",
         );
       }
     })();
@@ -308,7 +308,9 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                 {/* ===== STATS SECTION ===== */}
                 <section className="grid w-full grid-cols-2 md:grid-cols-4 text-center divide-x divide-base-300/40 border border-base-300/40 rounded-xl bg-base-200/25 backdrop-blur-sm mt-10 lg:mt-6 xl:mt-8 2xl:mt-10">
                   <div className="flex flex-col py-3 px-3">
-                    <span className="body-14 text-base-content/50">Platform</span>
+                    <span className="body-14 text-base-content/50">
+                      Platform
+                    </span>
                     <span className="body-16 font-medium text-base-content mt-1">
                       {platforms}
                     </span>

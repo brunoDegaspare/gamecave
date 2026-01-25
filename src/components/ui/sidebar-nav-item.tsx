@@ -49,12 +49,12 @@ export default function SidebarNavItem({
       href={href}
       onClick={onClick}
       className={clsx(
-        "group flex items-center rounded-xl py-3 px-3 text-base font-medium transition-colors",
+        "group flex items-center rounded-xl py-3 px-3 text-base body-14 font-medium transition-colors",
         active
           ? "bg-base-300 text-primary"
           : "text-base-content/70 hover:bg-base-300",
         collapsed ? "justify-center" : "gap-3",
-        className
+        className,
       )}
       aria-current={active ? "page" : undefined}
     >

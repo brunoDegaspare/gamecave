@@ -3,7 +3,7 @@ import AuthBrand from "@/components/auth/auth-brand";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen text-base-content [background:radial-gradient(1000px_circle_at_top_center,oklch(var(--p)/0.15),transparent_60%),oklch(var(--b1))]">
+    <div className="min-h-screen text-base-content [background:radial-gradient(900px_circle_at_top_center,oklch(var(--p)/0.22),transparent_60%),radial-gradient(1200px_circle_at_10%_10%,oklch(var(--s)/0.1),transparent_56%),oklch(var(--b1))]">
       <div className="mx-auto grid min-h-screen w-full max-w-5xl grid-cols-1 content-start items-start gap-10 px-6 py-12 md:grid-cols-2 md:content-center md:items-center md:gap-12">
         <div className="space-y-6">
           <AuthBrand />

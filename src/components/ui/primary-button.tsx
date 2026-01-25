@@ -2,8 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import clsx from "clsx";
 import Icon, { type IconName } from "@/components/ui/icon";
 
-export interface PrimaryButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface PrimaryButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size: "md" | "lg";
   showIcon?: boolean;
   iconOnly?: IconName;
@@ -37,9 +36,9 @@ export default function PrimaryButton({
   const baseClasses = clsx(
     "inline-flex items-center justify-center gap-2 rounded-lg weight-semibold box-border border border-transparent transition-all duration-300 ease-out hover:cursor-pointer",
     sizeClasses,
-    "bg-primary text-primary-content hover:bg-primary-focus hover:shadow-[0_0_16px_oklch(var(--p)/0.45)]",
+    "bg-primary text-primary-content hover:bg-primary hover:brightness-125 hover:shadow-[0_0_18px_oklch(var(--p)/0.35)]",
     "disabled:cursor-not-allowed disabled:opacity-70",
-    className
+    className,
   );
 
   const renderIcon = (name?: IconName) =>
