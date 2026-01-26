@@ -41,8 +41,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
   const [showCollectionsScrollbar, setShowCollectionsScrollbar] =
     useState(false);
   const [showVerificationToast, setShowVerificationToast] = useState(false);
-  const [isCollectionStatusReady, setIsCollectionStatusReady] =
-    useState(false);
+  const [isCollectionStatusReady, setIsCollectionStatusReady] = useState(false);
   const collectionsScrollTimeout = useRef<number | null>(null);
   const collectionsScrollRef = useRef<HTMLDivElement | null>(null);
   const lastHandledCollectionId = useRef<number | null>(null);
@@ -88,13 +87,10 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     const loadCollectionsForGame = async () => {
       try {
         const token = await user.getIdToken();
-        const response = await fetch(
-          `/api/games/${game.igdb_id}/collections`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            signal: controller.signal,
-          },
-        );
+        const response = await fetch(`/api/games/${game.igdb_id}/collections`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
 
         if (!response.ok) {
           return;
@@ -483,7 +479,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                   {sortedCollections.map((collection) => (
                     <label
                       key={collection.id}
-                      className={`relative flex items-center gap-3 rounded-xl border border-base-300 bg-base-200/30 px-4 py-3 cursor-pointer transition-all duration-300 ease-out hover:bg-base-200 ${
+                      className={`relative flex items-center gap-3 rounded-xl px-4 py-3 cursor-pointer bg-base-200/70 border border-transparent transition-all duration-300 ease-out hover:bg-base-200/90 ${
                         recentCollectionIds.has(collection.id)
                           ? "opacity-0"
                           : "opacity-100"
@@ -493,7 +489,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                         type="checkbox"
                         checked={pendingCollectionIds.includes(collection.id)}
                         onChange={() => handleCollectionToggle(collection.id)}
-                        className="checkbox peer border-base-300 bg-base-200/80 hover:bg-base-200 checked:border-transparent checked:bg-primary checked:hover:bg-primary focus:ring-0 [--chkfg:oklch(var(--pc))] cursor-pointer transition-colors duration-300 ease-out"
+                        className="checkbox peer borde-primary-content bg-base-200/70 hover:bg-base-200 checked:border-transparent checked:bg-primary checked:hover:bg-primary focus:ring-0 [--chkfg:oklch(var(--pc))] cursor-pointer transition-colors duration-300 ease-out"
                       />
                       <span className="body-16 text-base-content">
                         {collection.name}

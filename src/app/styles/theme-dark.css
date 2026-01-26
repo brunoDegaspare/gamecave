@@ -13,6 +13,12 @@
     color: var(--gc-primary);
   }
 
+  /* Link
+  -------------------- */
+  a.link-accent {
+    color: var(--gc-action);
+  }
+
   /* Button
   -------------------- */
   .btn-primary {
@@ -20,12 +26,6 @@
   }
   .btn-primary:hover {
     background-color: var(--gc-primary-hover);
-  }
-
-  /* Link
-  -------------------- */
-  a.link-accent {
-    color: var(--gc-action);
   }
 
   /* Input

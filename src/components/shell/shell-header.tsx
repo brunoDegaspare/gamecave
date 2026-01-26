@@ -65,7 +65,7 @@ export default function ShellHeader({
           <SearchPaletteTrigger
             onClick={() => setOpen(true)}
             leftIconName="ico-search-outline"
-            widthClassName="w-full max-w-[860px]"
+            widthClassName="w-full max-w-[680px]"
             heightClassName="h-11"
           />
 
