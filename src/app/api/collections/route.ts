@@ -8,6 +8,47 @@ type CollectionPayload = {
   description?: string;
 };
 
+const slugify = (value: string) => {
+  const base = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return base || "collection";
+};
+
+const buildUniqueSlug = async (userId: number, name: string) => {
+  const baseSlug = slugify(name);
+  const existing = await prisma.collection.findMany({
+    where: {
+      userId,
+      slug: { startsWith: baseSlug },
+    },
+    select: { slug: true },
+  });
+
+  if (existing.length === 0) {
+    return baseSlug;
+  }
+
+  let maxSuffix = 0;
+  for (const entry of existing) {
+    const slug = entry.slug;
+    if (slug === baseSlug) {
+      maxSuffix = Math.max(maxSuffix, 1);
+      continue;
+    }
+    if (!slug.startsWith(`${baseSlug}-`)) {
+      continue;
+    }
+    const suffix = Number(slug.slice(baseSlug.length + 1));
+    if (Number.isSafeInteger(suffix) && suffix > 1) {
+      maxSuffix = Math.max(maxSuffix, suffix);
+    }
+  }
+
+  return maxSuffix <= 1 ? `${baseSlug}-2` : `${baseSlug}-${maxSuffix + 1}`;
+};
+
 const toAuthResponse = (error: AuthError) =>
   Response.json({ error: error.message, code: error.code }, { status: error.status });
 
@@ -28,6 +69,7 @@ export async function GET(request: Request) {
       select: {
         id: true,
         name: true,
+        slug: true,
         description: true,
         createdAt: true,
       },
@@ -63,15 +105,19 @@ export async function POST(request: Request) {
         ? payload.description.trim() || null
         : null;
 
+    const slug = await buildUniqueSlug(user.id, name);
+
     const collection = await prisma.collection.create({
       data: {
         name,
+        slug,
         description,
         userId: user.id,
       },
       select: {
         id: true,
         name: true,
+        slug: true,
         description: true,
         createdAt: true,
       },

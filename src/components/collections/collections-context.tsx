@@ -6,6 +6,7 @@ import type { ToastVariant } from "@/components/ui/toast";
 export type CollectionSummary = {
   id: number;
   name: string;
+  slug: string;
   description: string | null;
   createdAt: string;
 };
