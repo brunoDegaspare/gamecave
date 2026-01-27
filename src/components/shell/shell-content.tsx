@@ -1,12 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import * as React from "react";
+import Lenis from "lenis";
 import type { User } from "firebase/auth";
 import Alert from "@/components/ui/alert";
 import ShellHeader from "@/components/shell/shell-header";
 
 type ShellContentProps = {
-  children: ReactNode;
+  children: React.ReactNode;
   user: User | null;
   collapsed: boolean;
   isHydrated: boolean;
@@ -20,6 +21,50 @@ export default function ShellContent({
   isHydrated,
   onToggleSidebar,
 }: ShellContentProps) {
+  const contentWrapperRef = React.useRef<HTMLElement | null>(null);
+  const contentInnerRef = React.useRef<HTMLDivElement | null>(null);
+  const lenisRef = React.useRef<Lenis | null>(null);
+  const rafIdRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    if (!contentWrapperRef.current || !contentInnerRef.current) {
+      return;
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    if (!window.matchMedia("(min-width: 768px)").matches) {
+      return;
+    }
+
+    const lenis = new Lenis({
+      wrapper: contentWrapperRef.current,
+      content: contentInnerRef.current,
+      duration: 1.05,
+      smoothWheel: true,
+      smoothTouch: false,
+    });
+
+    lenisRef.current = lenis;
+
+    const raf = (time: number) => {
+      lenis.raf(time);
+      rafIdRef.current = requestAnimationFrame(raf);
+    };
+
+    rafIdRef.current = requestAnimationFrame(raf);
+
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+      lenis.destroy();
+      lenisRef.current = null;
+    };
+  }, []);
+
   return (
     <div className="drawer-content flex flex-1 flex-col min-h-0 min-w-0 md:order-2 md:overflow-x-hidden transition-all duration-300 ease-in-out">
       <ShellHeader
@@ -36,8 +81,11 @@ export default function ShellContent({
         </div>
       ) : null}
 
-      <main className="flex-1 min-h-0 overflow-visible md:overflow-y-auto gc-scrollbar">
-        {children}
+      <main
+        ref={contentWrapperRef}
+        className="flex-1 min-h-0 overflow-visible md:overflow-y-auto gc-scrollbar"
+      >
+        <div ref={contentInnerRef}>{children}</div>
       </main>
     </div>
   );

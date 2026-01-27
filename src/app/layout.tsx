@@ -16,8 +16,8 @@ export default function RootLayout({
   return (
     <html
       lang="en-US"
-      data-theme="dark"
-      className={`${saira.variable} h-full gc-scrollbaroo scroll-smooth md:scroll-auto`}
+      data-theme="black"
+      className={`${saira.variable} h-full gc-scrollbar scroll-smooth md:scroll-auto`}
       suppressHydrationWarning
     >
       <body

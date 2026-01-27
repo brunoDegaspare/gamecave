@@ -22,10 +22,6 @@ const config = {
     },
   },
   plugins: [lineClamp, scrollbar({ nocompatible: true }), daisyui],
-  daisyui: {
-    themes: true,
-    darkThemes: ["dark"],
-  },
 };
 
 export default config;

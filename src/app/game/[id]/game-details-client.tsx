@@ -441,7 +441,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
 
         <div className="drawer-side z-50">
           <div
-            className="drawer-overlay"
+            className="drawer-overlay gc-overlay-backdrop transition-opacity duration-300 ease-out"
             onClick={() => setIsDrawerOpen(false)}
           />
           <aside className="w-full md:w-[460px] h-full  bg-base-100 text-base-content border-l-0 md:border-l border-base-300 flex flex-col">

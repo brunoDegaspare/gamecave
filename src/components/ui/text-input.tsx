@@ -48,7 +48,7 @@ export default function TextInput({
         aria-describedby={shouldShowError && errorId ? errorId : undefined}
         className={clsx(
           // base
-          "gc-input-surface gc-placeholder w-full rounded-lg px-3 py-2 transition-all duration-300 ease-in-out",
+          "bg-base-200 gc-placeholder w-full rounded-lg px-3 py-2 transition-all duration-300 ease-in-out",
 
           // text + placeholder
           "text-base-content placeholder-base-content/50 placeholder:transition-opacity placeholder:duration-200 placeholder:ease-out",

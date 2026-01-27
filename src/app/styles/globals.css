@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 @plugin "daisyui" {
-  themes: dark;
+  themes: black;
 }
 
 @layer utilities {
@@ -15,6 +15,26 @@
   .dark.gc-scrollbar {
     color-scheme: dark;
   }
+  .sidebar-collections-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .sidebar-collections-scroll:hover {
+    scrollbar-color: oklch(var(--bc) / 0.24) transparent;
+  }
+  .sidebar-collections-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .sidebar-collections-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar-collections-scroll::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 999px;
+  }
+  .sidebar-collections-scroll:hover::-webkit-scrollbar-thumb {
+    background-color: oklch(var(--bc) / 0.1);
+  }
 }
 
 :root {
@@ -23,6 +43,16 @@
   --modal-backdrop-color: #000000;
   --modal-backdrop-opacity: 0.6;
   --modal-backdrop-blur: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 @theme inline {

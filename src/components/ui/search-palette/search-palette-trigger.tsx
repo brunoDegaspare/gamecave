@@ -31,7 +31,7 @@ export default function SearchPaletteTrigger({
   leftIconName = "ico-search-outline",
   showShortcut = true,
   shortcutLabel = "⌘ k",
-  className = "",
+  className = "text-primary-content",
   widthClassName = "",
   heightClassName = "h-10",
   size = "md",

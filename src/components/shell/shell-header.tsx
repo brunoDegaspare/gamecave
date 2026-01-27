@@ -21,7 +21,7 @@ export default function ShellHeader({
   const { open, setOpen } = useCommandPalette();
 
   return (
-    <header className="sticky top-0 z-40 bg-base-200/70 backdrop-blur-md border-b border-base-200">
+    <header className="sticky top-0 z-40 bg-base-100 backdrop-blur-md border-b border-base-200">
       <div className="relative mx-auto w-full px-6 py-3">
         <button
           onClick={onToggleSidebar}

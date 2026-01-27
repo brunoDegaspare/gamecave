@@ -69,7 +69,7 @@ export default function ModalLayout({
     >
       <div
         className={clsx(
-          "modal-box w-full max-w-3xl transition-[opacity,transform] duration-300 ease-out",
+          "modal-box w-full max-w-3xl rounded-2xl transition-[opacity,transform] duration-300 ease-out",
           isVisible ? "opacity-100 scale-100" : "opacity-0 scale-[0.98]",
           contentClassName,
         )}
@@ -92,7 +92,11 @@ export default function ModalLayout({
         {children}
       </div>
 
-      <form method="dialog" className="modal-backdrop" onClick={handleClose}>
+      <form
+        method="dialog"
+        className="modal-backdrop gc-overlay-backdrop transition-opacity duration-300 ease-out"
+        onClick={handleClose}
+      >
         <button aria-label={closeAriaLabel}>close</button>
       </form>
     </dialog>

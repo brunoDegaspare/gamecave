@@ -50,7 +50,9 @@ export default function SidebarNavItem({
       onClick={onClick}
       className={clsx(
         "group flex items-center rounded-xl py-3 px-3 text-base body-14 transition-colors",
-        active ? "bg-base-300" : "text-base-content/70 hover:bg-base-300",
+        active
+          ? "bg-base-300 text-secondary"
+          : "text-base-content/70 hover:bg-base-300",
         collapsed ? "justify-center" : "gap-3",
         className,
       )}
