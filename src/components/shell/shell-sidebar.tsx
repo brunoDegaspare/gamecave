@@ -176,7 +176,7 @@ export default function ShellSidebar({
                 {sortedCollections.map((collection) => (
                   <SidebarNavItem
                     key={collection.id}
-                    href={`/collection/${collection.slug}`}
+                    href={`/collection/${collection.id}-${collection.slug}`}
                     label={collection.name}
                     iconName="ico-collection-outline"
                     collapsed={collapsed}

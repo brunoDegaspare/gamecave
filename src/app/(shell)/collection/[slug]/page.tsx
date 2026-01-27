@@ -14,6 +14,7 @@ type CollectionGame = {
   igdbId: number | null;
   title: string;
   coverUrl: string;
+  releaseYear: number;
   addedAt: string;
   platforms: string[];
 };
@@ -29,16 +30,15 @@ type CollectionDetail = {
 
 const parseCollectionSlug = (rawSlug: string | string[] | undefined) => {
   const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
-  const trimmed = slug?.trim();
+  const trimmed = slug?.trim().toLowerCase();
   if (!trimmed) return null;
   return trimmed;
 };
 
-const formatPlatforms = (platforms: string[]) => {
-  const trimmed = platforms.map((platform) => platform.trim()).filter(Boolean);
-  if (trimmed.length === 0) return "Platform unknown";
-  return trimmed.join(", ");
-};
+const formatReleaseYear = (releaseYear: number) =>
+  Number.isFinite(releaseYear) && releaseYear > 0
+    ? String(releaseYear)
+    : "Year unknown";
 
 export default function CollectionPage() {
   const params = useParams<{ slug?: string | string[] }>();
@@ -145,7 +145,7 @@ export default function CollectionPage() {
                   key={game.id}
                   cover={game.coverUrl || FALLBACK_COVER}
                   name={game.title}
-                  platform={formatPlatforms(game.platforms)}
+                  platform={formatReleaseYear(game.releaseYear)}
                   className="w-full"
                 />
               ))}

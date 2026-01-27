@@ -5,8 +5,9 @@ export const runtime = "nodejs";
 
 const parseCollectionId = (raw: string | undefined) => {
   if (!raw) return null;
-  if (!/^\d+$/.test(raw)) return null;
-  const parsed = Number(raw);
+  const match = raw.trim().match(/^(\d+)/);
+  if (!match) return null;
+  const parsed = Number(match[1]);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) return null;
   return parsed;
 };
@@ -15,6 +16,10 @@ const parseCollectionSlug = (raw: string | undefined) => {
   if (!raw) return null;
   const trimmed = raw.trim().toLowerCase();
   if (!trimmed) return null;
+  const idSlugMatch = trimmed.match(/^\d+-(.+)$/);
+  if (idSlugMatch?.[1]) {
+    return idSlugMatch[1];
+  }
   return trimmed;
 };
 
@@ -71,6 +76,7 @@ export async function GET(
                 igdbId: true,
                 title: true,
                 coverUrl: true,
+                releaseYear: true,
                 platforms: {
                   select: {
                     platform: {
@@ -94,6 +100,7 @@ export async function GET(
       igdbId: game.igdbId,
       title: game.title,
       coverUrl: game.coverUrl,
+      releaseYear: game.releaseYear,
       addedAt,
       platforms: game.platforms.map((entry) => entry.platform.name),
     }));
