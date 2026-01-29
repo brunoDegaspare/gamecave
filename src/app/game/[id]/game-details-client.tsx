@@ -52,6 +52,13 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
   const hasLocalSelectionRef = useRef(false);
   const drawerInitializedRef = useRef(false);
   const baselineCollectionIdsRef = useRef<number[]>([]);
+  const bodyOverflowRef = useRef<string | null>(null);
+  const bodyPaddingRightRef = useRef<string | null>(null);
+  const htmlOverflowRef = useRef<string | null>(null);
+  const mainOverflowRef = useRef<string | null>(null);
+  const mainPaddingRightRef = useRef<string | null>(null);
+  const mainElementRef = useRef<HTMLElement | null>(null);
+  const drawerRef = useRef<HTMLElement | null>(null);
   const sortedCollections = [...collections].sort((a, b) => {
     const left = a.name.toLowerCase();
     const right = b.name.toLowerCase();
@@ -170,6 +177,165 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isDrawerOpen) {
+      if (bodyOverflowRef.current !== null) {
+        document.body.style.overflow = bodyOverflowRef.current;
+        bodyOverflowRef.current = null;
+      }
+      if (bodyPaddingRightRef.current !== null) {
+        document.body.style.paddingRight = bodyPaddingRightRef.current;
+        bodyPaddingRightRef.current = null;
+      }
+      if (htmlOverflowRef.current !== null) {
+        document.documentElement.style.overflow = htmlOverflowRef.current;
+        htmlOverflowRef.current = null;
+      }
+      if (mainElementRef.current) {
+        if (mainOverflowRef.current !== null) {
+          mainElementRef.current.style.overflow = mainOverflowRef.current;
+          mainOverflowRef.current = null;
+        }
+        if (mainPaddingRightRef.current !== null) {
+          mainElementRef.current.style.paddingRight = mainPaddingRightRef.current;
+          mainPaddingRightRef.current = null;
+        }
+      }
+      if (document.body.dataset.drawerScrollLocked) {
+        delete document.body.dataset.drawerScrollLocked;
+      }
+      return;
+    }
+
+    if (bodyOverflowRef.current === null) {
+      bodyOverflowRef.current = document.body.style.overflow;
+    }
+    if (bodyPaddingRightRef.current === null) {
+      bodyPaddingRightRef.current = document.body.style.paddingRight;
+    }
+    if (htmlOverflowRef.current === null) {
+      htmlOverflowRef.current = document.documentElement.style.overflow;
+    }
+    if (!mainElementRef.current) {
+      mainElementRef.current = document.querySelector("main");
+    }
+    if (mainElementRef.current) {
+      if (mainOverflowRef.current === null) {
+        mainOverflowRef.current = mainElementRef.current.style.overflow;
+      }
+      if (mainPaddingRightRef.current === null) {
+        mainPaddingRightRef.current = mainElementRef.current.style.paddingRight;
+      }
+    }
+
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    document.body.style.paddingRight =
+      scrollbarWidth > 0 ? `${scrollbarWidth}px` : "";
+    document.documentElement.style.overflow = "hidden";
+    if (mainElementRef.current) {
+      mainElementRef.current.style.overflow = "hidden";
+      mainElementRef.current.style.paddingRight =
+        scrollbarWidth > 0 ? `${scrollbarWidth}px` : "";
+    }
+    document.body.dataset.drawerScrollLocked = "true";
+
+    return () => {
+      if (bodyOverflowRef.current !== null) {
+        document.body.style.overflow = bodyOverflowRef.current;
+        bodyOverflowRef.current = null;
+      }
+      if (bodyPaddingRightRef.current !== null) {
+        document.body.style.paddingRight = bodyPaddingRightRef.current;
+        bodyPaddingRightRef.current = null;
+      }
+      if (htmlOverflowRef.current !== null) {
+        document.documentElement.style.overflow = htmlOverflowRef.current;
+        htmlOverflowRef.current = null;
+      }
+      if (mainElementRef.current) {
+        if (mainOverflowRef.current !== null) {
+          mainElementRef.current.style.overflow = mainOverflowRef.current;
+          mainOverflowRef.current = null;
+        }
+        if (mainPaddingRightRef.current !== null) {
+          mainElementRef.current.style.paddingRight = mainPaddingRightRef.current;
+          mainPaddingRightRef.current = null;
+        }
+      }
+      if (document.body.dataset.drawerScrollLocked) {
+        delete document.body.dataset.drawerScrollLocked;
+      }
+    };
+  }, [isDrawerOpen]);
+
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+
+    const isInsideDrawer = (target: EventTarget | null) => {
+      if (!target || !drawerRef.current) return false;
+      return drawerRef.current.contains(target as Node);
+    };
+
+    const isInsideScrollable = (target: EventTarget | null) => {
+      if (!target || !collectionsScrollRef.current) return false;
+      return collectionsScrollRef.current.contains(target as Node);
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      if (isInsideScrollable(event.target)) {
+        event.stopPropagation();
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (isInsideScrollable(event.target)) {
+        event.stopPropagation();
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const scrollKeys = new Set([
+        "ArrowUp",
+        "ArrowDown",
+        "PageUp",
+        "PageDown",
+        "Home",
+        "End",
+        " ",
+      ]);
+      if (!scrollKeys.has(event.key)) return;
+      if (isInsideDrawer(document.activeElement)) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    document.addEventListener("wheel", handleWheel, {
+      passive: false,
+      capture: true,
+    });
+    document.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+      capture: true,
+    });
+    document.addEventListener("keydown", handleKeyDown, true);
+
+    return () => {
+      document.removeEventListener("wheel", handleWheel, true);
+      document.removeEventListener("touchmove", handleTouchMove, true);
+      document.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [isDrawerOpen]);
 
   const handleCollectionsScroll = () => {
     setShowCollectionsScrollbar(true);
@@ -490,7 +656,10 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
             className="drawer-overlay gc-overlay-backdrop transition-opacity duration-300 ease-out"
             onClick={() => setIsDrawerOpen(false)}
           />
-          <aside className="w-full md:w-[460px] h-full  bg-base-100 text-base-content border-l-0 md:border-l border-base-300 flex flex-col">
+          <aside
+            ref={drawerRef}
+            className="w-full md:w-[460px] h-[100dvh] max-h-screen bg-base-100 text-base-content border-l-0 md:border-l border-base-300 flex flex-col"
+          >
             <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 px-4 py-3">
               <div className="flex items-center justify-between">
                 <h3 className="heading-4 text-base-content">
@@ -505,7 +674,12 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
               </div>
             </div>
 
-            <div className=" bg-base-100 flex-1 px-4 pt-6 pb-0 md:pb-6">
+            <div
+              ref={collectionsScrollRef}
+              data-lenis-prevent
+              className="bg-base-100 flex-1 px-4 pt-6 pb-0 md:pb-6 overflow-y-auto overscroll-contain gc-scrollbar scrollbar-thin scrollbar-track-transparent scrollbar-thumb-base-content/30"
+              onScroll={handleCollectionsScroll}
+            >
               <div className="flex h-full flex-col space-y-6 pb-4">
                 <GhostButton
                   size="md"
@@ -515,15 +689,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                 >
                   New collection
                 </GhostButton>
-                <div
-                  ref={collectionsScrollRef}
-                  className={`flex-1 space-y-3 overflow-y-auto pr-1 gc-scrollbar scrollbar-thin scrollbar-track-transparent ${
-                    showCollectionsScrollbar
-                      ? "scrollbar-thumb-base-content/30"
-                      : "scrollbar-thumb-transparent"
-                  }`}
-                  onScroll={handleCollectionsScroll}
-                >
+                <div className="flex-1 space-y-3 pr-1">
                   {sortedCollections.map((collection) => (
                     <label
                       key={collection.id}
