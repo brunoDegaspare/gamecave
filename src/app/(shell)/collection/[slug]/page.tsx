@@ -683,6 +683,15 @@ export default function CollectionPage() {
                 : null
             }
             onUpdate={handleUpdateCollection}
+            onDelete={(collectionId) => {
+              setIsEditOpen(false);
+              void refreshCollections();
+              router.replace("/");
+              if (collection?.id === collectionId) {
+                setCollection(null);
+              }
+              showToast("Collection deleted", "success");
+            }}
           />
 
           {gameToRemove ? (

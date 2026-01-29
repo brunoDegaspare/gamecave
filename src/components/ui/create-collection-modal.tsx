@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useCollections } from "@/components/collections/collections-context";
 import AuthField from "@/components/auth/auth-field";
 import GhostButton from "@/components/ui/ghost-button";
 import ModalLayout from "@/components/ui/modal-layout";
@@ -29,6 +31,7 @@ type CreateCollectionModalProps = {
   onClose: () => void;
   onCreate?: (collection: CreateCollectionResponse) => void;
   onUpdate?: (collection: CreateCollectionResponse) => void;
+  onDelete?: (collectionId: number) => void;
   mode?: CollectionModalMode;
   collection?: EditableCollection | null;
 };
@@ -38,14 +41,17 @@ export default function CreateCollectionModal({
   onClose,
   onCreate,
   onUpdate,
+  onDelete,
   mode = "create",
   collection,
 }: CreateCollectionModalProps) {
   const { user } = useAuth();
+  const { showToast } = useCollections();
   const closeRef = useRef<(() => void) | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -149,10 +155,55 @@ export default function CreateCollectionModal({
     }, 700);
   };
 
+  const handleDelete = async () => {
+    if (!collection?.id || isDeleting) return;
+    setIsDeleting(true);
+    try {
+      if (!user) {
+        throw new Error("Please sign in to manage collections.");
+      }
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/collections/${collection.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        console.error("Oops, we couldn't delete that collection.", {
+          status: response.status,
+          error: errorBody,
+        });
+        showToast(
+          "The collection couldn’t be deleted. Please try again.",
+          "error",
+        );
+        return;
+      }
+
+      onDelete?.(collection.id);
+      handleRequestClose();
+    } catch (error) {
+      console.error("Failed to delete collection.", error);
+      showToast(
+        "The collection couldn’t be deleted. Please try again.",
+        "error",
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (!open) return null;
 
   return (
-    <ModalLayout onClose={onClose} closeRef={closeRef}>
+    <ModalLayout
+      onClose={onClose}
+      closeRef={closeRef}
+      contentClassName="overflow-visible"
+    >
       <div className="space-y-6">
         <h3 className="heading-4 text-base-content">
           {mode === "edit" ? "Edit collection" : "New collection"}
@@ -176,18 +227,56 @@ export default function CreateCollectionModal({
         />
       </div>
 
-      <div className="modal-action mt-6">
-        <GhostButton size="md" type="button" onClick={handleRequestClose}>
-          Cancel
-        </GhostButton>
-        <PrimaryButton
-          size="md"
-          type="button"
-          disabled={!canSubmit}
-          onClick={handleSubmit}
-        >
-          {helperText}
-        </PrimaryButton>
+      <div className="modal-action mt-6 flex items-center justify-between">
+        {mode === "edit" ? (
+          <Popover className="relative">
+            <PopoverButton
+              type="button"
+              className="btn btn-ghost btn-md body-16 text-error hover:text-error"
+              disabled={isDeleting}
+            >
+              Delete
+            </PopoverButton>
+            <PopoverPanel className="absolute left-0 z-30 mt-2 w-64 rounded-xl border border-base-300 bg-base-100 p-4 shadow-lg">
+              <p className="body-14 text-base-content/70">
+                This action is permanent. All games will be removed from this
+                collection.
+              </p>
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  className="btn btn-error btn-sm"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  Delete
+                </button>
+                <PopoverButton
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </PopoverButton>
+              </div>
+            </PopoverPanel>
+          </Popover>
+        ) : (
+          <span />
+        )}
+        <div className="flex items-center gap-3">
+          <GhostButton size="md" type="button" onClick={handleRequestClose}>
+            Cancel
+          </GhostButton>
+          <PrimaryButton
+            size="md"
+            type="button"
+            disabled={!canSubmit}
+            onClick={handleSubmit}
+          >
+            {helperText}
+          </PrimaryButton>
+        </div>
       </div>
     </ModalLayout>
   );

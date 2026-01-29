@@ -253,3 +253,49 @@ export async function PATCH(
     return toServerError(error);
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ collectionId?: string }> },
+) {
+  try {
+    const user = await resolveAuthenticatedUser(request);
+    const { collectionId: rawCollectionId } = await params;
+    const collectionId = parseCollectionId(rawCollectionId);
+    const collectionSlug = parseCollectionSlug(rawCollectionId);
+    if (!collectionId && !collectionSlug) {
+      return Response.json({ error: "Invalid collection id." }, { status: 400 });
+    }
+
+    const orConditions: Array<{ id?: number; slug?: string }> = [];
+    if (collectionId) {
+      orConditions.push({ id: collectionId });
+    }
+    if (collectionSlug) {
+      orConditions.push({ slug: collectionSlug });
+    }
+
+    const existing = await prisma.collection.findFirst({
+      where: {
+        userId: user.id,
+        OR: orConditions,
+      },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return Response.json({ error: "Collection not found." }, { status: 404 });
+    }
+
+    await prisma.collection.delete({
+      where: { id: existing.id },
+    });
+
+    return Response.json({ id: existing.id });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return toAuthResponse(error);
+    }
+    return toServerError(error);
+  }
+}

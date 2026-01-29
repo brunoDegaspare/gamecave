@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fontsource/saira": "^5.2.10",
+    "@headlessui/react": "^2.2.9",
     "@heroui/react": "^2.8.5",
     "@prisma/client": "^6.19.2",
     "@tailwindcss/line-clamp": "^0.4.4",
