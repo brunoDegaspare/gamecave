@@ -42,11 +42,16 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     useState(false);
   const [showVerificationToast, setShowVerificationToast] = useState(false);
   const [isCollectionStatusReady, setIsCollectionStatusReady] = useState(false);
+  const [drawerTitle, setDrawerTitle] = useState("Add to collections");
+  const [allowEmptySelection, setAllowEmptySelection] = useState(false);
+  const [drawerCtaLabel, setDrawerCtaLabel] = useState("Add");
   const collectionsScrollTimeout = useRef<number | null>(null);
   const collectionsScrollRef = useRef<HTMLDivElement | null>(null);
   const lastHandledCollectionId = useRef<number | null>(null);
   const verificationToastTimeout = useRef<number | null>(null);
   const hasLocalSelectionRef = useRef(false);
+  const drawerInitializedRef = useRef(false);
+  const baselineCollectionIdsRef = useRef<number[]>([]);
   const sortedCollections = [...collections].sort((a, b) => {
     const left = a.name.toLowerCase();
     const right = b.name.toLowerCase();
@@ -59,8 +64,24 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     if (isDrawerOpen) {
       setPendingCollectionIds(selectedCollectionIds);
       setShowCollectionError(false);
+      if (!drawerInitializedRef.current) {
+        const hadCollections = baselineCollectionIdsRef.current.length > 0;
+        setDrawerTitle(
+          hadCollections ? "Manage collections" : "Add to collections",
+        );
+        setAllowEmptySelection(hadCollections);
+        setDrawerCtaLabel(hadCollections ? "Save changes" : "Add");
+        drawerInitializedRef.current = true;
+      }
+    } else {
+      drawerInitializedRef.current = false;
     }
   }, [isDrawerOpen, selectedCollectionIds]);
+
+  useEffect(() => {
+    if (!isCollectionStatusReady || isDrawerOpen) return;
+    baselineCollectionIdsRef.current = [...selectedCollectionIds];
+  }, [isCollectionStatusReady, isDrawerOpen, selectedCollectionIds]);
 
   useEffect(() => {
     if (!isDrawerOpen) return;
@@ -183,7 +204,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
   };
 
   const handleApplyCollections = () => {
-    if (pendingCollectionIds.length === 0) {
+    if (pendingCollectionIds.length === 0 && !allowEmptySelection) {
       setShowCollectionError(true);
       return;
     }
@@ -200,6 +221,12 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
 
     const gameId = Number(game.igdb_id);
     const collectionIds = [...pendingCollectionIds];
+    const toAdd = collectionIds.filter(
+      (collectionId) => !selectedCollectionIds.includes(collectionId),
+    );
+    const toRemove = selectedCollectionIds.filter(
+      (collectionId) => !collectionIds.includes(collectionId),
+    );
 
     if (!user) {
       showToast(
@@ -212,8 +239,12 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     void (async () => {
       try {
         const token = await user.getIdToken();
-        const results = await Promise.all(
-          collectionIds.map(async (collectionId) => {
+        if (toAdd.length === 0 && toRemove.length === 0) {
+          return;
+        }
+
+        await Promise.all([
+          ...toAdd.map(async (collectionId) => {
             const response = await fetch(
               `/api/collections/${collectionId}/games`,
               {
@@ -234,27 +265,42 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
               });
               throw new Error("Add to collection failed");
             }
-            return response.json();
           }),
-        );
+          ...toRemove.map(async (collectionId) => {
+            const response = await fetch(
+              `/api/collections/${collectionId}/games`,
+              {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ igdbId: gameId }),
+              },
+            );
 
-        if (results.length > 0) {
-          const collectionCount = collectionIds.length;
-          const gameCount = 1;
-          let message = "Game added to collection.";
-          if (gameCount === 1 && collectionCount > 1) {
-            message = `Game added to ${collectionCount} collections.`;
-          } else if (gameCount > 1) {
-            message = `${gameCount} games added to ${
-              collectionCount === 1 ? "collection" : "collections"
-            }.`;
-          }
-          showToast(message, "success");
-        }
+            if (!response.ok) {
+              const errorBody = await response.json().catch(() => null);
+              console.error("Failed to remove game from collection.", {
+                status: response.status,
+                error: errorBody,
+              });
+              throw new Error("Remove from collection failed");
+            }
+          }),
+        ]);
+
+        const hasSelections = collectionIds.length > 0;
+        showToast(
+          hasSelections
+            ? "Collections updated"
+            : "Removed from all collections",
+          "success",
+        );
       } catch (error) {
         console.error("Failed to add game to collection.", error);
         showToast(
-          "We couldn’t add this to your collection. Please try again.",
+          "We couldn’t update your collections. Please try again.",
           "error",
         );
       }
@@ -447,7 +493,9 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
           <aside className="w-full md:w-[460px] h-full  bg-base-100 text-base-content border-l-0 md:border-l border-base-300 flex flex-col">
             <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 px-4 py-3">
               <div className="flex items-center justify-between">
-                <h3 className="heading-4 text-base-content">Add to</h3>
+                <h3 className="heading-4 text-base-content">
+                  {drawerTitle}
+                </h3>
                 <GhostButton
                   size="md"
                   iconOnly="ico-cross-outline"
@@ -519,7 +567,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
                 className="w-full"
                 onClick={handleApplyCollections}
               >
-                Add
+                {drawerCtaLabel}
                 {pendingCollectionIds.length > 0
                   ? ` (${pendingCollectionIds.length})`
                   : ""}

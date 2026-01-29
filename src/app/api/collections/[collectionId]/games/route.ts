@@ -22,6 +22,11 @@ type AddGamePayload = {
   igdbId?: number;
 };
 
+type RemoveGamePayload = {
+  gameId?: number;
+  igdbId?: number;
+};
+
 const IGDB_API_URL = "https://api.igdb.com/v4/games";
 
 const parseCollectionId = (raw: string | undefined) => {
@@ -33,6 +38,13 @@ const parseCollectionId = (raw: string | undefined) => {
 };
 
 const parseIgdbId = (raw: number | undefined) => {
+  if (!raw || !Number.isFinite(raw)) return null;
+  const parsed = Number(raw);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) return null;
+  return parsed;
+};
+
+const parseGameId = (raw: number | undefined) => {
   if (!raw || !Number.isFinite(raw)) return null;
   const parsed = Number(raw);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) return null;
@@ -302,6 +314,83 @@ export async function POST(
       },
       { status: 201 },
     );
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return toAuthResponse(error);
+    }
+    return toServerError(error);
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ collectionId?: string }> },
+) {
+  try {
+    const user = await resolveAuthenticatedUser(request);
+    const { collectionId: rawCollectionId } = await params;
+    const collectionId = parseCollectionId(rawCollectionId);
+    if (!collectionId) {
+      return Response.json({ error: "Invalid collection id." }, { status: 400 });
+    }
+
+    const collection = await prisma.collection.findFirst({
+      where: { id: collectionId, userId: user.id },
+      select: { id: true },
+    });
+    if (!collection) {
+      return Response.json({ error: "Collection not found." }, { status: 404 });
+    }
+
+    let payload: RemoveGamePayload;
+    try {
+      payload = (await request.json()) as RemoveGamePayload;
+    } catch {
+      return Response.json({ error: "Invalid JSON payload." }, { status: 400 });
+    }
+
+    let gameId = parseGameId(payload.gameId);
+    if (!gameId) {
+      const igdbId = parseIgdbId(payload.igdbId);
+      if (!igdbId) {
+        return Response.json({ error: "Invalid game id." }, { status: 400 });
+      }
+      const game = await prisma.game.findUnique({
+        where: { igdbId },
+        select: { id: true },
+      });
+      if (!game) {
+        return Response.json({ error: "Game not found." }, { status: 404 });
+      }
+      gameId = game.id;
+    }
+
+    const existingLink = await prisma.collectionGame.findUnique({
+      where: {
+        collectionId_gameId: {
+          collectionId,
+          gameId,
+        },
+      },
+    });
+
+    if (!existingLink) {
+      return Response.json(
+        { error: "Game not found in collection." },
+        { status: 404 },
+      );
+    }
+
+    await prisma.collectionGame.delete({
+      where: {
+        collectionId_gameId: {
+          collectionId,
+          gameId,
+        },
+      },
+    });
+
+    return Response.json({ collectionId, gameId });
   } catch (error) {
     if (error instanceof AuthError) {
       return toAuthResponse(error);

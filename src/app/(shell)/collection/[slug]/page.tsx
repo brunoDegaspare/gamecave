@@ -9,6 +9,9 @@ import Alert from "@/components/ui/alert";
 import CreateCollectionModal from "@/components/ui/create-collection-modal";
 import GameCard from "@/components/ui/game-card";
 import Icon from "@/components/ui/icon";
+import ModalLayout from "@/components/ui/modal-layout";
+import GhostButton from "@/components/ui/ghost-button";
+import SecondaryButton from "@/components/ui/secondary-button";
 
 const FALLBACK_COVER =
   "https://images.unsplash.com/photo-1585076800242-945c4bb12c53?auto=format&fit=crop&w=1200&q=80";
@@ -170,6 +173,8 @@ export default function CollectionPage() {
   const [isPlatformOpen, setIsPlatformOpen] = React.useState(false);
   const platformRef = React.useRef<HTMLDivElement | null>(null);
   const [isEditOpen, setIsEditOpen] = React.useState(false);
+  const [gameToRemove, setGameToRemove] = React.useState<CollectionGame | null>(null);
+  const [isRemoving, setIsRemoving] = React.useState(false);
 
   const availablePlatforms = React.useMemo(() => {
     if (!collection) return [];
@@ -378,6 +383,47 @@ export default function CollectionPage() {
     }
   };
 
+  const handleConfirmRemove = async () => {
+    if (!collection || !gameToRemove || !user || isRemoving) return;
+    setIsRemoving(true);
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/collections/${collection.id}/games`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ gameId: gameToRemove.id }),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        console.error("Failed to remove game from collection.", {
+          status: response.status,
+          error: errorBody,
+        });
+        return;
+      }
+
+      setCollection((prev) =>
+        prev
+          ? {
+              ...prev,
+              games: prev.games.filter((game) => game.id !== gameToRemove.id),
+            }
+          : prev,
+      );
+      showToast("Game removed from collection", "success");
+      setGameToRemove(null);
+    } catch (error) {
+      console.error("Failed to remove game from collection.", error);
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8 p-6 max-w-[1440px] mx-auto">
       {error ? (
@@ -582,13 +628,43 @@ export default function CollectionPage() {
               className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
             >
               {filteredGames.map((game) => (
-                <GameCard
-                  key={game.id}
-                  cover={game.coverUrl || FALLBACK_COVER}
-                  name={game.title}
-                  platform={formatReleaseYear(game.releaseYear)}
-                  className="w-full"
-                />
+                <div key={game.id} className="group relative">
+                  <GameCard
+                    cover={game.coverUrl || FALLBACK_COVER}
+                    name={game.title}
+                    platform={formatReleaseYear(game.releaseYear)}
+                    className="w-full"
+                  />
+                  <div
+                    className="dropdown dropdown-end absolute top-2 right-2"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      tabIndex={0}
+                      className="btn btn-circle btn-ghost btn-sm bg-base-100/70 text-base-content/90 backdrop-blur-sm shadow-sm hover:bg-base-100/90 focus-visible:bg-base-100/90"
+                      aria-label="Open game actions"
+                      title="Open game actions"
+                    >
+                      <span className="text-lg leading-none text-base-content/90">
+                        ⋯
+                      </span>
+                    </button>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu menu-sm mt-1 w-48 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
+                    >
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => setGameToRemove(game)}
+                        >
+                          Remove from collection
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               ))}
             </section>
           )}
@@ -608,6 +684,45 @@ export default function CollectionPage() {
             }
             onUpdate={handleUpdateCollection}
           />
+
+          {gameToRemove ? (
+            <ModalLayout
+              onClose={() => {
+                if (!isRemoving) {
+                  setGameToRemove(null);
+                }
+              }}
+              contentClassName="max-w-md bg-base-100 text-base-content"
+            >
+              <div className="space-y-3">
+                <h3 className="heading-4 text-base-content">
+                  Remove game from collection?
+                </h3>
+                <p className="body-16 text-base-content/70">
+                  This won’t delete the game from your library.
+                </p>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <GhostButton
+                  size="md"
+                  type="button"
+                  onClick={() => setGameToRemove(null)}
+                  disabled={isRemoving}
+                >
+                  Cancel
+                </GhostButton>
+                <SecondaryButton
+                  size="md"
+                  type="button"
+                  onClick={handleConfirmRemove}
+                  disabled={isRemoving}
+                >
+                  Remove
+                </SecondaryButton>
+              </div>
+            </ModalLayout>
+          ) : null}
         </>
       ) : null}
     </div>
