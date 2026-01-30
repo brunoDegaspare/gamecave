@@ -19,9 +19,22 @@ export default function GameCard({
   onClick,
   className,
 }: GameCardProps) {
+  const isInteractive = Boolean(onClick);
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!onClick) return;
+    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      onClick();
+    }
+  };
+
   return (
     <div
       onClick={onClick}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
+      role={isInteractive ? "link" : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      aria-label={isInteractive ? name : undefined}
       className={clsx(
         "flex flex-col items-center rounded-xl p-3 transition-all duration-200 hover:bg-base-200/60 hover:cursor-pointer hover:scale-[1.02]",
         className

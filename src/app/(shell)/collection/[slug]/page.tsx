@@ -633,6 +633,7 @@ export default function CollectionPage() {
                     cover={game.coverUrl || FALLBACK_COVER}
                     name={game.title}
                     platform={formatReleaseYear(game.releaseYear)}
+                    onClick={() => router.push(`/game/${game.id}`)}
                     className="w-full"
                   />
                   <div
