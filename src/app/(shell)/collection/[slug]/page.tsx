@@ -175,6 +175,13 @@ export default function CollectionPage() {
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [gameToRemove, setGameToRemove] = React.useState<CollectionGame | null>(null);
   const [isRemoving, setIsRemoving] = React.useState(false);
+  const collectionContextQuery = React.useMemo(() => {
+    if (!collection) return "";
+    const params = new URLSearchParams();
+    params.set("collectionSlug", collection.slug);
+    params.set("collectionName", collection.name);
+    return `?${params.toString()}`;
+  }, [collection]);
 
   const availablePlatforms = React.useMemo(() => {
     if (!collection) return [];
@@ -633,7 +640,9 @@ export default function CollectionPage() {
                     cover={game.coverUrl || FALLBACK_COVER}
                     name={game.title}
                     platform={formatReleaseYear(game.releaseYear)}
-                    onClick={() => router.push(`/game/${game.id}`)}
+                    onClick={() =>
+                      router.push(`/game/${game.id}${collectionContextQuery}`)
+                    }
                     className="w-full"
                   />
                   <div

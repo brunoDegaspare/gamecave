@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import MainLayout from "@/components/layout/shell";
 import AuthGate from "@/components/auth/auth-gate";
@@ -22,6 +24,12 @@ type GameDetailsContentProps = {
 
 function GameDetailsContent({ game }: GameDetailsContentProps) {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const collectionSlug = searchParams.get("collectionSlug")?.trim();
+  const collectionName = searchParams.get("collectionName")?.trim();
+  const backLabel = collectionName
+    ? `← Back to ${collectionName}`
+    : "← Back to collection";
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<number[]>(
     [],
@@ -536,6 +544,16 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
           onChange={(event) => setIsDrawerOpen(event.target.checked)}
         />
         <div className="drawer-content w-full h-full min-h-0 bg-base-100 text-base-content pb-20 md:pb-0">
+          {collectionSlug ? (
+            <div className="mx-auto w-full max-w-6xl px-4 pt-6 md:px-6">
+              <Link
+                href={`/collection/${collectionSlug}`}
+                className="inline-flex items-center gap-2 text-sm font-medium text-base-content/70 transition-colors hover:text-base-content"
+              >
+                {backLabel}
+              </Link>
+            </div>
+          ) : null}
           {/* ===== HERO ===== */}
           <section className="relative isolate">
             {heroBackground ? (
