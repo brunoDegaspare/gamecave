@@ -30,12 +30,13 @@ export const deleteAccount = async () => {
   return deleteUser(firebaseAuth.currentUser);
 };
 
-export const sendVerificationEmail = async () => {
-  if (!firebaseAuth.currentUser) {
+export const sendVerificationEmail = async (user?: User) => {
+  const targetUser = user ?? firebaseAuth.currentUser;
+  if (!targetUser) {
     throw new Error("No authenticated user to verify.");
   }
 
-  return sendEmailVerification(firebaseAuth.currentUser);
+  return sendEmailVerification(targetUser);
 };
 
 export const onAuthStateChangedListener = (callback: (user: User | null) => void) =>

@@ -119,12 +119,26 @@ export default function SignupPage() {
 
     let didSucceed = false;
     try {
-      await signUp(email, password);
+      const credential = await signUp(email, password);
       didSucceed = true;
       try {
-        await sendVerificationEmail();
+        await sendVerificationEmail(credential.user);
       } catch (verificationError) {
-        console.error("Failed to send verification email.", verificationError);
+        const code =
+          verificationError &&
+          typeof verificationError === "object" &&
+          "code" in verificationError
+            ? String((verificationError as { code: unknown }).code)
+            : "unknown";
+        const message =
+          verificationError instanceof Error
+            ? verificationError.message
+            : "Unknown error";
+        console.error("Failed to send verification email.", {
+          code,
+          message,
+          error: verificationError,
+        });
         setError(SIGNUP_MESSAGES.verificationFallback);
       }
 
@@ -132,6 +146,12 @@ export default function SignupPage() {
         router.replace("/");
       }, REDIRECT_DELAY_MS);
     } catch (err) {
+      const code =
+        err && typeof err === "object" && "code" in err
+          ? String((err as { code: unknown }).code)
+          : "unknown";
+      const message = err instanceof Error ? err.message : "Unknown error";
+      console.error("Failed to create account.", { code, message, error: err });
       setError(getSignupErrorMessage(err));
       setSuppressAutoRedirect(false);
     } finally {

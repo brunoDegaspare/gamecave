@@ -9,12 +9,15 @@ export type CollectionSummary = {
   slug: string;
   description: string | null;
   createdAt: string;
+  gamesCount?: number;
+  lastGameCover?: string | null;
 };
 
 export type CollectionsContextValue = {
   collections: CollectionSummary[];
   recentCollectionIds: Set<number>;
   lastCreatedCollectionId: number | null;
+  isLoadingCollections: boolean;
   refreshCollections: () => Promise<void>;
   registerCollectionCreated: (collection: CollectionSummary) => void;
   openCreateCollection: () => void;

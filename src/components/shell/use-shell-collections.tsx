@@ -15,6 +15,7 @@ type ToastConfig = {
 
 export function useShellCollections(user: User | null) {
   const [collections, setCollections] = React.useState<CollectionSummary[]>([]);
+  const [isLoadingCollections, setIsLoadingCollections] = React.useState(true);
   const sortedCollections = React.useMemo(
     () =>
       [...collections].sort((a, b) =>
@@ -36,10 +37,12 @@ export function useShellCollections(user: User | null) {
   const refreshCollections = React.useCallback(async () => {
     if (!user) {
       setCollections([]);
+      setIsLoadingCollections(false);
       return;
     }
 
     try {
+      setIsLoadingCollections(true);
       const token = await user.getIdToken();
       const response = await fetch("/api/collections", {
         headers: {
@@ -60,6 +63,8 @@ export function useShellCollections(user: User | null) {
       setCollections(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to load collections.", error);
+    } finally {
+      setIsLoadingCollections(false);
     }
   }, [user]);
 
@@ -120,6 +125,7 @@ export function useShellCollections(user: User | null) {
       collections,
       recentCollectionIds,
       lastCreatedCollectionId,
+      isLoadingCollections,
       refreshCollections,
       registerCollectionCreated,
       openCreateCollection,
@@ -129,6 +135,7 @@ export function useShellCollections(user: User | null) {
       collections,
       recentCollectionIds,
       lastCreatedCollectionId,
+      isLoadingCollections,
       refreshCollections,
       registerCollectionCreated,
       openCreateCollection,

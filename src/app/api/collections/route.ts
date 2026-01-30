@@ -72,10 +72,32 @@ export async function GET(request: Request) {
         slug: true,
         description: true,
         createdAt: true,
+        _count: {
+          select: { games: true },
+        },
+        games: {
+          orderBy: { addedAt: "desc" },
+          take: 1,
+          select: {
+            game: {
+              select: { coverUrl: true },
+            },
+          },
+        },
       },
     });
 
-    return Response.json(collections);
+    return Response.json(
+      collections.map((collection) => ({
+        id: collection.id,
+        name: collection.name,
+        slug: collection.slug,
+        description: collection.description,
+        createdAt: collection.createdAt,
+        gamesCount: collection._count.games,
+        lastGameCover: collection.games[0]?.game.coverUrl ?? null,
+      })),
+    );
   } catch (error) {
     if (error instanceof AuthError) {
       return toAuthResponse(error);

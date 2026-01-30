@@ -2,9 +2,6 @@
 
 import clsx from "clsx";
 
-const FALLBACK_COVER =
-  "https://images.unsplash.com/photo-1585076800242-945c4bb12c53?auto=format&fit=crop&w=1200&q=80";
-
 type CollectionCardProps = {
   title: string;
   gamesCount: number;
@@ -20,7 +17,7 @@ export default function CollectionCard({
   className,
   onClick,
 }: CollectionCardProps) {
-  const backgroundImage = lastGameCover || FALLBACK_COVER;
+  const hasCover = Boolean(lastGameCover);
 
   return (
     <article
@@ -31,22 +28,24 @@ export default function CollectionCard({
         className
       )}
     >
-      <div className="absolute inset-0 overflow-hidden">
-        <div
-          aria-hidden
-          style={{ backgroundImage: `url(${backgroundImage})` }}
-          className="absolute inset-[2px] scale-105 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-base-200/50" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-base-300/30 via-base-200/80 to-base-200/95" />
-      </div>
+      {hasCover ? (
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            aria-hidden
+            style={{ backgroundImage: `url(${lastGameCover})` }}
+            className="absolute inset-[2px] scale-105 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-base-200/50" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-base-300/30 via-base-200/80 to-base-200/95" />
+        </div>
+      ) : null}
 
       <div className="relative flex h-full w-full flex-col items-center justify-end px-5 pt-10 pb-6 text-center">
         <span className="px-3 py-1 text-sm body-16 text-base-content/90">
           {title}
         </span>
         <h4 className="heading-4 weight-medium text-base-content drop-shadow-sm">
-          {gamesCount} games
+          {gamesCount} {gamesCount === 1 ? "game" : "games"}
         </h4>
       </div>
     </article>

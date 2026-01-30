@@ -1,40 +1,18 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import HomeHighlights from "@/components/home/home-highlights";
 import CollectionCard from "@/components/ui/collection-card";
 import PrimaryButton from "@/components/ui/primary-button";
 import { useAuth } from "@/components/auth/auth-provider";
-
-const RECENT_COLLECTIONS = [
-  {
-    id: "snes",
-    title: "SNES Classics",
-    gamesCount: 18,
-    lastGameCover: "/covers/super-metroid.jpg",
-  },
-  {
-    id: "md",
-    title: "Mega Drive",
-    gamesCount: 12,
-    lastGameCover: "/covers/sonic-2-md.jpg",
-  },
-  {
-    id: "ms",
-    title: "Master System",
-    gamesCount: 9,
-    lastGameCover: "/covers/alex-kidd.jpg",
-  },
-  {
-    id: "psx",
-    title: "PlayStation",
-    gamesCount: 15,
-    lastGameCover: "/covers/mega-man-x.jpg",
-  },
-];
+import { useCollections } from "@/components/collections/collections-context";
 
 export default function HomePage() {
   const { user } = useAuth();
+  const { collections, openCreateCollection, isLoadingCollections } =
+    useCollections();
+  const router = useRouter();
   const [showVerificationModal, setShowVerificationModal] =
     React.useState(false);
   const dialogRef = React.useRef<HTMLDialogElement | null>(null);
@@ -119,11 +97,44 @@ export default function HomePage() {
           <h2 className="heading-5 text-base-content">Your collections</h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {RECENT_COLLECTIONS.map((collection) => (
-            <CollectionCard key={collection.id} {...collection} />
-          ))}
-        </div>
+        {isLoadingCollections ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={`collection-skeleton-${index}`}
+                className="min-h-[200px] rounded-xl bg-base-200"
+                aria-hidden
+              />
+            ))}
+          </div>
+        ) : collections.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-4 py-10 text-center">
+            <p className="body-16 text-base-content/60">
+              You don’t have any collections yet.
+            </p>
+            <PrimaryButton size="md" onClick={openCreateCollection}>
+              Create collection
+            </PrimaryButton>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {collections.map((collection) => (
+              <CollectionCard
+                key={collection.id}
+                title={collection.name}
+                gamesCount={collection.gamesCount ?? 0}
+                lastGameCover={
+                  collection.gamesCount && collection.gamesCount > 0
+                    ? collection.lastGameCover ?? undefined
+                    : undefined
+                }
+                onClick={() =>
+                  router.push(`/collection/${collection.id}-${collection.slug}`)
+                }
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
