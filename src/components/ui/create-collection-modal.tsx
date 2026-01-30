@@ -36,6 +36,8 @@ type CreateCollectionModalProps = {
   collection?: EditableCollection | null;
 };
 
+const DESCRIPTION_MAX_LENGTH = 300;
+
 export default function CreateCollectionModal({
   open,
   onClose,
@@ -57,7 +59,9 @@ export default function CreateCollectionModal({
     if (!open) return;
     if (mode === "edit" && collection) {
       setName(collection.name);
-      setDescription(collection.description ?? "");
+      setDescription(
+        (collection.description ?? "").slice(0, DESCRIPTION_MAX_LENGTH),
+      );
     } else {
       setName("");
       setDescription("");
@@ -67,15 +71,18 @@ export default function CreateCollectionModal({
 
   const trimmedName = name.trim();
   const canSubmit = Boolean(trimmedName) && !isSubmitting;
-  const helperText = useMemo(
-    () => {
-      if (isSubmitting) {
-        return mode === "edit" ? "Saving..." : "Creating...";
-      }
-      return mode === "edit" ? "Save changes" : "Create";
-    },
-    [isSubmitting, mode],
-  );
+  const descriptionCount = description.length;
+  const isDescriptionNearLimit =
+    descriptionCount >= DESCRIPTION_MAX_LENGTH - 50;
+  const descriptionCounterClassName = isDescriptionNearLimit
+    ? "caption-12 text-base-content/70 font-medium"
+    : "caption-12 text-base-content/50";
+  const helperText = useMemo(() => {
+    if (isSubmitting) {
+      return mode === "edit" ? "Saving..." : "Creating...";
+    }
+    return mode === "edit" ? "Save changes" : "Create";
+  }, [isSubmitting, mode]);
 
   const handleRequestClose = () => {
     if (closeRef.current) {
@@ -221,9 +228,21 @@ export default function CreateCollectionModal({
         <TextArea
           label="Description (optional)"
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={(event) => {
+            const nextValue = event.target.value.slice(
+              0,
+              DESCRIPTION_MAX_LENGTH,
+            );
+            setDescription(nextValue);
+          }}
           placeholder="What’s this collection about?"
           rows={4}
+          maxLength={DESCRIPTION_MAX_LENGTH}
+          footerSlot={
+            <span className={descriptionCounterClassName}>
+              {descriptionCount} / {DESCRIPTION_MAX_LENGTH}
+            </span>
+          }
         />
       </div>
 

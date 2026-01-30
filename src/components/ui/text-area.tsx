@@ -8,6 +8,7 @@ export type TextAreaProps = {
   errorId?: string;
   showError?: boolean;
   rightSlot?: ReactNode;
+  footerSlot?: ReactNode;
   containerClassName?: string;
   textareaClassName?: string;
 } & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "className">;
@@ -18,6 +19,7 @@ export default function TextArea({
   errorId,
   showError,
   rightSlot,
+  footerSlot,
   containerClassName,
   textareaClassName,
   value,
@@ -49,6 +51,9 @@ export default function TextArea({
           textareaClassName,
         )}
       />
+      {footerSlot ? (
+        <div className="flex justify-end">{footerSlot}</div>
+      ) : null}
       {shouldShowError ? (
         <span
           id={errorId}
