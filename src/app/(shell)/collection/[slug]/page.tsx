@@ -12,6 +12,8 @@ import Icon from "@/components/ui/icon";
 import ModalLayout from "@/components/ui/modal-layout";
 import GhostButton from "@/components/ui/ghost-button";
 import SecondaryButton from "@/components/ui/secondary-button";
+import PrimaryButton from "@/components/ui/primary-button";
+import { SearchPalette } from "@/components/ui/search-palette/search-palette";
 
 const FALLBACK_COVER =
   "https://images.unsplash.com/photo-1585076800242-945c4bb12c53?auto=format&fit=crop&w=1200&q=80";
@@ -175,6 +177,10 @@ export default function CollectionPage() {
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [gameToRemove, setGameToRemove] = React.useState<CollectionGame | null>(null);
   const [isRemoving, setIsRemoving] = React.useState(false);
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+  const [addingIgdbIds, setAddingIgdbIds] = React.useState<Set<number>>(
+    () => new Set(),
+  );
   const collectionContextQuery = React.useMemo(() => {
     if (!collection) return "";
     const params = new URLSearchParams();
@@ -390,6 +396,87 @@ export default function CollectionPage() {
     }
   };
 
+  const collectionIgdbIds = React.useMemo(() => {
+    if (!collection) return new Set<number>();
+    const ids = collection.games
+      .map((game) => game.igdbId)
+      .filter((id): id is number => typeof id === "number");
+    return new Set(ids);
+  }, [collection]);
+
+  const handleAddGame = React.useCallback(
+    async (igdbId: number) => {
+      if (!collection || !user) return;
+      if (addingIgdbIds.has(igdbId)) return;
+      setAddingIgdbIds((prev) => new Set(prev).add(igdbId));
+
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch(`/api/collections/${collection.id}/games`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ igdbId }),
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => null);
+          console.error("Failed to add game to collection.", {
+            status: response.status,
+            error: errorBody,
+          });
+          return;
+        }
+
+        const data = (await response.json()) as {
+          game?: {
+            id: number;
+            igdbId: number;
+            title: string;
+            coverUrl: string | null;
+            releaseYear: number | null;
+          };
+          addedAt?: string;
+          alreadyExists?: boolean;
+        };
+
+        if (!data.game || data.alreadyExists) {
+          return;
+        }
+
+        setCollection((prev) => {
+          if (!prev) return prev;
+          if (prev.games.some((game) => game.igdbId === data.game?.igdbId)) {
+            return prev;
+          }
+          const nextGame: CollectionGame = {
+            id: data.game.id,
+            igdbId: data.game.igdbId,
+            title: data.game.title,
+            coverUrl: data.game.coverUrl ?? "",
+            releaseYear: data.game.releaseYear ?? 0,
+            addedAt: data.addedAt ?? new Date().toISOString(),
+            platforms: [],
+          };
+          return { ...prev, games: [nextGame, ...prev.games] };
+        });
+
+        showToast(`Game added to ${collection.name}`, "success");
+      } catch (error) {
+        console.error("Failed to add game to collection.", error);
+      } finally {
+        setAddingIgdbIds((prev) => {
+          const next = new Set(prev);
+          next.delete(igdbId);
+          return next;
+        });
+      }
+    },
+    [addingIgdbIds, collection, showToast, user],
+  );
+
   const handleConfirmRemove = async () => {
     if (!collection || !gameToRemove || !user || isRemoving) return;
     setIsRemoving(true);
@@ -454,13 +541,18 @@ export default function CollectionPage() {
                 </p>
               ) : null}
             </div>
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm md:btn-md"
-              onClick={() => setIsEditOpen(true)}
-            >
-              Edit
-            </button>
+            <div className="flex items-center gap-2">
+              <PrimaryButton size="sm" type="button" onClick={() => setIsSearchOpen(true)}>
+                Add games
+              </PrimaryButton>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm md:btn-md"
+                onClick={() => setIsEditOpen(true)}
+              >
+                Edit
+              </button>
+            </div>
           </header>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -742,6 +834,19 @@ export default function CollectionPage() {
               </div>
             </ModalLayout>
           ) : null}
+          <SearchPalette
+            open={isSearchOpen}
+            setOpen={setIsSearchOpen}
+            items={[]}
+            panelClassName="!max-w-3xl md:!max-w-[680px] w-[92vw]"
+            collectionContext={{
+              id: collection.id,
+              name: collection.name,
+              existingIgdbIds: collectionIgdbIds,
+              addingIgdbIds,
+              onAddToCollection: handleAddGame,
+            }}
+          />
         </>
       ) : null}
     </div>

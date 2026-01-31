@@ -59,7 +59,10 @@ const normalizeUrl = (url?: string) => {
 const normalizeIgdbImageUrl = (url: string | undefined, size: string) => {
   const normalized = normalizeUrl(url);
   if (!normalized) return null;
-  return normalized.replace("/t_thumb/", `/${size}/`);
+  if (normalized.includes("/t_")) {
+    return normalized.replace(/\/t_[^/]+\//, `/${size}/`);
+  }
+  return normalized;
 };
 
 const toUniqueList = (values: Array<string | undefined>) =>
@@ -197,7 +200,7 @@ const persistIgdbGame = async (game: IgdbGame) => {
 
   await prisma.screenshot.deleteMany({ where: { gameId: dbGame.id } });
   const screenshots = toUniqueList(game.screenshots?.map((s) => s.url) ?? [])
-    .map((url) => normalizeUrl(url))
+    .map((url) => normalizeIgdbImageUrl(url, "t_screenshot_big"))
     .filter(Boolean) as string[];
 
   if (screenshots.length > 0) {

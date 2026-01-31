@@ -9,6 +9,7 @@ import GhostButton from "@/components/ui/ghost-button";
 type Item = {
   id: string;
   label: string;
+  igdbId?: number;
   group?: string;
   shortcut?: string;
   icon?: React.ReactNode;
@@ -68,12 +69,20 @@ export function SearchPalette({
   items,
   panelClassName,
   onSeeMore,
+  collectionContext,
 }: {
   open: boolean;
   setOpen: (v: boolean) => void;
   items: Item[];
   panelClassName?: string;
   onSeeMore?: () => void;
+  collectionContext?: {
+    id: number;
+    name: string;
+    existingIgdbIds: Set<number>;
+    addingIgdbIds?: Set<number>;
+    onAddToCollection?: (igdbId: number) => void | Promise<void>;
+  };
 }) {
   const router = useRouter();
   const [isMounted, setIsMounted] = React.useState(false);
@@ -143,6 +152,17 @@ export function SearchPalette({
 
   React.useEffect(() => {
     if (!open) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, setOpen]);
+
+  React.useEffect(() => {
+    if (!open) return;
     const trimmed = query.trim();
     if (trimmed.length < 2) {
       requestIdRef.current += 1;
@@ -174,6 +194,7 @@ export function SearchPalette({
         const nextItems =
           data.games?.map((game) => ({
             id: String(game.igdbId),
+            igdbId: game.igdbId,
             label: game.title,
             group: "Games",
             action: () => {
@@ -268,6 +289,11 @@ export function SearchPalette({
           loop
           shouldFilter={false}
         >
+          {collectionContext?.name ? (
+            <div className="px-4 pt-3 text-xs text-base-content/60">
+              Adding games to {collectionContext.name}
+            </div>
+          ) : null}
           <div className="relative">
             <Command.Input
               autoFocus
@@ -310,6 +336,39 @@ export function SearchPalette({
                       {it.icon ?? "🔎"}
                     </span>
                     <span className="flex-1">{it.label}</span>
+                    {collectionContext && typeof it.igdbId === "number" ? (
+                      <button
+                        type="button"
+                        className={`btn btn-xs ${
+                          collectionContext.existingIgdbIds.has(it.igdbId) ||
+                          collectionContext.addingIgdbIds?.has(it.igdbId)
+                            ? "btn-ghost"
+                            : "btn-primary"
+                        }`}
+                        disabled={
+                          collectionContext.existingIgdbIds.has(it.igdbId) ||
+                          collectionContext.addingIgdbIds?.has(it.igdbId)
+                        }
+                        onMouseDown={(event) => event.stopPropagation()}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          if (
+                            collectionContext.existingIgdbIds.has(it.igdbId) ||
+                            collectionContext.addingIgdbIds?.has(it.igdbId)
+                          ) {
+                            return;
+                          }
+                          collectionContext.onAddToCollection?.(it.igdbId);
+                        }}
+                      >
+                        {collectionContext.existingIgdbIds.has(it.igdbId)
+                          ? "✓ Added"
+                          : collectionContext.addingIgdbIds?.has(it.igdbId)
+                            ? "Adding..."
+                            : "Add to collection"}
+                      </button>
+                    ) : null}
                     {it.shortcut && (
                       <kbd className="rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/50">
                         {it.shortcut}
