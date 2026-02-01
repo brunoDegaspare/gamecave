@@ -9,7 +9,8 @@ type IgdbGame = {
   name?: string;
   first_release_date?: number;
   cover?: { url?: string };
-  game_type?: number;
+  category?: number;
+  version_parent?: number;
 };
 
 type SearchResult = {
@@ -17,10 +18,11 @@ type SearchResult = {
   title: string;
   releaseYear: number | null;
   coverUrl: string | null;
-  category: "Main" | "Remake" | "Port";
+  category: "Main" | "Remake" | "Port" | "Expanded" | "Game";
 };
 
 const IGDB_API_URL = "https://api.igdb.com/v4/games";
+const IGDB_ALLOWED_CATEGORIES = [0, 8, 10, 11];
 
 const normalizeText = (value: string) => {
   const lower = value.toLowerCase();
@@ -86,10 +88,11 @@ const normalizeIgdbImageUrl = (url: string | undefined, size: string) => {
   return normalized.replace("/t_thumb/", `/${size}/`);
 };
 
-const mapCategory = (gameType?: number): SearchResult["category"] | null => {
-  if (gameType === 0) return "Main";
-  if (gameType === 8) return "Remake";
-  if (gameType === 11) return "Port";
+const mapCategory = (category?: number): SearchResult["category"] | null => {
+  if (category === 0) return "Main";
+  if (category === 8) return "Remake";
+  if (category === 10) return "Expanded";
+  if (category === 11) return "Port";
   return null;
 };
 
@@ -104,25 +107,25 @@ const fetchIgdbSearch = async (
       hasClientId: Boolean(clientId),
       hasAccessToken: Boolean(accessToken),
     });
-    return [] as IgdbGame[];
+    return { games: [] as IgdbGame[], requestBody: null as string | null };
   }
 
   if (!normalizedQuery) {
-    return [] as IgdbGame[];
+    return { games: [] as IgdbGame[], requestBody: null as string | null };
   }
 
-  const whereParts = ["name != null", "game_type = (0, 8, 11)"];
+  const whereParts: string[] = [];
   if (platformIds.length > 0) {
     whereParts.push(`platforms = (${platformIds.join(",")})`);
   }
   const safeSearch = normalizedQuery.replace(/"/g, '\\"');
-  const fields = "id,name,first_release_date,cover.url,game_type";
+  const fields = "id,name,first_release_date,cover.url,category,version_parent";
   const body =
     [
       `fields ${fields}`,
       `search "${safeSearch}"`,
-      `where ${whereParts.join(" & ")}`,
-      "limit 20",
+      ...(whereParts.length > 0 ? [`where ${whereParts.join(" & ")}`] : []),
+      "limit 50",
     ].join("; ") + ";";
 
   const response = await fetch(IGDB_API_URL, {
@@ -141,30 +144,100 @@ const fetchIgdbSearch = async (
   });
 
   if (!response.ok) {
-    return [] as IgdbGame[];
+    return { games: [] as IgdbGame[], requestBody: body };
   }
 
-  return (await response.json()) as IgdbGame[];
+  return {
+    games: (await response.json()) as IgdbGame[],
+    requestBody: body,
+  };
 };
 
-const mapSearchResult = (game: IgdbGame): SearchResult | null => {
-  const title = game.name?.trim();
-  if (!title) return null;
-  const category = mapCategory(game.game_type);
-  if (!category) return null;
+const mapIgdbResults = (games: IgdbGame[]) => {
+  const results: SearchResult[] = [];
 
-  const releaseYear = game.first_release_date
-    ? new Date(game.first_release_date * 1000).getUTCFullYear()
-    : null;
-  const coverUrl = normalizeIgdbImageUrl(game.cover?.url, "t_cover_big");
+  for (const game of games) {
+    const title = game.name?.trim();
+    if (!title) {
+      continue;
+    }
+    let category: SearchResult["category"] | null = null;
+    if (typeof game.category === "number") {
+      category = mapCategory(game.category);
+      if (!category) {
+        continue;
+      }
+    } else {
+      category = "Game";
+    }
 
-  return {
-    igdbId: game.id,
-    title,
-    releaseYear,
-    coverUrl,
-    category,
-  };
+    const releaseYear = game.first_release_date
+      ? new Date(game.first_release_date * 1000).getUTCFullYear()
+      : null;
+    const coverUrl = normalizeIgdbImageUrl(game.cover?.url, "t_cover_big");
+
+    results.push({
+      igdbId: game.id,
+      title,
+      releaseYear,
+      coverUrl,
+      category,
+    });
+  }
+
+  return results;
+};
+
+const rankIgdbResults = (
+  games: SearchResult[],
+  normalizedQuery: string,
+  tokens: string[],
+) => {
+  if (games.length <= 1) return games;
+  const query = normalizedQuery.trim();
+  if (!query) return games;
+
+  const noiseTerms = new Set([
+    "wave",
+    "booster",
+    "course",
+    "pass",
+    "bundle",
+    "pack",
+  ]);
+
+  return games
+    .map((game, index) => {
+      const normalizedTitle = normalizeText(game.title);
+      const titleTokens = normalizedTitle.split(" ").filter(Boolean);
+      const exactMatch = normalizedTitle === query;
+      const hasAllTokens =
+        tokens.length > 0 && tokens.every((token) => titleTokens.includes(token));
+      const startsWithQuery = normalizedTitle.startsWith(query);
+      const containsQuery = normalizedTitle.includes(query);
+      const isNoisy =
+        normalizedTitle.includes("course pass") ||
+        titleTokens.some((token) => noiseTerms.has(token));
+
+      let rank = 4;
+      if (exactMatch) {
+        rank = 0;
+      } else if (hasAllTokens) {
+        rank = 1;
+      } else if (startsWithQuery) {
+        rank = 2;
+      } else if (containsQuery) {
+        rank = 3;
+      }
+
+      return { game, rank, isNoisy, index };
+    })
+    .sort((a, b) => {
+      if (a.rank !== b.rank) return a.rank - b.rank;
+      if (a.isNoisy !== b.isNoisy) return a.isNoisy ? 1 : -1;
+      return a.index - b.index;
+    })
+    .map(({ game }) => game);
 };
 
 const evaluateTitleMatch = (
@@ -323,20 +396,24 @@ export async function GET(request: Request) {
       return Response.json({ ok: true, games: [] });
     }
 
-    const [dbResults, igdbResults] = await Promise.all([
+    const [dbResults, igdbResponse] = await Promise.all([
       fetchDbSearchResults(
         normalized.query,
         normalized.tokens,
         normalized.platformNames,
       ),
-      fetchIgdbSearch(normalized.query, normalized.platformIds)
-        .then((games) =>
-          games
-            .map(mapSearchResult)
-            .filter((game): game is SearchResult => Boolean(game)),
-        )
-        .catch(() => [] as SearchResult[]),
+      fetchIgdbSearch(normalized.query, normalized.platformIds).catch(() => ({
+        games: [] as IgdbGame[],
+        requestBody: null as string | null,
+      })),
     ]);
+    const rawIgdbResults = igdbResponse.games;
+
+    const igdbResults = rankIgdbResults(
+      mapIgdbResults(rawIgdbResults),
+      normalized.query,
+      normalized.tokens,
+    );
 
     const seen = new Set<number>();
     const merged: SearchResult[] = [];

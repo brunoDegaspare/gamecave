@@ -34,3 +34,8 @@ Then open `http://localhost:3000`.
 ## Project status
 
 In progress (building the Front End components).
+
+## Manual checks
+
+- Search for `mario kart 8` returns both "Mario Kart 8" (Wii U) and "Mario Kart 8 Deluxe" (Switch) in the results.
+- Search for `mario kart 8 deluxe` returns "Mario Kart 8 Deluxe" (2017) near the top results.

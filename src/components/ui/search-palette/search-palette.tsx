@@ -23,7 +23,7 @@ type SearchResponse = {
     title: string;
     releaseYear: number | null;
     coverUrl: string | null;
-    category: "Main" | "Remake" | "Port";
+    category: "Main" | "Remake" | "Port" | "Expanded" | "Game";
   }>;
 };
 

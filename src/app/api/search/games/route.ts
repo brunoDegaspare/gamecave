@@ -50,17 +50,6 @@ const normalizeSearchQuery = (value: string) => {
   return { full: collapsed, loose: loose || collapsed };
 };
 
-const buildNameMatch = (full: string, loose: string) => {
-  const patterns = new Set<string>();
-  if (full) patterns.add(full);
-  if (loose) patterns.add(loose);
-  const escaped = (text: string) => text.replace(/"/g, '\\"');
-  const clauses = Array.from(patterns).map(
-    (text) => `name ~ *"${escaped(text)}"*`
-  );
-  return clauses.length > 0 ? `(${clauses.join(" | ")})` : "";
-};
-
 const normalizeUrl = (url?: string) => {
   if (!url) return null;
   return url.startsWith("//") ? `https:${url}` : url;
@@ -107,11 +96,7 @@ const fetchIgdbGames = async (query: string) => {
     return [] as IgdbGame[];
   }
 
-  const nameMatch = buildNameMatch(normalized.full, normalized.loose);
-  const whereParts = ["name != null", "category = (0, 8, 11)"];
-  if (nameMatch) {
-    whereParts.push(nameMatch);
-  }
+  const whereParts = ["name != null", "category = (0, 8, 10, 11)"];
   const searchQuery = normalized.loose || normalized.full;
   const safeSearch = searchQuery.replace(/"/g, '\\"');
 
