@@ -13,6 +13,11 @@ import GhostButton from "@/components/ui/ghost-button";
 import InvertedButton from "@/components/ui/inverted-button";
 import Alert from "@/components/ui/alert";
 import type { Game } from "@/lib/db/games";
+import {
+  addToWishlist,
+  fetchWishlistStatus,
+  removeFromWishlist,
+} from "@/lib/wishlist-client";
 
 type GameDetailsClientProps = {
   game: Game | null;
@@ -25,11 +30,20 @@ type GameDetailsContentProps = {
 function GameDetailsContent({ game }: GameDetailsContentProps) {
   const { user } = useAuth();
   const searchParams = useSearchParams();
+  const origin = searchParams.get("origin")?.trim();
   const collectionSlug = searchParams.get("collectionSlug")?.trim();
   const collectionName = searchParams.get("collectionName")?.trim();
-  const backLabel = collectionName
-    ? `← Back to ${collectionName}`
-    : "← Back to collection";
+  const isWishlistOrigin = origin === "wishlist";
+  const backLabel = isWishlistOrigin
+    ? `← Back to ${collectionName || "Wishlist"}`
+    : collectionName
+      ? `← Back to ${collectionName}`
+      : "← Back to collection";
+  const backHref = isWishlistOrigin
+    ? "/wishlist"
+    : collectionSlug
+      ? `/collection/${collectionSlug}`
+      : null;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<number[]>(
     [],
@@ -50,6 +64,9 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     useState(false);
   const [showVerificationToast, setShowVerificationToast] = useState(false);
   const [isCollectionStatusReady, setIsCollectionStatusReady] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlistStatusReady, setIsWishlistStatusReady] = useState(false);
+  const [isWishlistUpdating, setIsWishlistUpdating] = useState(false);
   const [drawerTitle, setDrawerTitle] = useState("Add to collections");
   const [allowEmptySelection, setAllowEmptySelection] = useState(false);
   const [drawerCtaLabel, setDrawerCtaLabel] = useState("Add");
@@ -58,6 +75,7 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
   const lastHandledCollectionId = useRef<number | null>(null);
   const verificationToastTimeout = useRef<number | null>(null);
   const hasLocalSelectionRef = useRef(false);
+  const hasLocalWishlistRef = useRef(false);
   const drawerInitializedRef = useRef(false);
   const baselineCollectionIdsRef = useRef<number[]>([]);
   const bodyOverflowRef = useRef<string | null>(null);
@@ -113,6 +131,9 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     hasLocalSelectionRef.current = false;
     setSelectedCollectionIds([]);
     setIsCollectionStatusReady(!user);
+    hasLocalWishlistRef.current = false;
+    setIsWishlisted(false);
+    setIsWishlistStatusReady(!user);
   }, [game.igdb_id, user]);
 
   useEffect(() => {
@@ -155,6 +176,43 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
 
     setIsCollectionStatusReady(false);
     void loadCollectionsForGame();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [game.igdb_id, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const controller = new AbortController();
+    let isActive = true;
+
+    const loadWishlistStatus = async () => {
+      try {
+        const token = await user.getIdToken();
+        const data = await fetchWishlistStatus(
+          token,
+          Number(game.igdb_id),
+          controller.signal,
+        );
+        if (!hasLocalWishlistRef.current) {
+          setIsWishlisted(Boolean(data.wishlisted));
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to load wishlist status for game.", error);
+      } finally {
+        if (isActive) {
+          setIsWishlistStatusReady(true);
+        }
+      }
+    };
+
+    setIsWishlistStatusReady(false);
+    void loadWishlistStatus();
 
     return () => {
       isActive = false;
@@ -363,18 +421,70 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
     );
   };
 
+  const triggerVerificationToast = () => {
+    setShowVerificationToast(true);
+    if (verificationToastTimeout.current !== null) {
+      window.clearTimeout(verificationToastTimeout.current);
+    }
+    verificationToastTimeout.current = window.setTimeout(() => {
+      setShowVerificationToast(false);
+    }, 2400);
+  };
+
   const handleOpenDrawer = () => {
     if (user && !user.emailVerified) {
-      setShowVerificationToast(true);
-      if (verificationToastTimeout.current !== null) {
-        window.clearTimeout(verificationToastTimeout.current);
-      }
-      verificationToastTimeout.current = window.setTimeout(() => {
-        setShowVerificationToast(false);
-      }, 2400);
+      triggerVerificationToast();
       return;
     }
     setIsDrawerOpen(true);
+  };
+
+  const handleToggleWishlist = () => {
+    if (user && !user.emailVerified) {
+      triggerVerificationToast();
+      return;
+    }
+    if (!user) {
+      showToast(
+        "We couldn’t update your wishlist. Please try again.",
+        "error",
+      );
+      return;
+    }
+    if (!game || isWishlistUpdating) return;
+
+    const previous = isWishlisted;
+    const next = !previous;
+    hasLocalWishlistRef.current = true;
+    setIsWishlisted(next);
+    setIsWishlistUpdating(true);
+
+    void (async () => {
+      try {
+        const token = await user.getIdToken();
+        const gameId = Number(game.igdb_id);
+        if (next) {
+          await addToWishlist(token, gameId);
+        } else {
+          await removeFromWishlist(token, gameId);
+        }
+
+        showToast(
+          next ? "Added to wishlist" : "Removed from wishlist",
+          "success",
+        );
+      } catch (error) {
+        console.error("Failed to update wishlist.", error);
+        hasLocalWishlistRef.current = false;
+        setIsWishlisted(previous);
+        showToast(
+          "We couldn’t update your wishlist. Please try again.",
+          "error",
+        );
+      } finally {
+        setIsWishlistUpdating(false);
+      }
+    })();
   };
 
   const handleApplyCollections = () => {
@@ -510,11 +620,35 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
       </PrimaryButton>
     );
 
-  const renderWishlistButton = () => (
-    <GhostButton size="md" iconOnly="ico-heart-outline" aria-label="Wishlist">
-      Wishlist
-    </GhostButton>
-  );
+  const renderWishlistButton = () =>
+    !isWishlistStatusReady ? (
+      <div
+        aria-hidden="true"
+        className="h-10 w-14 rounded-lg bg-base-200/60"
+      />
+    ) : isWishlisted ? (
+      <InvertedButton
+        size="md"
+        iconOnly="ico-heart-bold"
+        aria-label="Remove from wishlist"
+        aria-pressed={true}
+        onClick={handleToggleWishlist}
+        disabled={isWishlistUpdating}
+      >
+        Wishlist
+      </InvertedButton>
+    ) : (
+      <GhostButton
+        size="md"
+        iconOnly="ico-heart-outline"
+        aria-label="Add to wishlist"
+        aria-pressed={false}
+        onClick={handleToggleWishlist}
+        disabled={isWishlistUpdating}
+      >
+        Wishlist
+      </GhostButton>
+    );
 
   const heroBackground = game.screenshots[0] ?? game.cover_url ?? null;
   const coverUrl = game.cover_url;
@@ -544,10 +678,10 @@ function GameDetailsContent({ game }: GameDetailsContentProps) {
           onChange={(event) => setIsDrawerOpen(event.target.checked)}
         />
         <div className="drawer-content w-full h-full min-h-0 bg-base-100 text-base-content pb-20 md:pb-0">
-          {collectionSlug ? (
+          {backHref ? (
             <div className="mx-auto w-full max-w-6xl px-4 pt-6 md:px-6">
               <Link
-                href={`/collection/${collectionSlug}`}
+                href={backHref}
                 className="inline-flex items-center gap-2 text-sm font-medium text-base-content/70 transition-colors hover:text-base-content"
               >
                 {backLabel}

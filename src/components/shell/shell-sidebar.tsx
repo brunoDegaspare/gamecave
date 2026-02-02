@@ -146,7 +146,7 @@ export default function ShellSidebar({
             collapsed={collapsed}
           />
           <SidebarNavItem
-            href="#"
+            href="/wishlist"
             label="Wishlist"
             iconName="ico-heart-outline"
             collapsed={collapsed}

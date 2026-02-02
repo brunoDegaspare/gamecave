@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import clsx from "clsx";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useCollections } from "@/components/collections/collections-context";
 import Alert from "@/components/ui/alert";
@@ -14,6 +14,7 @@ import GhostButton from "@/components/ui/ghost-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 import PrimaryButton from "@/components/ui/primary-button";
 import { SearchPalette } from "@/components/ui/search-palette/search-palette";
+import { addToWishlist, fetchWishlist } from "@/lib/wishlist-client";
 
 const FALLBACK_COVER =
   "https://images.unsplash.com/photo-1585076800242-945c4bb12c53?auto=format&fit=crop&w=1200&q=80";
@@ -158,7 +159,13 @@ const getPlatformSummary = (platforms: string[]) => {
 
 export default function CollectionPage() {
   const params = useParams<{ slug?: string | string[] }>();
-  const collectionSlug = React.useMemo(() => parseCollectionSlug(params?.slug), [params]);
+  const collectionSlug = React.useMemo(
+    () => parseCollectionSlug(params?.slug),
+    [params],
+  );
+  const pathname = usePathname();
+  const isWishlist = pathname?.startsWith("/wishlist") ?? false;
+  const listLabelLower = isWishlist ? "wishlist" : "collection";
   const router = useRouter();
   const { user } = useAuth();
   const { refreshCollections, showToast } = useCollections();
@@ -181,13 +188,24 @@ export default function CollectionPage() {
   const [addingIgdbIds, setAddingIgdbIds] = React.useState<Set<number>>(
     () => new Set(),
   );
+  const [wishlistGameIds, setWishlistGameIds] = React.useState<Set<number>>(
+    () => new Set(),
+  );
+  const [pendingWishlistIds, setPendingWishlistIds] = React.useState<
+    Set<number>
+  >(() => new Set());
   const collectionContextQuery = React.useMemo(() => {
     if (!collection) return "";
     const params = new URLSearchParams();
+    if (isWishlist) {
+      params.set("origin", "wishlist");
+      params.set("collectionName", collection.name);
+      return `?${params.toString()}`;
+    }
     params.set("collectionSlug", collection.slug);
     params.set("collectionName", collection.name);
     return `?${params.toString()}`;
-  }, [collection]);
+  }, [collection, isWishlist]);
 
   const availablePlatforms = React.useMemo(() => {
     if (!collection) return [];
@@ -238,9 +256,9 @@ export default function CollectionPage() {
 
   React.useEffect(() => {
     if (!user) return;
-    if (!collectionSlug) {
+    if (!collectionSlug && !isWishlist) {
       setIsLoading(false);
-      setError("Invalid collection.");
+      setError(`Invalid ${listLabelLower}.`);
       return;
     }
 
@@ -253,7 +271,10 @@ export default function CollectionPage() {
 
       try {
         const token = await user.getIdToken();
-        const response = await fetch(`/api/collections/${collectionSlug}`, {
+        const endpoint = isWishlist
+          ? "/api/wishlist"
+          : `/api/collections/${collectionSlug}`;
+        const response = await fetch(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
           signal: controller.signal,
         });
@@ -262,7 +283,7 @@ export default function CollectionPage() {
           const body = await response.json().catch(() => null);
           const message =
             (body && typeof body.error === "string" && body.error) ||
-            "Failed to load collection.";
+            `Failed to load ${listLabelLower}.`;
           throw new Error(message);
         }
 
@@ -275,7 +296,7 @@ export default function CollectionPage() {
           return;
         }
         const message =
-          err instanceof Error ? err.message : "Failed to load collection.";
+          err instanceof Error ? err.message : `Failed to load ${listLabelLower}.`;
         if (isActive) {
           setError(message);
           setCollection(null);
@@ -293,7 +314,48 @@ export default function CollectionPage() {
       isActive = false;
       controller.abort();
     };
-  }, [collectionSlug, user]);
+  }, [collectionSlug, isWishlist, listLabelLower, user]);
+
+  React.useEffect(() => {
+    if (!user) {
+      setWishlistGameIds(new Set());
+      return;
+    }
+    if (!isWishlist || !collection) return;
+    setWishlistGameIds(new Set(collection.games.map((game) => game.id)));
+  }, [collection, isWishlist, user]);
+
+  React.useEffect(() => {
+    if (!user) {
+      setWishlistGameIds(new Set());
+      return;
+    }
+    if (isWishlist) return;
+
+    const controller = new AbortController();
+    let isActive = true;
+
+    const loadWishlist = async () => {
+      try {
+        const token = await user.getIdToken();
+        const data = await fetchWishlist(token, controller.signal);
+        if (!isActive) return;
+        setWishlistGameIds(new Set(data.games.map((game) => game.id)));
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to load wishlist.", error);
+      }
+    };
+
+    void loadWishlist();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [isWishlist, user]);
 
   React.useEffect(() => {
     setAppliedFilters(DEFAULT_FILTERS);
@@ -382,6 +444,7 @@ export default function CollectionPage() {
     description: string | null;
     slug: string;
   }) => {
+    if (isWishlist) return;
     setCollection((prev) =>
       prev ? { ...prev, ...updated } : prev,
     );
@@ -406,6 +469,7 @@ export default function CollectionPage() {
 
   const handleAddGame = React.useCallback(
     async (igdbId: number) => {
+      if (isWishlist) return;
       if (!collection || !user) return;
       if (addingIgdbIds.has(igdbId)) return;
       setAddingIgdbIds((prev) => new Set(prev).add(igdbId));
@@ -474,7 +538,7 @@ export default function CollectionPage() {
         });
       }
     },
-    [addingIgdbIds, collection, showToast, user],
+    [addingIgdbIds, collection, isWishlist, showToast, user],
   );
 
   const handleConfirmRemove = async () => {
@@ -483,7 +547,10 @@ export default function CollectionPage() {
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`/api/collections/${collection.id}/games`, {
+      const endpoint = isWishlist
+        ? "/api/wishlist"
+        : `/api/collections/${collection.id}/games`;
+      const response = await fetch(endpoint, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -494,7 +561,7 @@ export default function CollectionPage() {
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => null);
-        console.error("Failed to remove game from collection.", {
+        console.error(`Failed to remove game from ${listLabelLower}.`, {
           status: response.status,
           error: errorBody,
         });
@@ -509,14 +576,49 @@ export default function CollectionPage() {
             }
           : prev,
       );
-      showToast("Game removed from collection", "success");
+      showToast(`Game removed from ${listLabelLower}`, "success");
       setGameToRemove(null);
     } catch (error) {
-      console.error("Failed to remove game from collection.", error);
+      console.error(`Failed to remove game from ${listLabelLower}.`, error);
     } finally {
       setIsRemoving(false);
     }
   };
+
+  const handleAddToWishlist = React.useCallback(
+    async (game: CollectionGame) => {
+      if (!user) return;
+      if (wishlistGameIds.has(game.id)) return;
+      if (pendingWishlistIds.has(game.id)) return;
+
+      setPendingWishlistIds((prev) => new Set(prev).add(game.id));
+      setWishlistGameIds((prev) => new Set(prev).add(game.id));
+
+      try {
+        const token = await user.getIdToken();
+        await addToWishlist(token, game.id);
+        showToast("Added to wishlist", "success");
+      } catch (error) {
+        console.error("Failed to add game to wishlist.", error);
+        setWishlistGameIds((prev) => {
+          const next = new Set(prev);
+          next.delete(game.id);
+          return next;
+        });
+        showToast(
+          "We couldn’t update your wishlist. Please try again.",
+          "error",
+        );
+      } finally {
+        setPendingWishlistIds((prev) => {
+          const next = new Set(prev);
+          next.delete(game.id);
+          return next;
+        });
+      }
+    },
+    [pendingWishlistIds, showToast, user, wishlistGameIds],
+  );
 
   return (
     <div className="flex flex-col gap-8 p-6 max-w-[1440px] mx-auto">
@@ -527,7 +629,9 @@ export default function CollectionPage() {
       ) : null}
 
       {isLoading ? (
-        <div className="body-16 text-base-content/60">Loading collection...</div>
+        <div className="body-16 text-base-content/60">
+          Loading {listLabelLower}...
+        </div>
       ) : null}
 
       {!isLoading && collection ? (
@@ -541,18 +645,24 @@ export default function CollectionPage() {
                 </p>
               ) : null}
             </div>
-            <div className="flex items-center gap-2">
-              <PrimaryButton size="sm" type="button" onClick={() => setIsSearchOpen(true)}>
-                Add games
-              </PrimaryButton>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm md:btn-md"
-                onClick={() => setIsEditOpen(true)}
-              >
-                Edit
-              </button>
-            </div>
+            {!isWishlist ? (
+              <div className="flex items-center gap-2">
+                <PrimaryButton
+                  size="sm"
+                  type="button"
+                  onClick={() => setIsSearchOpen(true)}
+                >
+                  Add games
+                </PrimaryButton>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm md:btn-md"
+                  onClick={() => setIsEditOpen(true)}
+                >
+                  Edit
+                </button>
+              </div>
+            ) : null}
           </header>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -715,7 +825,7 @@ export default function CollectionPage() {
 
           {collection.games.length === 0 ? (
             <div className="rounded-xl border border-base-300 bg-base-200/40 p-8 text-center text-base-content/60">
-              No games in this collection yet.
+              No games in this {listLabelLower} yet.
             </div>
           ) : filteredGames.length === 0 ? (
             <div className="rounded-xl border border-base-300 bg-base-200/40 p-8 text-center text-base-content/60">
@@ -757,11 +867,26 @@ export default function CollectionPage() {
                       className="dropdown-content menu menu-sm mt-1 w-48 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
                     >
                       <li>
+                        {wishlistGameIds.has(game.id) ? (
+                          <button type="button" disabled>
+                            In your Wishlist
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleAddToWishlist(game)}
+                            disabled={pendingWishlistIds.has(game.id)}
+                          >
+                            Add to Wishlist
+                          </button>
+                        )}
+                      </li>
+                      <li>
                         <button
                           type="button"
                           onClick={() => setGameToRemove(game)}
                         >
-                          Remove from collection
+                          Remove from {listLabelLower}
                         </button>
                       </li>
                     </ul>
@@ -771,30 +896,32 @@ export default function CollectionPage() {
             </section>
           )}
 
-          <CreateCollectionModal
-            open={isEditOpen}
-            onClose={() => setIsEditOpen(false)}
-            mode="edit"
-            collection={
-              collection
-                ? {
-                    id: collection.id,
-                    name: collection.name,
-                    description: collection.description,
-                  }
-                : null
-            }
-            onUpdate={handleUpdateCollection}
-            onDelete={(collectionId) => {
-              setIsEditOpen(false);
-              void refreshCollections();
-              router.replace("/");
-              if (collection?.id === collectionId) {
-                setCollection(null);
+          {!isWishlist ? (
+            <CreateCollectionModal
+              open={isEditOpen}
+              onClose={() => setIsEditOpen(false)}
+              mode="edit"
+              collection={
+                collection
+                  ? {
+                      id: collection.id,
+                      name: collection.name,
+                      description: collection.description,
+                    }
+                  : null
               }
-              showToast("Collection deleted", "success");
-            }}
-          />
+              onUpdate={handleUpdateCollection}
+              onDelete={(collectionId) => {
+                setIsEditOpen(false);
+                void refreshCollections();
+                router.replace("/");
+                if (collection?.id === collectionId) {
+                  setCollection(null);
+                }
+                showToast("Collection deleted", "success");
+              }}
+            />
+          ) : null}
 
           {gameToRemove ? (
             <ModalLayout
@@ -807,7 +934,7 @@ export default function CollectionPage() {
             >
               <div className="space-y-3">
                 <h3 className="heading-4 text-base-content">
-                  Remove game from collection?
+                  Remove game from {listLabelLower}?
                 </h3>
                 <p className="body-16 text-base-content/70">
                   This won’t delete the game from your library.
@@ -834,19 +961,21 @@ export default function CollectionPage() {
               </div>
             </ModalLayout>
           ) : null}
-          <SearchPalette
-            open={isSearchOpen}
-            setOpen={setIsSearchOpen}
-            items={[]}
-            panelClassName="!max-w-3xl md:!max-w-[680px] w-[92vw]"
-            collectionContext={{
-              id: collection.id,
-              name: collection.name,
-              existingIgdbIds: collectionIgdbIds,
-              addingIgdbIds,
-              onAddToCollection: handleAddGame,
-            }}
-          />
+          {!isWishlist ? (
+            <SearchPalette
+              open={isSearchOpen}
+              setOpen={setIsSearchOpen}
+              items={[]}
+              panelClassName="!max-w-3xl md:!max-w-[680px] w-[92vw]"
+              collectionContext={{
+                id: collection.id,
+                name: collection.name,
+                existingIgdbIds: collectionIgdbIds,
+                addingIgdbIds,
+                onAddToCollection: handleAddGame,
+              }}
+            />
+          ) : null}
         </>
       ) : null}
     </div>

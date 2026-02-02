@@ -21,12 +21,14 @@ model Game {
   developers  GameDeveloper[]
   publishers  GamePublisher[]
   collections CollectionGame[]
+  wishlists   Wishlist[]
 }
 
 model User {
   id          Int          @id @default(autoincrement())
   firebaseUid String       @unique
   collections Collection[]
+  wishlists   Wishlist[]
 }
 
 model Collection {
@@ -50,6 +52,16 @@ model CollectionGame {
   addedAt      DateTime   @default(now())
 
   @@id([collectionId, gameId])
+}
+
+model Wishlist {
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  gameId    Int
+  createdAt DateTime @default(now())
+
+  @@id([userId, gameId])
 }
 
 model Platform {
